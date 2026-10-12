@@ -1,0 +1,22 @@
+{
+    "tasks": {
+        "deploy": "deno --allow-env --allow-run npm:wrangler deploy",
+        "dev": "deno --allow-env --allow-run npm:wrangler dev",
+        "start": "deno --allow-env --allow-run npm:wrangler dev",
+        "cf-typegen": "deno --allow-env --allow-run npm:wrangler types",
+        "test": "deno test",
+        "check": "deno check src/"
+    },
+    "imports": {
+        "wrangler": "npm:wrangler@^4.149.0"
+    },
+    "compilerOptions": {
+        "lib": ["esnext"],
+        "types": ["./worker-configuration.d.ts"],
+        "skipLibCheck": true
+    },
+    "fmt": {
+        "semiColons": false,
+        "indentWidth": 4
+    }
+}

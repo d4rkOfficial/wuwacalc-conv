@@ -1,0 +1,12 @@
+{
+  "$schema": "https://www.unpkg.com/wrangler/config-schema.json",
+  "name": "deno-wrangler",
+  "main": "src/mod.ts",
+  "compatibility_date": "2026-04-18",
+  "vars": {
+    "WUWACALC_API_BASE": "https://wuwacalc.cn"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

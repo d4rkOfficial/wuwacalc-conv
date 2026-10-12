@@ -1,0 +1,4 @@
+.wrangler
+.scratch
+test*
+*test.ts

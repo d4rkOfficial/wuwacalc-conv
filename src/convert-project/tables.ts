@@ -1,0 +1,180 @@
+/**
+ * 运行时拉取并缓存的上游数据表。
+ *
+ * 这两张表是**同站静态资源**（与 API 同源），随游戏版本更新，所以不内联进代码：
+ *
+ * | 文件 | 用途 | 规模 |
+ * | --- | --- | --- |
+ * | `weapons.json` | 武器 `id → 名称`（`members[].weaponSelection.id` 只有 ID） | 93 条 / ~48KB |
+ * | `echo-sets.json` | 套装 `id → { 名称, 生效档位 }`（`setLoadout[].setId` 只有 ID） | 38 条 / ~45KB |
+ *
+ * 口径与约定：
+ * - **缓存**：模块级内存缓存 + TTL（{@link TABLE_TTL_MS}）+ 单飞（同一时刻只发一轮请求）；
+ * - **降级**：任一表拉取失败都不影响转换——拿不到名称的字段留空，绝不让下载接口因此失败；
+ * - 两张表**全部**失败时不写缓存，避免把一次抖动固化 6 小时。
+ */
+
+import { DEFAULT_API_BASE } from "../http.ts"
+import type { Bindings } from "../http.ts"
+import { optionalString, toInt } from "../utils.ts"
+
+/** 表数据缓存时长：上游随游戏版本更新，6 小时足够新鲜，也避免每次请求都拉一遍 */
+export const TABLE_TTL_MS = 6 * 60 * 60 * 1000
+
+/** 表文件本身只有几十 KB，但上游站点响应波动大，超时给宽一点 */
+const TABLE_TIMEOUT_MS = 20_000
+
+/** 套装信息：名称 + 该套装实际存在的档位（来自上游 `bonuses` 的键，降序） */
+export interface EchoSetInfo {
+    name: string
+    bonusTiers: number[]
+}
+
+/** 声骸信息：名称 + cost（上游常常只给 `echoId` 不给名称） */
+export interface EchoInfo {
+    name: string
+    cost: number
+}
+
+/** 转换期需要的名称表集合 */
+export interface ProjectTables {
+    /** 武器 id → 名称 */
+    weapons: Map<string, string>
+    /** 套装 id → 名称 + 生效档位 */
+    echoSets: Map<string, EchoSetInfo>
+    /** 声骸 id → 名称 + cost */
+    echoes: Map<string, EchoInfo>
+}
+
+/** 空表：拉取失败或单测里不关心名称时使用 */
+export const EMPTY_TABLES: ProjectTables = {
+    weapons: new Map(),
+    echoSets: new Map(),
+    echoes: new Map(),
+}
+
+// ── 缓存 ──────────────────────────────────────────────────────────────────────
+
+let cached: { at: number; tables: ProjectTables } | null = null
+let inflight: Promise<ProjectTables> | null = null
+
+/** 仅测试用：清掉内存缓存，避免用例之间互相影响 */
+export const resetProjectTablesCache = (): void => {
+    cached = null
+    inflight = null
+}
+
+const apiBaseOf = (env: Bindings): string =>
+    (env.WUWACALC_API_BASE || DEFAULT_API_BASE).replace(/\/+$/, "")
+
+/** 拉一个表文件；任何失败都返回 `null`（由调用方决定是否降级） */
+const fetchTable = async <T>(
+    env: Bindings,
+    file: string,
+): Promise<T | null> => {
+    try {
+        const res = await fetch(`${apiBaseOf(env)}/${file}`, {
+            headers: { accept: "application/json" },
+            signal: AbortSignal.timeout(TABLE_TIMEOUT_MS),
+        })
+        if (!res.ok) return null
+        return await res.json() as T
+    } catch {
+        return null
+    }
+}
+
+const toNameMap = (
+    rows: { id?: string; name?: string }[] | undefined,
+): Map<string, string> => {
+    const map = new Map<string, string>()
+    for (const row of rows ?? []) {
+        const id = optionalString(row?.id)
+        const name = optionalString(row?.name)
+        if (id && name) map.set(id, name)
+    }
+    return map
+}
+
+const toEchoSetMap = (
+    rows:
+        | { id?: string; name?: string; bonuses?: Record<string, unknown> }[]
+        | undefined,
+): Map<string, EchoSetInfo> => {
+    const map = new Map<string, EchoSetInfo>()
+    for (const row of rows ?? []) {
+        const id = optionalString(row?.id)
+        const name = optionalString(row?.name)
+        if (!id || !name) continue
+        const bonusTiers = Object.keys(row?.bonuses ?? {})
+            .map((tier) => Number.parseInt(tier, 10))
+            .filter((tier) => Number.isFinite(tier) && tier > 0)
+            .sort((a, b) => b - a)
+        map.set(id, { name, bonusTiers })
+    }
+    return map
+}
+
+const toEchoMap = (
+    rows: { id?: string; name?: string; cost?: number }[] | undefined,
+): Map<string, EchoInfo> => {
+    const map = new Map<string, EchoInfo>()
+    for (const row of rows ?? []) {
+        const id = optionalString(row?.id)
+        const name = optionalString(row?.name)
+        if (!id || !name) continue
+        map.set(id, { name, cost: toInt(row?.cost, 0) })
+    }
+    return map
+}
+
+/**
+ * 取名称表（带缓存）。**永不抛错**：拉不到就返回空表，让转换按「名称缺失」降级。
+ */
+export const loadProjectTables = async (
+    env: Bindings,
+): Promise<ProjectTables> => {
+    if (cached && Date.now() - cached.at < TABLE_TTL_MS) return cached.tables
+    if (inflight) return await inflight
+
+    inflight = (async (): Promise<ProjectTables> => {
+        const [weapons, echoSets, echoes] = await Promise.all([
+            fetchTable<{ weapons?: { id?: string; name?: string }[] }>(
+                env,
+                "weapons.json",
+            ),
+            fetchTable<
+                {
+                    sets?: {
+                        id?: string
+                        name?: string
+                        bonuses?: Record<string, unknown>
+                    }[]
+                }
+            >(env, "echo-sets.json"),
+            fetchTable<
+                { echoes?: { id?: string; name?: string; cost?: number }[] }
+            >(env, "echo-catalog.json"),
+        ])
+
+        const tables: ProjectTables = {
+            weapons: toNameMap(weapons?.weapons),
+            echoSets: toEchoSetMap(echoSets?.sets),
+            echoes: toEchoMap(echoes?.echoes),
+        }
+        // 三张表全没拉到 → 不写缓存，下一次请求重试
+        if (
+            tables.weapons.size > 0 || tables.echoSets.size > 0 ||
+            tables.echoes.size > 0
+        ) {
+            cached = { at: Date.now(), tables }
+        }
+        return tables
+    })()
+
+    try {
+        return await inflight
+    } finally {
+        inflight = null
+    }
+}
