@@ -29,7 +29,12 @@ export interface WuwaCalcTeamSnapshot {
     monsterLevel?: number
     axisDuration?: number
     activeIndex?: number
-    sharedBuffs?: unknown
+    /** 队伍级 Buff 列表与全局选中态；结构见 `calculation.ts` 的 `collectBuffs` */
+    sharedBuffs?: {
+        buffs?: unknown[] | null
+        globalBuffActive?: Record<string, boolean> | null
+        globalBuffStacks?: Record<string, number> | null
+    } | null
 }
 
 export interface WuwaCalcWeaponSelection {
@@ -127,6 +132,13 @@ export interface WuwaCalcCycleRound {
     rotationCatalog?: WuwaCalcRotationEntry[] | null
     /** 该轮的非直伤条目（处决 / 响应 / 效应） */
     specialSkills?: WuwaCalcSpecialSkills | null
+    /**
+     * **该轮的逐技能层数**：`catalogId → buffId → 层数`。
+     * 多轮模式下层数的权威来源（上游 `getCatalogResolvedStacks()` 读的就是它）。
+     */
+    catalogStacks?: Record<string, Record<string, number>> | null
+    /** 该轮的默认层数（`globalBuffStacks` 的轮内快照） */
+    globalBuffStacks?: Record<string, number> | null
     buffStacks?: Record<string, number> | null
 }
 
@@ -143,6 +155,8 @@ export interface WuwaCalcAxisPhase {
     name?: string
     skills?: WuwaCalcAxisSkill[] | null
     locked?: boolean
+    /** 阶段级默认层数（优先级低于技能目录条目上的层数） */
+    buffStacks?: Record<string, number> | null
 }
 
 /** 轴技能目录条目（`members[].rotationCatalog[]`）：技能段的时间与倍率都在这 */
@@ -330,6 +344,13 @@ export interface CoconutSkillHit {
     element: string
     character: string
     hits?: number
+    /**
+     * 上游技能的 `damageType`（`普攻` / `重击` / `共鸣技能` / …），原样带过来。
+     *
+     * 工具箱的 `resolveDamageTypes()` 会先看显式配置、再自己推断；推断靠技能名与角色文案，
+     * 鸣算屋的技能名（技能库全名）多半对不上，所以这里把上游的权威类型带进条目。
+     */
+    damageType?: string
 }
 
 /** 非直伤条目：处决 / 响应带 `responders`，效应带 `layers` 与 `hits` */
@@ -405,6 +426,8 @@ export interface CoconutDamageEntry {
     hits: number
     ratioUnit?: "%" | "fixed"
     burstLayers?: number
+    /** 上游 `damageType`（`普攻` / `重击` / …）；拿来落 `damageEntryDamageTypes` */
+    damageType?: string
 }
 
 /** 对应工具箱 `CalcState` */

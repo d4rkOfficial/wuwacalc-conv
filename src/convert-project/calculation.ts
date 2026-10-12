@@ -9,6 +9,7 @@
  */
 
 import { optionalString, toInt } from "../utils.ts"
+import { collectPanelBuffs } from "./panel.ts"
 import type { SkillState } from "./timeline.ts"
 import {
     type CoconutBuffCondition,
@@ -57,6 +58,32 @@ const ZONE_MAP: Record<string, string> = {
     multBoostExtra: "extraRatio",
     // 偏谐
     offsetHarmonyEff: "offTuneBuildupRate",
+    // 按伤害类型的双暴（「召鬼呼星·承天」的重击暴击率）→ 带上类型条件
+    typeCritRate: "critRate",
+    typeCritDmg: "critDmg",
+    // 谐度破坏增幅 / 共鸣效率 / 最终伤害（单乘区 buff 的 category 也会落到这里）
+    harmonyBreakAmp: "tuneBreakBoost",
+    energyRegenPct: "recharge",
+    extraVulnerability: "finalDmg",
+}
+
+/** 椰果乘区 id → 中文名，拆分 buff 时用来给变体起名（取工具箱 `ZONE_DEFS` 的叫法，略作精简） */
+const ZONE_LABELS: Record<string, string> = {
+    atkPct: "攻击",
+    hpPct: "生命",
+    defPct: "防御",
+    critRate: "暴击率",
+    critDmg: "暴击伤害",
+    bonusDmg: "增伤",
+    deepenDmg: "加深",
+    dmgTakenInc: "易伤",
+    finalDmg: "最终伤害",
+    resDown: "减抗",
+    defPen: "穿防",
+    extraRatio: "额外倍率",
+    offTuneBuildupRate: "偏谐累积",
+    tuneBreakBoost: "谐度破坏增幅",
+    recharge: "共鸣效率",
 }
 
 /** 需要按元素 / 伤害类型挂条件的乘区 */
@@ -69,6 +96,8 @@ const CONDITIONAL_ZONES: Record<string, "element" | "damageType"> = {
     typeDeep: "damageType",
     typeVulnerability: "damageType",
     typeDefense: "damageType",
+    typeCritRate: "damageType",
+    typeCritDmg: "damageType",
 }
 
 /**
@@ -103,13 +132,22 @@ const NAME_PREFIX_TYPES: [string, string][] = [
     ["延奏技能·", "延奏技能伤害"],
 ]
 
+/** 上游 `damageType` 对应的工具箱伤害类型全名；没给或认不出来时返回 `null` */
+const upstreamDamageType = (entry: CoconutDamageEntry): string | null =>
+    DAMAGE_TYPE_LABELS[optionalString(entry.damageType) ?? ""] ?? null
+
 /**
- * 复刻工具箱 `inferDamageTypes()` 的规则 1 / 3 / 4，用来判断带伤害类型条件的乘区是否命中该条目。
+ * 条目最终生效的伤害类型（工具箱 `resolveDamageTypes()` 的口径）。
  *
- * 规则 2（角色技能富文本里的「视为 XX 伤害」）依赖上游角色文案，这里复刻不了 ——
- * 那条规则只会让类型更精确，不影响「条件明显不匹配时不勾选」这个判断。
+ * **上游写了 `damageType` 就以它为准**：工具箱的显式配置优先于一切推断，
+ * 而推断规则靠技能名与角色文案，鸣算屋的技能名（技能库全名，如
+ * `济善伐恶·普攻·苍剑式第一段`）对不上 `普攻·` 这类前缀，常态攻击里的重击招式
+ * 也会被推成普攻 —— 类型一旦错，带类型条件的乘区就整体失效。
+ * 上游没写时才退回复刻的工具箱规则 1 / 3 / 4（规则 2 依赖角色文案，复刻不了）。
  */
 export const inferEntryDamageTypes = (entry: CoconutDamageEntry): string[] => {
+    const upstream = upstreamDamageType(entry)
+    if (upstream) return [upstream]
     if (entry.isEffect) return ["效应伤害"]
     for (const [prefix, type] of NAME_PREFIX_TYPES) {
         if (entry.hitName.includes(prefix)) return [type]
@@ -274,17 +312,6 @@ const collectBuffs = (
     return result
 }
 
-/** 一条拆层后的 buff：椰子没有叠层，叠层 buff 会拆成「一层一条」 */
-interface BuffLayer {
-    instance: CoconutBuffInstance
-    /** 上游 buff id，用来查逐技能的选中态 */
-    sourceId: string
-    /** 层号，从 1 开始；`0` 表示固定效果（不拆层、不设层数门槛） */
-    layer: number
-    /** 总层数；0 表示固定效果，1 表示不拆层 */
-    layerCount: number
-}
-
 /** 第 n 层的每层值：取第一条覆盖 n 的 segment 的 perStack */
 const perStackAt = (
     segments: UpstreamSegment[] | null | undefined,
@@ -302,30 +329,77 @@ const perStackAt = (
 }
 
 /**
- * 把一条上游 buff 转成椰果实例。
+ * 一条拆出来的椰果 buff 变体。
  *
- * **叠层 buff 拆成「一层一条」**：椰果没有叠层模型，`zones[].value` 就是最终值。
- * 真实工程（工坊 `2CDs8kRG`）的作法是每条写「每层」的值（`暴击1层`/`暴击2层`…），
- * 再按该层在轴上的生效区间逐条勾选 —— 这样层数沿轴往上叠的语义就能表达出来。
+ * 一个上游 buff 会拆成若干个变体，拆分维度有两个：
+ * - **乘区**：一个变体只带一种乘区（同乘区、同条件、同技能限定的效果并成一条），
+ *   拆出来的变体在命名上加乘区后缀；
+ * - **层数**：椰果没有叠层模型，于是「轴上用到过的每个层数」各出一条，
+ *   `zones[].value` 写**该层数下的累计值**（第 1..n 层之和）。
  */
-const toBuffLayers = (
+interface BuffVariant {
+    instance: CoconutBuffInstance
+    /** 上游 buff id，用来查逐技能的层数 */
+    sourceId: string
+    /** 该变体对应的层数；`null` = 不按层绑（纯固定段） */
+    layer: number | null
+    /** 纯固定段的 `minStacks` 门槛（按层绑的变体恒为 0） */
+    minStacks: number
+    /** 技能限定名（`skillScope: 'names'`）；非空时只绑名称命中的条目 */
+    skillNames: string[]
+    /**
+     * 占位条目：轴上没用到任何层，这条只为「别让 buff 从列表里消失」而存在，
+     * 值为 0 且不参与勾选。
+     */
+    placeholder?: boolean
+}
+
+/**
+ * 该效果在 `layer` 层上的**累计**贡献。
+ *
+ * 上游自己的口径就是累计（`docs` 1.3）：`value = Σ_{s=1..stacks} perStackOf(s)`。
+ * 椰果一条 buff 只能写一个数，「祸兮福兮 50层」要的就是 50 层的累计值（2.5 × 50 = 125）。
+ */
+const cumulativeAt = (effect: UpstreamEffect, layer: number): number => {
+    if (layer < toInt(effect.minStacks, 0)) return 0
+    if (effect.valueMode === "fixed") return Number(effect.value) || 0
+    let total = 0
+    for (let n = 1; n <= layer; n++) total += perStackAt(effect.segments, n)
+    return total
+}
+
+/** 同乘区重复出现时的消歧：优先用技能名，其次用序号 */
+const discriminatorOf = (names: string[], index: number): string => {
+    const first = names[0]?.split("·").pop()?.trim()
+    return first || `#${index + 1}`
+}
+
+/**
+ * 把一条上游 buff 拆成椰果实例。
+ *
+ * | 维度 | 规则 |
+ * | --- | --- |
+ * | 乘区 | 同乘区 + 同条件 + 同技能限定的效果并成一条；一个变体只带**一种**乘区 |
+ * | 层数 | 轴上**用到过的层数**各一条（`祸兮福兮 50层`），值取该层的累计值 |
+ * | 固定段 | 不拆层：`minStacks` 当绑定门槛（`≥N 层`才生效） |
+ *
+ * 层数只取轴上真正用到的：`maxStacks` 是上限（祸兮福兮 50 层的上限不代表每条轴都用满），
+ * `1..N` 全铺更是会凭空多出一堆空 buff。
+ */
+const toBuffVariants = (
     buff: UpstreamBuff,
     ownerIndex: number | null,
     resonances: number[],
-    /**
-     * 该 buff 在轴上**实际达到过的最大层数**（逐技能优先，回落到全局）。
-     * 这是拆层数的**唯一依据**：`maxStacks` 只是上限，「祸兮福兮」上限 50 层但轴上 0 层，
-     * 按上限拆会凭空多出 50 条空 buff。轴上完全没记录时兜底为 1 条。
-     */
-    observedStacks = 0,
-): BuffLayer[] => {
+    /** 该 buff 在轴上用到过的层数（升序，均 > 0） */
+    usedLayers: number[],
+): BuffVariant[] => {
     const id = optionalString(buff.id)
     if (!id) return []
 
     const resonance = ownerIndex === null ? 6 : resonances[ownerIndex] ?? 0
 
     // 单乘区 buff 视作只有一条效果
-    const effects: UpstreamEffect[] = buff.category === "composite"
+    const rawEffects: UpstreamEffect[] = buff.category === "composite"
         ? buff.effects ?? []
         : [{
             zone: buff.category,
@@ -345,93 +419,187 @@ const toBuffLayers = (
             skillScope: "all",
         }]
 
-    // 只有存在叠层效果才拆层；纯固定值 buff 的 `maxStacks` 只是上限，不是层数。
-    // 层数取**轴上实际达到过的最大层数**（真实工程也只写用到的那几层），
-    // 而不是 `maxStacks` —— 否则「祸兮福兮」上限 50 层会凭空多出 50 条空 buff。
-    const stackEffects = effects.filter((effect) =>
-        effect.valueMode !== "fixed"
+    // 共鸣链没到就不计入（静态门槛，先筛掉）
+    const effects = rawEffects.filter((effect) =>
+        resonance >= toInt(effect.minResonance, 0)
     )
-    // 固定值部分单独成一条（`layer: 0`）：它和层数无关，只要 buff 生效就一直贡献；
-    // 塞进「第 1 层」里的话，第 1 层的勾选条件会把它一起关掉
-    const fixedEffects = effects.filter((effect) =>
-        effect.valueMode === "fixed"
-    )
-    const stackLayerCount = stackEffects.length
-        ? Math.max(1, observedStacks)
-        : 0
+
+    // 集谐模态只有 convergenceVuln 一个数值，单独成一条易伤乘区
+    if (buff.category === "convergence") {
+        const value = Number(buff.convergenceVuln) * 100
+        if (value) {
+            effects.push({
+                zone: "convergence",
+                valueMode: "fixed",
+                value,
+                skillScope: "all",
+            })
+        }
+    }
+
+    interface ZoneGroup {
+        zoneId: string
+        zoneKey: string
+        condition?: CoconutBuffCondition
+        skillNames: string[]
+        effects: UpstreamEffect[]
+    }
+
+    /** 同乘区 + 同条件 + 同技能限定 → 一条椰果 buff */
+    const groups: ZoneGroup[] = []
+    for (const effect of effects) {
+        const zoneKey = optionalString(effect.zone) ?? ""
+        const zoneId = ZONE_MAP[zoneKey]
+        if (!zoneId) continue
+        const condition = conditionOf(effect)
+        const skillNames = skillNamesOf(effect).sort()
+        const hit = groups.find((group) =>
+            group.zoneId === zoneId &&
+            JSON.stringify(group.condition ?? null) ===
+                JSON.stringify(condition ?? null) &&
+            group.skillNames.join("\u0000") === skillNames.join("\u0000")
+        )
+        if (hit) hit.effects.push(effect)
+        else {
+            groups.push({
+                zoneId,
+                zoneKey,
+                condition,
+                skillNames,
+                effects: [effect],
+            })
+        }
+    }
+    if (!groups.length) return []
+
+    // 同乘区出现多次（如「命火」的劫魄 / 踏罡两段）时给后来者加消歧后缀
+    const zoneUseCount = new Map<string, number>()
+    for (const group of groups) {
+        zoneUseCount.set(
+            group.zoneId,
+            (zoneUseCount.get(group.zoneId) ?? 0) + 1,
+        )
+    }
+    const seenZone = new Map<string, number>()
+    const discriminators = groups.map((group) => {
+        const nth = seenZone.get(group.zoneId) ?? 0
+        seenZone.set(group.zoneId, nth + 1)
+        if ((zoneUseCount.get(group.zoneId) ?? 0) <= 1) return ""
+        return discriminatorOf(group.skillNames, nth)
+    })
 
     const baseName = optionalString(buff.name) ?? id
     const scope = applyExcludeSource(scopeOf(ownerIndex), buff)
-    const layers: BuffLayer[] = []
+    const variants: BuffVariant[] = []
 
-    /** 取一批效果在某一层上的乘区；`layer: 0` 表示固定效果，不设层数门槛 */
-    const zonesAt = (
-        pool: UpstreamEffect[],
-        layer: number,
-    ): CoconutBuffZone[] => {
-        const zones: CoconutBuffZone[] = []
-        for (const effect of pool) {
-            if (resonance < toInt(effect.minResonance, 0)) continue
-            // 上游的 `minStacks` 语义是「≥N 层才计入」，未达标的层直接跳过
-            if (layer > 0 && layer < toInt(effect.minStacks, 0)) continue
+    groups.forEach((group, index) => {
+        const label = ZONE_LABELS[group.zoneId] ?? group.zoneId
+        const discriminator = discriminators[index]
+        // **一律带乘区后缀**：一条 buff 只带一种乘区，名字里就得看得出是哪一种。
+        // 上游常见「同名的两条不同乘区 buff」（如「冥途夜行之灯」的暴击率与热熔增伤），
+        // 光看名字根本分不清谁是谁 —— 把乘区写进名字，拉表里一眼就能对上。
+        const nameSuffix = `·${label}${
+            discriminator ? `·${discriminator}` : ""
+        }`
+        const idSuffix = `·${group.zoneId}${
+            discriminator ? `·${discriminator}` : ""
+        }`
 
-            const zoneId = ZONE_MAP[optionalString(effect.zone) ?? ""]
-            if (!zoneId) continue
-            const value = layer > 0
-                ? perStackAt(effect.segments, layer)
-                : Number(effect.value) || 0
-            // 折算后为 0 也要保留：叠层 buff 当前 0 层时就是 0 贡献，
-            // 但条目本身必须留在列表里，否则整条 buff 会凭空消失
-            const zone: CoconutBuffZone = { zoneId, value: roundValue(value) }
-            const condition = conditionOf(effect)
-            if (condition) zone.condition = condition
-            zones.push(zone)
+        const emit = (
+            name: string,
+            variantId: string,
+            value: number,
+            layer: number | null,
+            minStacks: number,
+            placeholder = false,
+        ) => {
+            const zone: CoconutBuffZone = {
+                zoneId: group.zoneId,
+                value: roundValue(value),
+            }
+            if (group.condition) zone.condition = group.condition
+            variants.push({
+                instance: {
+                    id: variantId,
+                    name,
+                    zones: [zone],
+                    scope,
+                    source: "builtin",
+                },
+                sourceId: id,
+                layer,
+                minStacks,
+                skillNames: group.skillNames,
+                ...(placeholder ? { placeholder: true } : {}),
+            })
         }
-        return zones
-    }
 
-    const fixedZones = zonesAt(fixedEffects, 0)
-    // 集谐模态只有 convergenceVuln 一个数值，不参与拆层，跟着固定部分走
-    if (buff.category === "convergence") {
-        const value = roundValue(Number(buff.convergenceVuln) * 100)
-        if (value) fixedZones.push({ zoneId: "dmgTakenInc", value })
-    }
-    if (fixedZones.length) {
-        layers.push({
-            instance: {
-                id,
-                name: baseName,
-                zones: fixedZones,
-                scope,
-                source: "builtin",
-            },
-            sourceId: id,
-            layer: 0,
-            layerCount: 0,
-        })
-    }
+        const hasStack = group.effects.some((effect) =>
+            effect.valueMode !== "fixed"
+        )
+        let emitted = 0
 
-    // 叠层效果一层一条：第 n 层只绑到「该时点层数 ≥ n」的条目上
-    // 有固定段兄弟时也带层号后缀，免得两条同名条目在列表里分不清
-    const nameLayers = stackLayerCount > 1 || fixedZones.length > 0
-    for (let layer = 1; layer <= stackLayerCount; layer++) {
-        const zones = zonesAt(stackEffects, layer)
-        if (!zones.length) continue
-        layers.push({
-            instance: {
-                id: `${id}#L${layer}`,
-                name: nameLayers ? `${baseName} ${layer}层` : baseName,
-                zones,
-                scope,
-                source: "builtin",
-            },
-            sourceId: id,
-            layer,
-            layerCount: stackLayerCount,
-        })
-    }
+        if (hasStack) {
+            // 叠层段：轴上用到过的每个层数各一条，值 = 该层的累计值
+            for (const layer of usedLayers) {
+                const value = group.effects.reduce(
+                    (sum, effect) => sum + cumulativeAt(effect, layer),
+                    0,
+                )
+                if (!value) continue
+                emit(
+                    `${baseName}${nameSuffix} ${layer}层`,
+                    `${id}${idSuffix}#L${layer}`,
+                    value,
+                    layer,
+                    0,
+                )
+                emitted++
+            }
+            // 轴上完全没叠到层：保住这条 buff（按 0 层算），不参与勾选
+            if (!emitted) {
+                const value = group.effects.reduce(
+                    (sum, effect) => sum + cumulativeAt(effect, 0),
+                    0,
+                )
+                emit(
+                    `${baseName}${nameSuffix}`,
+                    `${id}${idSuffix}`,
+                    value,
+                    null,
+                    0,
+                    true,
+                )
+            }
+            return
+        }
 
-    return layers
+        // 纯固定段：不拆层，`minStacks` 不同的分开发（各自有各自的生效门槛）。
+        // 只有真的分了多个门槛才在名字上标出来，免得给普通 buff 加没用的后缀。
+        const byMinStacks = new Map<number, number>()
+        for (const effect of group.effects) {
+            const minStacks = toInt(effect.minStacks, 0)
+            byMinStacks.set(
+                minStacks,
+                (byMinStacks.get(minStacks) ?? 0) + (Number(effect.value) || 0),
+            )
+        }
+        const gated = byMinStacks.size > 1
+        for (const [minStacks, value] of byMinStacks) {
+            const gate = gated && minStacks > 0 ? ` ≥${minStacks}层` : ""
+            emit(
+                `${baseName}${nameSuffix}${gate}`,
+                `${id}${idSuffix}${
+                    gated && minStacks > 0 ? `#S${minStacks}` : ""
+                }`,
+                value,
+                null,
+                minStacks,
+            )
+        }
+    })
+
+    return variants
 }
 
 export interface CalculationResult {
@@ -499,27 +667,16 @@ export const convertCalculationPhase = (
     const members = payload?.members ?? []
     const resonances = members.map((m) => toInt(m?.resonanceUnlocked, 0))
 
-    // 当前选中态：叠层数 / 是否生效
-    const stacksById = new Map<string, number>()
+    // 当前选中态：是否生效。层数不走这里 —— 逐技能的层数由排轴阶段解析好，
+    // 落在 `entryState[].stacks` 上（上游 `getCatalogResolvedStacks` 的口径）。
     const activeById = new Map<string, boolean>()
     const shared = payload?.team?.sharedBuffs as
-        | {
-            globalBuffActive?: Record<string, boolean>
-            globalBuffStacks?: Record<string, number>
-        }
+        | { globalBuffActive?: Record<string, boolean> }
         | undefined
-    for (const [id, value] of Object.entries(shared?.globalBuffStacks ?? {})) {
-        stacksById.set(id, toInt(value, 0))
-    }
     for (const [id, value] of Object.entries(shared?.globalBuffActive ?? {})) {
         activeById.set(id, !!value)
     }
     for (const member of members) {
-        for (
-            const [id, value] of Object.entries(member.globalBuffStacks ?? {})
-        ) {
-            if (!stacksById.has(id)) stacksById.set(id, toInt(value, 0))
-        }
         for (
             const [id, value] of Object.entries(member.globalBuffActive ?? {})
         ) {
@@ -531,44 +688,23 @@ export const convertCalculationPhase = (
     const damageEntryBuffSetIds: Record<string, string[]> = {}
     const buffIds = new Set<string>()
 
-    /** 该 buff 在轴上（逐技能）达到过的最大层数 */
-    const maxObservedStacks = (id: string): number => {
-        let max = 0
-        const keys = stateKeysOf(id)
-        for (const key of keys) max = Math.max(max, stacksById.get(key) ?? 0)
-        for (const state of entryState.values()) {
-            for (const key of keys) {
-                const n = state.stacks[key]
-                if (n !== undefined && n > max) max = n
-            }
+    /** 逐条目的解析层数：上游 `getCatalogResolvedStacks` 的口径，缺省 0 */
+    const layerOf = (state: SkillState | undefined, id: string): number => {
+        for (const key of stateKeysOf(id)) {
+            const n = state?.stacks[key]
+            if (n !== undefined) return toInt(n, 0)
         }
-        return max
+        return 0
     }
 
-    /**
-     * 沿轴逐条目的「该 buff 当前层数」。
-     *
-     * 上游只在**会改变层数**的技能上写 `buffStacks`，真正吃效果的技能常常只写
-     * `buffActive: true`、层数留空（例如「锯环·终结」只被标记生效，52 层记在它前面的
-     * 几段疾攻上）。这种条目如果按 0 层处理，整条 buff 一条都绑不上。
-     * 所以：条目自己记了层数就用它，没记就用**轴上此前出现过的最大层数**兜底。
-     */
-    const stackCurve = (id: string): Map<string, number> => {
-        const keys = stateKeysOf(id)
-        const curve = new Map<string, number>()
-        let running =
-            keys.map((key) => stacksById.get(key)).find((v) =>
-                v !== undefined
-            ) ?? 0
-        for (const entry of entries) {
-            const state = entryState.get(entry.id)
-            const own = keys.map((key) => state?.stacks[key]).find((v) =>
-                v !== undefined
-            )
-            if (own !== undefined && own > running) running = own
-            curve.set(entry.id, own ?? running)
+    /** 该 buff 在轴上**用到过**的层数（升序、只留 > 0） */
+    const usedLayersOf = (id: string): number[] => {
+        const values = new Set<number>()
+        for (const state of entryState.values()) {
+            const n = layerOf(state, id)
+            if (n > 0) values.add(n)
         }
-        return curve
+        return [...values].sort((a, b) => a - b)
     }
 
     for (const { buff, ownerIndex } of collectBuffs(payload)) {
@@ -577,70 +713,105 @@ export const convertCalculationPhase = (
         // 否则产物里会出现重复 id，工具箱的 buff 弹窗按 id 做 key 会直接崩（each_key_duplicate）
         if (id && buffIds.has(id)) continue
 
-        const observedStacks = id ? maxObservedStacks(id) : 0
-        const layers = toBuffLayers(
+        const usedLayers = id ? usedLayersOf(id) : []
+        const variants = toBuffVariants(
             buff,
             ownerIndex,
             resonances,
-            observedStacks,
+            usedLayers,
         )
-        if (!layers.length) continue
+        if (!variants.length) continue
         if (id) buffIds.add(id)
-        for (const layer of layers) buffs.push(layer.instance)
+        for (const variant of variants) buffs.push(variant.instance)
 
-        // 技能限定：只绑名称匹配的伤害条目；其余按「范围 + 选中态 + 条件」判断
-        const effects: UpstreamEffect[] = buff.category === "composite"
-            ? buff.effects ?? []
-            : []
-        const limitedNames = new Set(effects.flatMap(skillNamesOf))
-        const curve = id ? stackCurve(id) : new Map<string, number>()
-
-        for (const layer of layers) {
+        for (const variant of variants) {
+            // 占位条目只为了留在 buff 列表里，不参与勾选
+            if (variant.placeholder) continue
             const targets = entries.filter((entry) => {
-                // 逐技能的选中态优先（`skill.buffActive` / `skill.buffStacks`），
-                // 该技能没记录时回落到角色 / 队伍级；两级都要两种 id 形态都试
+                // 逐技能的选中态优先（`skill.buffActive`），该技能没记录时回落到角色 / 队伍级；
+                // 两级都要两种 id 形态都试
                 const state = entryState.get(entry.id)
-                const keys = stateKeysOf(layer.sourceId)
-                // 先逐技能、后全局；每一级里两种 id 形态都试
-                const pick = <T>(
-                    perSkill: (key: string) => T | undefined,
-                    global: (key: string) => T | undefined,
-                ): T | undefined =>
-                    keys.map(perSkill).find((v) => v !== undefined) ??
-                        keys.map(global).find((v) => v !== undefined)
-                const active = pick(
-                    (key) => state?.active[key],
-                    (key) => activeById.get(key),
+                const keys = stateKeysOf(variant.sourceId)
+                const active = keys.map((key) =>
+                    state?.active[key]
+                ).find((v) => v !== undefined) ?? keys.map((key) =>
+                    activeById.get(key)
+                ).find((v) =>
+                    v !== undefined
                 )
                 if (active === false) return false
 
-                // 叠层实例：该条目在这个时点的层数必须达到本层；`layer: 0` 是固定效果，不设门槛
-                if (layer.layer > 0) {
-                    const stacks = curve.get(entry.id) ?? observedStacks
-                    if (stacks < layer.layer) return false
-                }
-
-                if (limitedNames.size > 0) {
-                    return (
-                        limitedNames.has(entry.hitName) ||
-                        limitedNames.has(entry.displayName)
-                    )
-                }
-                if (!scopeCovers(layer.instance.scope, entry, members)) {
+                // 层数门槛：按层绑的变体要求**恰好**该层（值就是这一层的累计值）；
+                // 纯固定段按 `minStacks`（≥N 层才生效）
+                const layer = layerOf(state, variant.sourceId)
+                if (
+                    variant.layer !== null && layer !== variant.layer
+                ) return false
+                if (variant.minStacks > 0 && layer < variant.minStacks) {
                     return false
                 }
-                return buffApplies(layer.instance, entry)
+
+                if (variant.skillNames.length > 0) {
+                    return (
+                        variant.skillNames.includes(entry.hitName) ||
+                        variant.skillNames.includes(entry.displayName)
+                    )
+                }
+                if (!scopeCovers(variant.instance.scope, entry, members)) {
+                    return false
+                }
+                return buffApplies(variant.instance, entry)
             })
             for (const entry of targets) {
                 damageEntryBuffSetIds[entry.id] = [
                     ...(damageEntryBuffSetIds[entry.id] ?? []),
-                    layer.instance.id,
+                    variant.instance.id,
                 ]
             }
         }
     }
 
-    if (!buffs.length && !Object.keys(damageEntryBuffSetIds).length) {
+    // 面板加成也 buff 化：工具箱只算「角色基础 + 配置阶段的声骸主副词条 + 敌怪」，
+    // 角色固有（阳变阴合）、共鸣链分支、声骸套装 2 件这些它算不出来，只能由 Buff 贡献。
+    for (const panel of collectPanelBuffs(members)) {
+        const instance: CoconutBuffInstance = {
+            id: panel.id,
+            name: panel.name,
+            zones: [{
+                zoneId: panel.zoneId,
+                value: roundValue(panel.value),
+                ...(panel.condition ? { condition: panel.condition } : {}),
+            }],
+            // 面板加成只作用于该角色自己的伤害
+            scope: [panel.memberIndex],
+            source: "builtin",
+        }
+        buffs.push(instance)
+        for (const entry of entries) {
+            if (!scopeCovers(instance.scope, entry, members)) continue
+            if (!buffApplies(instance, entry)) continue
+            damageEntryBuffSetIds[entry.id] = [
+                ...(damageEntryBuffSetIds[entry.id] ?? []),
+                instance.id,
+            ]
+        }
+    }
+
+    // 伤害类型：**上游给了就显式落下来**。工具箱的 `resolveDamageTypes()` 是先看这张表、
+    // 再看自己推断，而它推断不出鸣算屋的技能名；不写就等于把上游的类型信息丢掉，
+    // 拉表页的类型列会空/错，带类型条件的乘区也跟着失效。
+    // 上游没给类型的条目**不写**：留给工具箱按规则 1~4 自己推断（含依赖角色文案的规则 2），
+    // 我们硬写一个「其它类型伤害」反而会把它挡掉。
+    const damageEntryDamageTypes: Record<string, string[]> = {}
+    for (const entry of entries) {
+        const type = upstreamDamageType(entry)
+        if (type) damageEntryDamageTypes[entry.id] = [type]
+    }
+
+    if (
+        !buffs.length && !Object.keys(damageEntryBuffSetIds).length &&
+        !Object.keys(damageEntryDamageTypes).length
+    ) {
         return { phase: { locked: true, data: EMPTY_CALC }, buffs: [] }
     }
 
@@ -650,7 +821,7 @@ export const convertCalculationPhase = (
             data: {
                 buffSets: buffs,
                 damageEntryBuffSetIds,
-                damageEntryDamageTypes: {},
+                damageEntryDamageTypes,
             },
         },
         buffs,

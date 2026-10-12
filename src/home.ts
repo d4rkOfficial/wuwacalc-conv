@@ -192,7 +192,7 @@ const renderCard = (project: HomeProject): string => {
             : "",
     ].filter(Boolean).join("")
 
-    return `<article class="card">
+    return `<article class="card pop">
   <header class="card-head">
     <span class="card-order">${escapeHtml(project.order)}</span>
     <span class="card-date">${escapeHtml(formatDate(project.createdAt))}</span>
@@ -225,7 +225,7 @@ const layout = (title: string, body: string): string =>
 <title>${escapeHtml(title)}</title>
 <style>${STYLES}</style>
 </head>
-<body>
+<body id="top">
 ${body}
 </body>
 </html>`
@@ -253,23 +253,45 @@ export const renderHomePage = (input: {
     <span class="brand-mark" aria-hidden="true"></span>
     鸣算屋转接器
   </a>
-  <nav class="nav-links">
-    <a href="${WUWACALC_URL}" target="_blank" rel="noopener">鸣算屋</a>
-    <a href="${WORKSHOP_URL}" target="_blank" rel="noopener">椰果工坊主站</a>
-    <a href="${TOOLBOX_URL}" target="_blank" rel="noopener">椰果工具箱主站</a>
-  </nav>
+  <!-- 顶栏是 fixed 的，锚点挂在 body 上（fixed 元素算不出滚动目标） -->
+  <a class="nav-top" href="#top" aria-label="返回顶部">
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 19V5" />
+      <path d="M5 12l7-7 7 7" />
+    </svg>
+    <span>返回顶部</span>
+  </a>
 </header>
 
 <section class="hero">
-  <p class="hero-eyebrow">WuwaCalc ⇄ Coconut Workshop</p>
-  <h1>椰果工坊<span class="dot">·</span><span class="accent">鸣算屋转接器</span></h1>
-  <p class="hero-tagline">
+  <p class="hero-eyebrow pop-hero">WuwaCalc ⇄ Coconut Workshop</p>
+  <h1 class="pop-hero">椰果工坊<span class="dot">·</span><span class="accent">鸣算屋转接器</span></h1>
+  <p class="hero-tagline pop-hero">
     把鸣算屋的方案列表/下载API与完整工程翻译成椰果工具箱认得的格式
   </p>
   <div class="hero-actions">
-    <a class="btn btn-solid" href="${TOOLBOX_URL}" target="_blank" rel="noopener">椰果工具箱</a>
-    <a class="btn btn-ghost" href="${WUWACALC_URL}" target="_blank" rel="noopener">鸣算屋</a>
-    <a class="btn btn-ghost" href="#usage">使用方法</a>
+    <a class="btn btn-toolbox pop-hero" href="${TOOLBOX_URL}" target="_blank" rel="noopener">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+        <path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+      </svg>
+      椰果工具箱
+    </a>
+    <a class="btn btn-wuwacalc pop-hero" href="${WUWACALC_URL}" target="_blank" rel="noopener">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+        <path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+      </svg>
+      鸣算屋
+    </a>
+    <a class="btn btn-usage pop-hero" href="#usage">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M9.6 9.2a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2-2.4 3.6" />
+        <path d="M12 17.2h.01" />
+      </svg>
+      使用方法
+    </a>
   </div>
 </section>`
 
@@ -280,18 +302,22 @@ export const renderHomePage = (input: {
         ? "—"
         : decimal.format(total + workshopTotal)
 
-    const ledger = `<section class="ledger">
-  <div class="ledger-item"><span class="ledger-label">鸣算屋收录方案</span><span class="ledger-value">${
+    const ledger = `<section class="ledger pop">
+  <div class="ledger-inner">
+    <div class="ledger-item"><span class="ledger-label">鸣算屋收录方案</span><span class="ledger-value">${
         count(total)
     }</span></div>
-  <div class="ledger-item"><span class="ledger-label">椰果工坊收录方案</span><span class="ledger-value">${
+    <div class="ledger-item"><span class="ledger-label">椰果工坊收录方案</span><span class="ledger-value">${
         count(workshopTotal)
     }</span></div>
-  <div class="ledger-item"><span class="ledger-label">合计收录方案</span><span class="ledger-value">${sum}</span></div>
+    <div class="ledger-item"><span class="ledger-label">合计收录方案</span><span class="ledger-value">${sum}</span></div>
+  </div>
 </section>`
 
     const notice = error
-        ? `<p class="notice"><strong>上游暂时不可用</strong>${escapeHtml(error)}
+        ? `<p class="notice pop"><strong>上游暂时不可用</strong>${
+            escapeHtml(error)
+        }
            —— 页面结构仍然可用，稍后刷新即可。</p>`
         : ""
 
@@ -305,26 +331,26 @@ export const renderHomePage = (input: {
 <main class="page">
 ${ledger}
 <section class="section" id="projects">
-  <div class="section-head">
+  <div class="section-head"><div class="section-head-inner pop">
     <h2>最新方案</h2>
     <span class="section-label">Latest</span>
-  </div>
+  </div></div>
   ${notice}
   ${list}
 </section>
 
 <section class="section" id="endpoints">
-  <div class="section-head">
+  <div class="section-head"><div class="section-head-inner pop">
     <h2>两个端点</h2>
     <span class="section-label">Endpoints</span>
-  </div>
+  </div></div>
   <div class="endpoint-grid">
-    <article class="endpoint-card">
+    <article class="endpoint-card pop">
       <h3 class="endpoint-name"><span class="endpoint-method">GET</span>/api/public/projects</h3>
       <p>工坊「最新方案」列表口径。<code>page</code> / <code>perPage</code> / <code>sort</code> / <code>q</code>
          归一化后转发到鸣算屋 <code>/api/public-schemes</code>，并把响应体转成工坊的字段。</p>
     </article>
-    <article class="endpoint-card">
+    <article class="endpoint-card pop">
       <h3 class="endpoint-name"><span class="endpoint-method">GET</span>/share/{code}/download</h3>
       <p>按分享码取方案详情，把队伍配置、排轴、拉表、词条环境四个阶段分别转换后合成
          椰果工程文件（<code>{ version, exportedAt, project }</code>），直接当附件下载。</p>
@@ -333,26 +359,28 @@ ${ledger}
 </section>
 
 <section class="section" id="usage">
-  <div class="section-head">
+  <div class="section-head"><div class="section-head-inner pop">
     <h2>使用方法</h2>
     <span class="section-label">Usage</span>
-  </div>
-  <p class="usage-lead">
-    在椰果工具箱主页点击 <b>设置 - 连接配置</b>，在 <b>工坊 / 分享源</b> 输入
-    <code>${BRIDGE_URL}</code> 新建配置，然后切换到新建的配置。
-    此时「从工坊导入」便会展示鸣算屋的方案列表并可供下载。
-  </p>
-  <div class="usage-figures">
-    <figure class="usage-figure is-dark">
+  </div></div>
+  <!-- 图文双列：图 3 : 文 1，教程文本在图片右侧 -->
+  <div class="usage-layout">
+    <figure class="usage-figure is-dark pop">
       <img src="${USAGE_IMAGE_PATHS.dark}" width="1200" height="675" loading="lazy"
            alt="椰果工具箱「设置 → 连接配置」：已在工坊 / 分享源新建鸣算屋转接器配置（黑夜模式）">
-      <figcaption>图 1 · 黑夜模式</figcaption>
     </figure>
-    <figure class="usage-figure is-light">
+    <figure class="usage-figure is-light pop">
       <img src="${USAGE_IMAGE_PATHS.light}" width="1200" height="675" loading="lazy"
            alt="椰果工具箱「设置 → 连接配置」：已在工坊 / 分享源新建鸣算屋转接器配置（白天模式）">
-      <figcaption>图 2 · 白天模式</figcaption>
     </figure>
+    <div class="usage-text pop">
+      <ol class="usage-steps">
+        <li>在椰果工具箱主页点击 <b>设置 - 连接配置</b></li>
+        <li>在 <b>工坊 / 分享源</b> 输入 <code>${BRIDGE_URL}</code> 新建配置</li>
+        <li>切换到新建的配置</li>
+        <li>此时「从工坊导入」便会展示鸣算屋的方案列表并可供下载</li>
+      </ol>
+    </div>
   </div>
 </section>
 </main>
@@ -490,7 +518,11 @@ const STYLES = `
   --ink-3: #8b827c;
   --rule: #e4ded3;
   --accent: #0f766e;
+  --accent-strong: #0b5f59;
   --accent-2: #b45309;
+  /* 主色底上的文字色：浅色模式的 accent 很深，得用浅字 */
+  --on-accent: #fdfcf9;
+  --nav-h: 56px;
   --shadow: 0 1px 2px rgba(28, 25, 23, .04), 0 12px 32px -18px rgba(28, 25, 23, .28);
 }
 @media (prefers-color-scheme: dark) {
@@ -502,11 +534,22 @@ const STYLES = `
     --ink-3: #857f78;
     --rule: #2c2c31;
     --accent: #5eead4;
+    --accent-strong: #2dd4bf;
     --accent-2: #fbbf24;
+    /* 暗色模式的 accent 很浅，主色底上得用深字 */
+    --on-accent: #06231f;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 16px 40px -22px rgba(0, 0, 0, .8);
   }
 }
 * { box-sizing: border-box; }
+/* 页面里的图标一律手绘内联 SVG：描边跟随文字颜色 */
+.icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 html {
   scroll-behavior: smooth;
   /* 页面不显示滚动条（滚动本身照旧：滚轮 / 触控 / 键盘都还能翻） */
@@ -532,19 +575,41 @@ code {
   border-radius: 4px;
 }
 
-/* 顶栏 */
+/* 顶栏：开屏（大部分内容还在首屏）时藏起来，滚下去再出现 */
 .nav {
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 14px clamp(20px, 6vw, 64px);
+  height: var(--nav-h);
+  padding: 0 clamp(20px, 6vw, 64px);
   background: color-mix(in srgb, var(--paper) 88%, transparent);
   backdrop-filter: saturate(180%) blur(12px);
   border-bottom: 1px solid var(--rule);
+}
+/*
+ * 顶栏的显隐只用滚动时间线**切一下状态**（steps(1)，没有滑动/淡入的动作），
+ * 滚过 80px 就出现。不支持的浏览器整段跳过，顶栏保持常显。
+ */
+@supports (animation-timeline: scroll()) {
+  .nav {
+    animation: nav-flip 1ms steps(1, end) both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 80px;
+  }
+}
+@keyframes nav-flip {
+  from {
+    opacity: 0;
+    pointer-events: none;
+  }
+  to {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 .brand {
   display: inline-flex;
@@ -559,8 +624,28 @@ code {
   background: var(--accent);
   transform: rotate(45deg);
 }
-.nav-links { display: flex; gap: clamp(14px, 3vw, 28px); font-size: 14px; color: var(--ink-2); }
-.nav-links a:hover { color: var(--accent); }
+/* 右上角只留「返回顶部」 */
+.nav-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px 7px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink-2);
+  transition: .18s ease;
+}
+.nav-top .icon { width: 15px; height: 15px; }
+.nav-top:hover {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--rule));
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  transform: translateY(-1px);
+}
+@media (max-width: 560px) { .nav-top span { display: none; } }
 
 /* 首屏 */
 .hero {
@@ -598,31 +683,117 @@ code {
   color: var(--ink-2);
 }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 36px; }
+
+/* 按钮：三个都带底色，hover 各自加深一档 */
 .btn {
-  display: inline-block;
-  padding: 11px 26px;
-  border: 1px solid var(--rule);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 24px 11px 20px;
+  border: 1px solid transparent;
   border-radius: 999px;
   font-family: var(--sans);
   font-size: 14px;
   letter-spacing: .02em;
-  transition: .18s ease;
+  transition: background .18s ease, border-color .18s ease, color .18s ease,
+    box-shadow .18s ease, transform .18s ease;
 }
-.btn-solid { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.btn-solid:hover { background: var(--accent); border-color: var(--accent); }
-.btn-ghost { color: var(--ink-2); }
-.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn .icon {
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn-toolbox {
+  color: var(--on-accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  border-color: transparent;
+  box-shadow: 0 6px 18px -10px color-mix(in srgb, var(--accent) 80%, transparent);
+}
+.btn-toolbox:hover {
+  background: linear-gradient(135deg, var(--accent-strong), var(--accent-2));
+  box-shadow: 0 12px 26px -12px color-mix(in srgb, var(--accent) 90%, transparent);
+}
+.btn-wuwacalc {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 7%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--ink) 14%, transparent);
+}
+.btn-wuwacalc:hover {
+  color: var(--accent-strong);
+  background: color-mix(in srgb, var(--accent) 14%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.btn-usage {
+  color: var(--ink-2);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+  border-color: var(--rule);
+}
+.btn-usage:hover {
+  color: var(--accent-strong);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/*
+ * 唯一的动画：主内容区入场时「弹」一下。
+ *
+ * - 首屏那几件（主副标题 / 三个按钮）用**定时**动画，进页面就依次弹出来；
+ * - 其余内容（统计区 / 卡片 / 图片 / 栏目标题 / 提示）用 view() 滚动时间线，
+ *   滚进画面才弹（animation-range: entry）—— 元素一旦已在视口里，进度就超出区间，
+ *   直接是终态，不会出现「先空一片再弹」。
+ * - 动画只挂在内容元素上，不挂 .section / .section-head：带 transform 的祖先
+ *   会成为 sticky 的包含块，贴顶就废了。
+ * - 不支持 view() 时间线的浏览器整段跳过；系统偏好减少动效时也一律关掉。
+ */
+.pop {
+  animation: pop-in .5s cubic-bezier(.22, 1, .36, 1) both;
+}
+.pop-hero {
+  animation: pop-in .55s cubic-bezier(.22, 1, .36, 1) both;
+}
+/* 首屏：进页面依次弹出（主标题 → 副标题 → 三个按钮） */
+.hero .pop-hero:nth-child(1) { animation-delay: .04s; }
+.hero .pop-hero:nth-child(2) { animation-delay: .12s; }
+.hero .pop-hero:nth-child(3) { animation-delay: .2s; }
+.hero-actions .pop-hero:nth-child(1) { animation-delay: .28s; }
+.hero-actions .pop-hero:nth-child(2) { animation-delay: .35s; }
+.hero-actions .pop-hero:nth-child(3) { animation-delay: .42s; }
+@supports (animation-timeline: view()) {
+  .pop {
+    animation-duration: auto;
+    animation-timeline: view();
+    animation-range: entry 0% entry 45%;
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pop, .pop-hero { animation: none; }
+}
 
 /* 正文栏 */
 .page { max-width: 1152px; margin: 0 auto; padding: 0 24px 96px; }
+
+/* 收录总数：普通横条，跟着内容滚走（贴顶的是下面的栏目标题） */
 .ledger {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
   margin-bottom: clamp(48px, 7vw, 80px);
 }
-.ledger-item { padding: 20px 4px; }
+.ledger-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  padding: 0 18px;
+  border-block: 1px solid var(--rule);
+}
+.ledger-item { padding: 16px 4px; }
 .ledger-item + .ledger-item { border-left: 1px solid var(--rule); padding-left: 22px; }
 .ledger-label {
   display: block;
@@ -632,17 +803,33 @@ code {
   text-transform: uppercase;
   color: var(--ink-3);
 }
-.ledger-value { display: block; margin-top: 6px; font-size: 24px; font-variant-numeric: tabular-nums; }
+.ledger-value { display: block; margin-top: 4px; font-size: 23px; font-variant-numeric: tabular-nums; }
 
 .section { margin-bottom: clamp(56px, 8vw, 88px); }
+
+/*
+ * 栏目标题（最新方案 / 两个端点 / 使用方法）：随内容往上滚，滚到顶栏下面就贴住。
+ * 贴住之后用 **CSS 滚动状态容器查询**（container-type: scroll-state +
+ * @container scroll-state(stuck: top)）换一套外观 —— 这是 2025 年的新特性；
+ * 不支持的浏览器只是少了那点高亮，贴顶行为照旧。
+ */
 .section-head {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 15;
+  margin-bottom: 28px;
+  container-type: scroll-state;
+}
+.section-head-inner {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  padding-bottom: 12px;
-  margin-bottom: 28px;
+  padding: 10px 18px 11px;
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  backdrop-filter: saturate(180%) blur(10px);
   border-bottom: 1px solid var(--ink);
+  transition: background .2s ease, border-color .2s ease;
 }
 .section-head h2 { margin: 0; font-size: clamp(24px, 3vw, 32px); font-weight: 600; letter-spacing: -.01em; }
 .section-label {
@@ -651,6 +838,15 @@ code {
   letter-spacing: .22em;
   text-transform: uppercase;
   color: var(--ink-3);
+  transition: color .2s ease;
+}
+@container scroll-state(stuck: top) {
+  .section-head-inner {
+    background: color-mix(in srgb, var(--paper) 86%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--rule));
+  }
+  .section-head h2 { color: var(--accent-strong); }
+  .section-label { color: var(--accent-strong); }
 }
 
 .notice {
@@ -762,16 +958,13 @@ code {
 }
 .endpoint-card p { margin: 0; color: var(--ink-2); font-size: 15px; }
 
-/* 使用方法：正文 + 一张随配色切换的截图 */
-.usage-lead {
-  max-width: 68ch;
-  margin: 0 0 28px;
-  font-size: clamp(16px, 1.5vw, 18px);
-  color: var(--ink-2);
+/* 使用方法：图文双列（图 3 : 文 1），文字在图片右侧 */
+.usage-layout {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: clamp(20px, 2.5vw, 32px);
+  align-items: start;
 }
-.usage-lead b { color: var(--ink); }
-.usage-lead code { color: var(--ink); }
-.usage-figures { display: grid; gap: 22px; }
 .usage-figure { margin: 0; }
 .usage-figure img {
   display: block;
@@ -780,13 +973,23 @@ code {
   border: 1px solid var(--rule);
   box-shadow: var(--shadow);
 }
-.usage-figure figcaption {
-  margin-top: 10px;
-  font-family: var(--sans);
-  font-size: 11px;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+.usage-text { font-size: 15px; color: var(--ink-2); }
+.usage-steps {
+  margin: 0;
+  padding-left: 1.35em;
+  display: grid;
+  gap: 10px;
+}
+.usage-steps li { padding-left: 2px; }
+.usage-steps li::marker { color: var(--accent); font-family: var(--sans); }
+.usage-text b { color: var(--ink); }
+.usage-text code {
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+/* 窄屏堆叠：图在上、文在下 */
+@media (max-width: 860px) {
+  .usage-layout { grid-template-columns: 1fr; }
 }
 /* 暗色截图只在暗色配色下出现，反之亦然 */
 .usage-figure.is-dark { display: none; }

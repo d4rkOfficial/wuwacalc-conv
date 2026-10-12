@@ -254,6 +254,8 @@ const toSkillHit = (
         element: optionalString(entry.damageElement) || element,
         character,
         hits: toInt(entry.multCount, 1),
+        // 上游的伤害类型原样带走，拉表要用它落 `damageEntryDamageTypes`
+        ...(damageType ? { damageType } : {}),
     }
 }
 
@@ -314,6 +316,7 @@ const collectMemberItems = (
     for (const [index, skill] of source.skills.entries()) {
         const catalogId = optionalString(skill.catalogId)
         const entry = catalogId ? catalog.get(catalogId) : undefined
+        const resolved = resolveStacks(source, catalogId ?? "", entry)
         items.push({
             seconds: secondsOf(entry, placement(index, source.skills.length)),
             trackIndex,
@@ -330,7 +333,7 @@ const collectMemberItems = (
                 element,
             ),
             ownLine: true,
-            state: skillStateOf(skill),
+            state: skillStateOf(skill, resolved),
         })
     }
 
@@ -391,19 +394,66 @@ const collectMemberItems = (
 }
 
 /** 抽出技能段上的 buff 选中态（只留有效的键，避免产物里塞满空对象） */
-const skillStateOf = (skill: WuwaCalcAxisSkill): SkillState | undefined => {
+const skillStateOf = (
+    skill: WuwaCalcAxisSkill,
+    /** 该技能解析出来的叠层数（见 {@link resolveStacks}） */
+    resolvedStacks: Record<string, number> = {},
+): SkillState | undefined => {
     const active: Record<string, boolean> = {}
     for (const [id, value] of Object.entries(skill.buffActive ?? {})) {
         if (typeof value === "boolean") active[id] = value
     }
-    const stacks: Record<string, number> = {}
-    for (const [id, value] of Object.entries(skill.buffStacks ?? {})) {
-        const n = Number(value)
-        if (Number.isFinite(n)) stacks[id] = n
-    }
+    const stacks: Record<string, number> = { ...resolvedStacks }
     return Object.keys(active).length || Object.keys(stacks).length
         ? { active, stacks }
         : undefined
+}
+
+/**
+ * 解析某个技能时点上各 buff 的层数。
+ *
+ * 口径复刻上游 `getCatalogResolvedStacks()`（`buff-templates.js`）：
+ * 默认取 `globalBuffStacks`（缺省 0），再被**该技能目录条目的层数**覆盖；
+ * 多轮模式下那份层数在 `cycleConfig.rounds[r].catalogStacks[catalogId]`，
+ * 单轮模式在 `rotationCatalog[].stackLayers`（上游关掉多轮时会把前者搬到后者）。
+ *
+ * ⚠️ `skill.buffStacks` / `phases[].buffStacks` **不是主源**：多轮模式下上游会清空前者
+ * （「多轮：层数走轮次 catalog layers，时间线技能不存叠层快照」），
+ * 残留的旧值会把「祸兮福兮 50 层」读成 0 层、「终结 72 层」读成 52 层，
+ * 于是凭空多出几条谁也用不到的层。**工程里有 catalog 层数时就只认那一份**，
+ * 完全没有（老格式）时才拿它们兜底。
+ */
+const resolveStacks = (
+    source: MemberRoundSource,
+    catalogId: string,
+    entry: WuwaCalcRotationEntry | undefined,
+): Record<string, number> => {
+    const catalogLayers: Record<string, number> = {}
+    // 单轮模式：层数挂在目录条目自己的 `stackLayers` 上
+    for (const [id, value] of Object.entries(entry?.stackLayers ?? {})) {
+        const n = Number(value)
+        if (Number.isFinite(n)) catalogLayers[id] = n
+    }
+    // 多轮模式：层数在该轮的 `catalogStacks[catalogId]` 上
+    for (
+        const [id, value] of Object.entries(
+            (catalogId ? source.catalogStacks[catalogId] : undefined) ?? {},
+        )
+    ) {
+        const n = Number(value)
+        if (Number.isFinite(n)) catalogLayers[id] = n
+    }
+
+    const stacks: Record<string, number> = { ...source.defaultStacks }
+    if (source.hasCatalogLayers) {
+        // 有 catalog 数据：catalog 没提到这个 buff 就是 0 层，不再拿旧快照补
+        return { ...stacks, ...catalogLayers }
+    }
+    for (const [id, value] of Object.entries(source.phaseStacks)) {
+        const n = Number(value)
+        if (Number.isFinite(n)) stacks[id] = n
+    }
+    return stacks
 }
 
 // ── 组装 ──────────────────────────────────────────────────────────────────────
@@ -427,6 +477,14 @@ interface MemberRoundSource {
     skills: WuwaCalcAxisSkill[]
     catalog: WuwaCalcRotationEntry[]
     specialSkills: WuwaCalcSpecialSkillItem[]
+    /** 该轮的默认层数（角色级 / 轮次级 `globalBuffStacks`） */
+    defaultStacks: Record<string, number>
+    /** 该轮各阶段上的层数（`phases[].buffStacks`） */
+    phaseStacks: Record<string, number>
+    /** 多轮模式：`catalogId → buffId → 层数` */
+    catalogStacks: Record<string, Record<string, number>>
+    /** 这份数据里到底有没有 catalog 层数（决定要不要退回阶段 / 技能级旧快照） */
+    hasCatalogLayers: boolean
 }
 
 /** 一轮的轴数据 */
@@ -465,6 +523,54 @@ const resolveRounds = (
             member.cycleConfig?.rounds?.[roundIndex]?.phases,
         )
 
+    /** 把若干层数表合并成一份（后写的覆盖先写的） */
+    const mergeStacks = (
+        ...maps: (Record<string, number> | null | undefined)[]
+    ): Record<string, number> => {
+        const result: Record<string, number> = {}
+        for (const map of maps) {
+            for (const [id, value] of Object.entries(map ?? {})) {
+                const n = Number(value)
+                if (Number.isFinite(n)) result[id] = n
+            }
+        }
+        return result
+    }
+
+    /** 若干阶段上的层数合成一份 */
+    const phaseStacksOf = (phases: WuwaCalcAxisPhase[] | null | undefined) =>
+        mergeStacks(
+            ...(phases ?? []).map((phase) =>
+                phase?.buffStacks as Record<string, number> | undefined
+            ),
+        )
+
+    const asLayerMap = (
+        raw: unknown,
+    ): Record<string, Record<string, number>> => {
+        const result: Record<string, Record<string, number>> = {}
+        for (
+            const [catalogId, layers] of Object.entries(
+                (raw ?? {}) as Record<string, unknown>,
+            )
+        ) {
+            if (!layers || typeof layers !== "object") continue
+            const normalized: Record<string, number> = {}
+            for (const [buffId, value] of Object.entries(layers)) {
+                const n = Number(value)
+                if (Number.isFinite(n)) normalized[buffId] = n
+            }
+            if (Object.keys(normalized).length) result[catalogId] = normalized
+        }
+        return result
+    }
+
+    /** catalog 条目上有没有单轮模式的 `stackLayers` */
+    const hasEntryStackLayers = (catalog: WuwaCalcRotationEntry[]) =>
+        catalog.some((entry) =>
+            Object.keys(entry?.stackLayers ?? {}).length > 0
+        )
+
     if (roundCount > 1) {
         let cursor = 0
         return Array.from({ length: roundCount }, (_, roundIndex) => {
@@ -477,14 +583,25 @@ const resolveRounds = (
                 startSeconds: cursor,
                 sources: members.map((member) => {
                     const round = member.cycleConfig?.rounds?.[roundIndex]
+                    // 该轮自己的目录；轮内没有目录时才退回顶层（`activeRound`）的
+                    const catalog = (round?.rotationCatalog ??
+                        member.rotationCatalog ??
+                        []) as WuwaCalcRotationEntry[]
+                    const catalogStacks = asLayerMap(round?.catalogStacks)
                     return {
                         skills: skillsOfRound(member, roundIndex),
-                        // 该轮自己的目录；轮内没有目录时才退回顶层（`activeRound`）的
-                        catalog: (round?.rotationCatalog ??
-                            member.rotationCatalog ??
-                            []) as WuwaCalcRotationEntry[],
+                        catalog,
                         specialSkills: round?.specialSkills?.items ??
                             payload?.specialSkills?.items ?? [],
+                        defaultStacks: mergeStacks(
+                            member.globalBuffStacks,
+                            round?.globalBuffStacks,
+                        ),
+                        phaseStacks: phaseStacksOf(round?.phases),
+                        catalogStacks,
+                        hasCatalogLayers:
+                            Object.keys(catalogStacks).length > 0 ||
+                            hasEntryStackLayers(catalog),
                     }
                 }),
             }
@@ -497,11 +614,23 @@ const resolveRounds = (
     return [{
         duration: toInt(payload?.team?.axisDuration, 0),
         startSeconds: 0,
-        sources: members.map((member) => ({
-            skills: skillsOfPhases(member.phases),
-            catalog: (member.rotationCatalog ?? []) as WuwaCalcRotationEntry[],
-            specialSkills: payload?.specialSkills?.items ?? [],
-        })),
+        sources: members.map((member) => {
+            const catalog =
+                (member.rotationCatalog ?? []) as WuwaCalcRotationEntry[]
+            return {
+                skills: skillsOfPhases(member.phases),
+                catalog,
+                specialSkills: payload?.specialSkills?.items ?? [],
+                defaultStacks: mergeStacks(
+                    member.globalBuffStacks,
+                    payload?.team?.sharedBuffs?.globalBuffStacks,
+                ),
+                phaseStacks: phaseStacksOf(member.phases),
+                // 单轮模式没有 `catalogStacks`，层数在目录条目的 `stackLayers` 上
+                catalogStacks: {},
+                hasCatalogLayers: hasEntryStackLayers(catalog),
+            }
+        }),
     }]
 }
 
@@ -640,6 +769,9 @@ export const convertTimelinePhase = (
                     sourceTimelineBlockId: refLineId,
                     hits: item.hit!.hits ?? 1,
                     ratioUnit: unit,
+                    ...(item.hit!.damageType
+                        ? { damageType: item.hit!.damageType }
+                        : {}),
                 })
                 if (item.state) entryState.set(id, item.state)
             }
