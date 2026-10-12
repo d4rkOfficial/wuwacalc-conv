@@ -14,6 +14,8 @@ import {
 } from "./convert-project-list.ts"
 import { fetchUpstream, LIST_TIMEOUT_MS, readUpstreamJson } from "./http.ts"
 import type { Bindings } from "./http.ts"
+import { USAGE_IMAGE_PATHS, USAGE_IMAGES } from "./usage-images.ts"
+import type { UsageTheme } from "./usage-images.ts"
 import type {
     WuwaCalcSchemeListItem,
     WuwaCalcSchemeListResponse,
@@ -33,6 +35,9 @@ const HOME_CACHE_SECONDS = 60
 const WUWACALC_URL = "https://wuwacalc.cn"
 const WORKSHOP_URL = "https://wuwa-afyg-share.200503.xyz"
 const TOOLBOX_URL = "https://wuwa-afyg-tool.200503.xyz"
+
+/** 本转接器自己的部署地址：使用方法里让用户填进工具箱的「工坊 / 分享源」 */
+const BRIDGE_URL = "https://wuwacalc-conv.200503.xyz"
 
 /** 工坊收录总数是页面上的一句装饰，不值得为它等太久 */
 const WORKSHOP_TOTAL_TIMEOUT_MS = 8_000
@@ -264,6 +269,7 @@ export const renderHomePage = (input: {
   <div class="hero-actions">
     <a class="btn btn-solid" href="${TOOLBOX_URL}" target="_blank" rel="noopener">椰果工具箱</a>
     <a class="btn btn-ghost" href="${WUWACALC_URL}" target="_blank" rel="noopener">鸣算屋</a>
+    <a class="btn btn-ghost" href="#usage">使用方法</a>
   </div>
 </section>`
 
@@ -325,6 +331,30 @@ ${ledger}
     </article>
   </div>
 </section>
+
+<section class="section" id="usage">
+  <div class="section-head">
+    <h2>使用方法</h2>
+    <span class="section-label">Usage</span>
+  </div>
+  <p class="usage-lead">
+    在椰果工具箱主页点击 <b>设置 - 连接配置</b>，在 <b>工坊 / 分享源</b> 输入
+    <code>${BRIDGE_URL}</code> 新建配置，然后切换到新建的配置。
+    此时「从工坊导入」便会展示鸣算屋的方案列表并可供下载。
+  </p>
+  <div class="usage-figures">
+    <figure class="usage-figure is-dark">
+      <img src="${USAGE_IMAGE_PATHS.dark}" width="1200" height="675" loading="lazy"
+           alt="椰果工具箱「设置 → 连接配置」：已在工坊 / 分享源新建鸣算屋转接器配置（黑夜模式）">
+      <figcaption>图 1 · 黑夜模式</figcaption>
+    </figure>
+    <figure class="usage-figure is-light">
+      <img src="${USAGE_IMAGE_PATHS.light}" width="1200" height="675" loading="lazy"
+           alt="椰果工具箱「设置 → 连接配置」：已在工坊 / 分享源新建鸣算屋转接器配置（白天模式）">
+      <figcaption>图 2 · 白天模式</figcaption>
+    </figure>
+  </div>
+</section>
 </main>
 
 <footer class="foot">
@@ -333,6 +363,37 @@ ${ledger}
 </footer>`
 
     return layout("椰果工坊 · 鸣算屋转接器", body)
+}
+
+// ── 附图 ──────────────────────────────────────────────────────────────────────
+
+/** 附图路由：`/assets/usage-dark.jpg` / `/assets/usage-light.jpg` */
+export const USAGE_IMAGE_ROUTE = /^\/assets\/usage-(dark|light)\.jpg$/
+
+/** 解码一次就留着：图片是常量，没必要每个请求都解一遍 base64 */
+const decodedUsageImages = new Map<UsageTheme, Uint8Array>()
+
+const decodeBase64 = (base64: string): Uint8Array => {
+    const binary = atob(base64)
+    const bytes = new Uint8Array(binary.length)
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+    return bytes
+}
+
+/** 出图：内容不会变，给一年缓存 + `immutable`，换图记得顺手改文件名 */
+export const handleUsageImage = (theme: UsageTheme): Response => {
+    let bytes = decodedUsageImages.get(theme)
+    if (!bytes) {
+        bytes = decodeBase64(USAGE_IMAGES[theme].base64)
+        decodedUsageImages.set(theme, bytes)
+    }
+    return new Response(bytes, {
+        status: 200,
+        headers: {
+            "content-type": USAGE_IMAGES[theme].contentType,
+            "cache-control": "public, max-age=31536000, immutable",
+        },
+    })
 }
 
 /**
@@ -700,6 +761,39 @@ code {
   padding: 2px 6px;
 }
 .endpoint-card p { margin: 0; color: var(--ink-2); font-size: 15px; }
+
+/* 使用方法：正文 + 一张随配色切换的截图 */
+.usage-lead {
+  max-width: 68ch;
+  margin: 0 0 28px;
+  font-size: clamp(16px, 1.5vw, 18px);
+  color: var(--ink-2);
+}
+.usage-lead b { color: var(--ink); }
+.usage-lead code { color: var(--ink); }
+.usage-figures { display: grid; gap: 22px; }
+.usage-figure { margin: 0; }
+.usage-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow);
+}
+.usage-figure figcaption {
+  margin-top: 10px;
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+/* 暗色截图只在暗色配色下出现，反之亦然 */
+.usage-figure.is-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  .usage-figure.is-dark { display: block; }
+  .usage-figure.is-light { display: none; }
+}
 
 /* 页脚 */
 .foot {

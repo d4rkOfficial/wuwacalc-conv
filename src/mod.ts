@@ -4,6 +4,7 @@
  * | 方法 | 路径 | 实现 |
  * | --- | --- | --- |
  * | `GET` | `/` | `home.ts`（工程广场展示页，HTML） |
+ * | `GET` | `/assets/usage-{dark\|light}.jpg` | `home.ts`（使用方法附图） |
  * | `GET` | `/api/public/projects` | `convert-project-list.ts` |
  * | `GET` | `/share/{code}/download` | `convert-project-download.ts` |
  */
@@ -13,7 +14,7 @@ import {
     SHARE_DOWNLOAD_PATTERN,
 } from "./convert-project-download.ts"
 import { handleListProjects } from "./convert-project-list.ts"
-import { handleHome } from "./home.ts"
+import { handleHome, handleUsageImage, USAGE_IMAGE_ROUTE } from "./home.ts"
 import { CORS_HEADERS, errorResponse } from "./http.ts"
 import type { Bindings } from "./http.ts"
 
@@ -27,6 +28,9 @@ export default {
         if (req.method !== "GET") return errorResponse(405, "仅支持 GET 请求")
 
         if (url.pathname === "/") return await handleHome(url, env)
+
+        const usage = USAGE_IMAGE_ROUTE.exec(url.pathname)
+        if (usage) return handleUsageImage(usage[1] as "dark" | "light")
 
         if (url.pathname === "/api/public/projects") {
             return await handleListProjects(url, env)
