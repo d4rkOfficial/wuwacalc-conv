@@ -19,8 +19,6 @@
 
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
-| `GET` | `/` | 工程广场展示页（HTML） |
-| `GET` | `/assets/usage-{dark\|light}.jpg` | 使用方法附图 |
 | `GET` | `/api/public/projects` | 工坊列表口径：`page` / `perPage` / `sort` / `q` |
 | `GET` | `/share/{code}/download` | 下载转换后的椰果工程文件 |
 
