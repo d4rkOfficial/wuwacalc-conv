@@ -12,6 +12,14 @@
 
 import { optionalString, toInt } from "../utils.ts"
 import {
+    collectMultAddEffects,
+    EXTRA_RATIO_PLACEHOLDER,
+    EXTRA_RATIO_SUFFIX,
+    globalBuffActiveOf,
+    type MultAddEffect,
+    resolveSkillMultAdds,
+} from "./extra-ratio.ts"
+import {
     type CoconutDamageBlock,
     type CoconutDamageEntry,
     type CoconutNonDirectEntry,
@@ -344,6 +352,16 @@ interface AxisItem {
      */
     groupKey?: string
     /**
+     * 「（额外）」条目要承载的追加倍率（上游 `multAdd`）：buff id + 层数（固定段为 `null`）
+     * + 技能名键（同一条 buff 可以有多条点名不同技能的效果，命火就是劫魄 / 踏罡两条）。
+     * 拉表阶段据此把 `extraRatio` 变体绑到它上面。
+     */
+    extraRatioKeys?: {
+        buffId: string
+        layer: number | null
+        skillNamesKey: string
+    }[]
+    /**
      * 该条目**认**的名字：技能库全名 / 轴上短名 / 目录名。
      *
      * 显示名被缩成短名后，上游 buff 的 `librarySkillNames`（全名）就对不上了，
@@ -433,6 +451,8 @@ const normalizeNonDirect = (
  * @param source 该轮该角色的技能段、技能目录与非直伤条目
  * @param secondsBase 该轮的起始秒，用来把各轮串成一条时间轴
  * @param placement 找不到 `axisOffsetPx` 时的兜底时间（按数组顺序在轮内均分）
+ * @param multAdds 全工程的追加倍率效果（用来补「（额外）」条目，见 `extra-ratio.ts`）
+ * @param activeById 全局 buff 开关（`globalBuffActive`）
  */
 const collectMemberItems = (
     member: WuwaCalcMember,
@@ -441,6 +461,8 @@ const collectMemberItems = (
     source: MemberRoundSource,
     secondsBase: number,
     placement: (index: number, count: number) => number,
+    multAdds: MultAddEffect[],
+    activeById: Map<string, boolean>,
 ): AxisItem[] => {
     const character = optionalString(member.name) ?? ""
     const element = characterElement(member)
@@ -522,6 +544,47 @@ const collectMemberItems = (
                 ownLine: segmentIndex === 0,
                 groupKey,
                 state,
+            })
+        }
+
+        // **（额外）条目**：追加倍率（上游 `multAdd`）是技能级的一次性追加，
+        // 但工具箱的 `extraRatio` 是逐命中加算的 —— 绑到拆开的每一段上会被乘
+        // `Σhits` 倍（景燃的劫魄：命火 527.5% 被算成近 5 倍）。所以给它单开一条
+        // 倍率≈0、`hits = 1` 的条目，追加倍率类 buff 只挂这里（见 `extra-ratio.ts`）。
+        const extraKeys = resolveSkillMultAdds({
+            effects: multAdds,
+            memberIndex: trackIndex,
+            names: nameCandidates,
+            stacks: resolved,
+            active: skill.buffActive,
+            globalActive: activeById,
+            member,
+        })
+        if (extraKeys.length) {
+            // 缩放词条后缀跟技能本体一致（追加的倍率按同一个面板属性缩放）
+            const suffix = SCALE_SUFFIX[
+                optionalString(entry?.scaleStat ?? skill.scaleStat) ?? ""
+            ] ??
+                ""
+            items.push({
+                seconds,
+                trackIndex,
+                character,
+                kind: "direct",
+                hit: {
+                    ...base,
+                    hitName: `${
+                        displayNameOf(nameCandidates, 0, 1, base.skillType)
+                    }${EXTRA_RATIO_SUFFIX}`,
+                    ratio: `${EXTRA_RATIO_PLACEHOLDER}${suffix}`,
+                    hits: 1,
+                },
+                names: nameCandidates,
+                // 与各段同组：共用同一条参考线，轴不会因此变长
+                ownLine: false,
+                groupKey,
+                state,
+                extraRatioKeys: extraKeys,
             })
         }
     }
@@ -833,6 +896,9 @@ export const convertTimelinePhase = (
     const members = (payload?.members ?? []).slice(0, TEAM_SIZE)
     const roster = rosterNames(payload)
     const rounds = resolveRounds(payload)
+    // 追加倍率（`multAdd`）与全局 buff 开关：用来给技能补「（额外）」条目
+    const multAdds = collectMultAddEffects(payload)
+    const activeById = globalBuffActiveOf(payload)
 
     // 每轮：本条轴上的结束下标，用来把轮次边界参考线放准
     const roundBounds: { duration: number; endIndex: number }[] = []
@@ -853,6 +919,8 @@ export const convertTimelinePhase = (
                     round.duration > 0 && count > 0
                         ? round.startSeconds + (i * round.duration) / count
                         : round.startSeconds,
+                multAdds,
+                activeById,
             )
         )
         items.push(...roundItems)
@@ -973,6 +1041,10 @@ export const convertTimelinePhase = (
                     ratioUnit: unit,
                     // 显示名是短名，名称匹配靠这份名单（含技能库全名）
                     ...(item.names?.length ? { skillNames: item.names } : {}),
+                    // 「（额外）」条目：追加倍率（`extraRatio`）只绑它
+                    ...(item.extraRatioKeys
+                        ? { extraRatioKeys: item.extraRatioKeys }
+                        : {}),
                     ...(item.hit!.damageType
                         ? { damageType: item.hit!.damageType }
                         : {}),

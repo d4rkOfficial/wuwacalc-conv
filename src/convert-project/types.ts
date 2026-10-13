@@ -440,6 +440,19 @@ export interface CoconutDamageEntry {
      * 拉表阶段用这份名单做名称匹配。
      */
     skillNames?: string[]
+    /**
+     * 「（额外）」条目承载的追加倍率（上游 `multAdd`）：buff id + 层数（固定段为 `null`）
+     * + 该效果的技能名键（同一条 buff 可以有多条点名不同技能的效果）。
+     *
+     * 追加倍率是**技能级**的一次性追加，而工具箱按 `extraRatio / 100 × hits` 逐命中加算；
+     * 排轴阶段为每个带追加倍率的技能单开一条倍率≈0、`hits = 1` 的「（额外）」条目，
+     * 拉表阶段只把 `extraRatio` 变体绑到它上面（见 `extra-ratio.ts`）。
+     */
+    extraRatioKeys?: {
+        buffId: string
+        layer: number | null
+        skillNamesKey: string
+    }[]
     ratioUnit?: "%" | "fixed"
     burstLayers?: number
     /** 上游 `damageType`（`普攻` / `重击` / …）；拿来落 `damageEntryDamageTypes` */

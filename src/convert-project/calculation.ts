@@ -9,7 +9,15 @@
  */
 
 import { optionalString, toInt } from "../utils.ts"
+import {
+    EXTRA_RATIO_ZONE_ID,
+    globalBuffActiveOf,
+    isTeamBuffExcludedFor,
+    skillNamesKey,
+    TEAM_COPY_PREFIX,
+} from "./extra-ratio.ts"
 import { collectPanelBuffs } from "./panel.ts"
+import { cumulativeAt, type UpstreamEffect } from "./stacks.ts"
 import type { SkillState } from "./timeline.ts"
 import {
     type CoconutBuffCondition,
@@ -180,28 +188,6 @@ export const inferEntryDamageTypes = (entry: CoconutDamageEntry): string[] => {
 
 // ── 上游结构（仅本模块用到） ──────────────────────────────────────────────────
 
-interface UpstreamSegment {
-    upTo?: number | null
-    perStack?: number
-}
-
-interface UpstreamEffect {
-    zone?: string
-    valueMode?: string
-    value?: number
-    perStack?: number
-    segments?: UpstreamSegment[] | null
-    element?: string
-    damageType?: string
-    defenseKind?: string
-    minStacks?: number
-    minResonance?: number
-    maxStacks?: number
-    skillScope?: string
-    skillNames?: string[] | null
-    librarySkillNames?: string[] | null
-}
-
 interface UpstreamBuff {
     id?: string
     name?: string
@@ -370,32 +356,13 @@ const applyExcludeSource = (
  *
  * 漏读它的后果就是「只该给一个人的延奏落到全队头上」：实测 `MC-JXUQZU` 里
  * 「弗洛洛·延奏」只勾了莫宁，但产物给的是 `[1,2]`（坎特蕾拉也吃了）。
+ *
+ * 判定与「（额外）追加倍率条目」共用一份口径（`extra-ratio.ts`），免得两边不一致。
  */
 const excludedTeamBuffLookup = (
     members: WuwaCalcMember[],
-): (memberIndex: number, buffId: string) => boolean => {
-    const byMember = members.map((member) => {
-        const set = new Set<string>()
-        for (
-            const list of [
-                member?.excludedTeamBuffIds,
-                member?.manuallyExcludedTeamBuffIds,
-            ]
-        ) {
-            for (const raw of list ?? []) {
-                const id = optionalString(raw)
-                if (id) set.add(id)
-            }
-        }
-        return set
-    })
-    return (memberIndex, buffId) => {
-        const set = byMember[memberIndex]
-        if (!set?.size) return false
-        // 两种 id 形态都试：上游有时写原始 id，有时写成员副本的 `tm_` id
-        return stateKeysOf(buffId).some((key) => set.has(key))
-    }
-}
+): (memberIndex: number, buffId: string) => boolean =>
+(memberIndex, buffId) => isTeamBuffExcludedFor(members[memberIndex], buffId)
 
 /** 按“不吃的人”收窄作用范围；一个人都不剩时返回空（调用方丢弃这条 buff） */
 const narrowScope = (
@@ -416,7 +383,6 @@ const narrowScope = (
  * （`globalBuffActive` / `globalBuffStacks` 也用原始 id），而成员 `buffs` 里的副本
  * 带 `tm_` 前缀（排轴上的逐技能状态用的就是这个前缀）。查状态时两种都要试。
  */
-const TEAM_COPY_PREFIX = "tm_"
 const stateKeysOf = (id: string): string[] =>
     id.startsWith(TEAM_COPY_PREFIX)
         ? [id, id.slice(TEAM_COPY_PREFIX.length)]
@@ -458,32 +424,6 @@ const collectBuffs = (
 }
 
 /**
- * 第 n 层的每层值：取第一条覆盖 n 的 segment 的 `perStack`。
- *
- * `segments` 是**分段**的每层值，`upTo` 是该段的层数上限：
- * 例「每拥有1层暴击伤害 +2.5%（至多24层），溢出后每层 +1%（至多100层）」
- * = `[{upTo:24, perStack:2.5}, {upTo:124, perStack:1}]`。
- *
- * 超出最后一段 `upTo` 的层数**不再提供每层值**（返回 0）——不能沿用最后一段，
- * 否则「每层余响使倍率额外增加（至多24层）」这类效果会一直涨到满层：
- * 余响 124 层时会被算成 `124 × 82.55`，正确值是 `24 × 82.55`。
- */
-const perStackAt = (
-    segments: UpstreamSegment[] | null | undefined,
-    n: number,
-): number => {
-    const list = (segments ?? []).filter((s) =>
-        Number.isFinite(Number(s?.perStack))
-    )
-    if (!list.length) return 0
-    const hit = list.find((seg) =>
-        seg.upTo === null || seg.upTo === undefined || n <= Number(seg.upTo)
-    )
-    if (!hit) return 0
-    return Number(hit?.perStack) || 0
-}
-
-/**
  * 一条拆出来的椰果 buff 变体。
  *
  * 一个上游 buff 会拆成若干个变体，拆分维度有两个：
@@ -496,6 +436,8 @@ interface BuffVariant {
     instance: CoconutBuffInstance
     /** 上游 buff id，用来查逐技能的层数 */
     sourceId: string
+    /** 该变体的椰果乘区 id（`extraRatio` 要按「（额外）」条目特殊绑定） */
+    zoneId: string
     /** 该变体对应的层数；`null` = 不按层绑（纯固定段） */
     layer: number | null
     /** 纯固定段的 `minStacks` 门槛（按层绑的变体恒为 0） */
@@ -507,20 +449,6 @@ interface BuffVariant {
      * 值为 0 且不参与勾选。
      */
     placeholder?: boolean
-}
-
-/**
- * 该效果在 `layer` 层上的**累计**贡献。
- *
- * 上游自己的口径就是累计（`docs` 1.3）：`value = Σ_{s=1..stacks} perStackOf(s)`。
- * 椰果一条 buff 只能写一个数，「祸兮福兮 50层」要的就是 50 层的累计值（2.5 × 50 = 125）。
- */
-const cumulativeAt = (effect: UpstreamEffect, layer: number): number => {
-    if (layer < toInt(effect.minStacks, 0)) return 0
-    if (effect.valueMode === "fixed") return Number(effect.value) || 0
-    let total = 0
-    for (let n = 1; n <= layer; n++) total += perStackAt(effect.segments, n)
-    return total
 }
 
 /** 同乘区重复出现时的消歧：优先用技能名，其次用序号 */
@@ -697,6 +625,7 @@ const toBuffVariants = (
                     ...(ownerGate ? { condition: ownerGate } : {}),
                 },
                 sourceId: id,
+                zoneId: group.zoneId,
                 layer,
                 minStacks,
                 skillNames: group.skillNames,
@@ -839,20 +768,7 @@ export const convertCalculationPhase = (
 
     // 当前选中态：是否生效。层数不走这里 —— 逐技能的层数由排轴阶段解析好，
     // 落在 `entryState[].stacks` 上（上游 `getCatalogResolvedStacks` 的口径）。
-    const activeById = new Map<string, boolean>()
-    const shared = payload?.team?.sharedBuffs as
-        | { globalBuffActive?: Record<string, boolean> }
-        | undefined
-    for (const [id, value] of Object.entries(shared?.globalBuffActive ?? {})) {
-        activeById.set(id, !!value)
-    }
-    for (const member of members) {
-        for (
-            const [id, value] of Object.entries(member.globalBuffActive ?? {})
-        ) {
-            if (!activeById.has(id)) activeById.set(id, !!value)
-        }
-    }
+    const activeById = globalBuffActiveOf(payload)
 
     const buffs: CoconutBuffInstance[] = []
     const damageEntryBuffSetIds: Record<string, string[]> = {}
@@ -923,6 +839,20 @@ export const convertCalculationPhase = (
                 ) return false
                 if (variant.minStacks > 0 && layer < variant.minStacks) {
                     return false
+                }
+
+                // 追加倍率（上游 `multAdd`）是**技能级**的一次性追加，而工具箱按
+                // `extraRatio / 100 × hits` 逐命中加算 —— 绑到拆开的每一段上就会被
+                // 乘 `Σhits` 倍。所以只认排轴阶段为它建的「（额外）」条目：
+                // 那个条目 `hits = 1` 且倍率≈0，正好「每个技能加一次」。
+                // 同一条 buff 可能有多条效果（命火：劫魄 / 踏罡），用技能名键区分。
+                if (variant.zoneId === EXTRA_RATIO_ZONE_ID) {
+                    const wanted = skillNamesKey(variant.skillNames)
+                    return (entry.extraRatioKeys ?? []).some((key) =>
+                        key.buffId === variant.sourceId &&
+                        key.layer === variant.layer &&
+                        key.skillNamesKey === wanted
+                    )
                 }
 
                 if (variant.skillNames.length > 0) {
