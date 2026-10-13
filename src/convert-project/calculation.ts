@@ -52,10 +52,17 @@ const ZONE_MAP: Record<string, string> = {
     generalDefense: "defPen",
     elementDefense: "defPen",
     typeDefense: "defPen",
-    // 倍率追加 / 提升
+    // 倍率**追加**：「每层/每点增加倍率 N%」——把倍率数值本身加上去。
+    // 工具箱 `extraRatio` 正是这个语义（`compute.ts`：`effectiveRatio = ratio + extraRatio/100`）。
     multAdd: "extraRatio",
-    multBoost: "extraRatio",
-    multBoostExtra: "extraRatio",
+    // 倍率**提升**：「××伤害倍率提升 N%」——把这段伤害乘 (1 + N%)。
+    // 两者不是一回事：追加是往倍率数值上加（技能倍率越高越吃亏），提升是乘在整段伤害上。
+    // 工具箱里「倍率提升」对应**特殊终伤(1)**（`compute.ts`：`customMult = 1 + specialFinal1/100`，
+    // 同乘区加算、再乘进总伤害），这也是工具箱自己的命名口径
+    // （`ai/generate/prompts.config.ts`：普通相加语义的终伤/倍率用 specialFinal1）。
+    multBoost: "specialFinal1",
+    // 同上（数据里尚未出现，按「提升」语义兜住，别让它被静默丢掉）
+    multBoostExtra: "specialFinal1",
     // 偏谐
     offsetHarmonyEff: "offTuneBuildupRate",
     // 按伤害类型的双暴（「召鬼呼星·承天」的重击暴击率）→ 带上类型条件
@@ -81,6 +88,7 @@ const ZONE_LABELS: Record<string, string> = {
     resDown: "减抗",
     defPen: "穿防",
     extraRatio: "额外倍率",
+    specialFinal1: "特殊终伤(1)",
     offTuneBuildupRate: "偏谐累积",
     tuneBreakBoost: "谐度破坏增幅",
     recharge: "共鸣效率",
@@ -210,6 +218,98 @@ interface UpstreamBuff {
     sourceMemberIndex?: number
     sourceTag?: string
     convergenceVuln?: number
+    /** 武器 Buff 自带（`weapon_fx_*` / `weapon_team_fx_*`） */
+    weaponId?: string
+    /** 角色模板键，里面常带共鸣链档位（`qingxiao_c4_team_atk`） */
+    templateKey?: string
+}
+
+// ── 归属门（参考武器 / 参考本体 / 参考某人的共鸣链）────────────────────────────
+
+/** `pk_0_…` / `tb_1_…` / `weapon_team_fx_2_…` 里的站位号 */
+const SOURCE_SLOT_PATTERN = /^(?:tm_)?(?:pk|tb|weapon_team_fx)_(\d+)_/
+
+/** 这条 buff 的来源是角色本体还是武器（声骸/套装的留空，工具箱按名字归档） */
+const sourceKindOf = (
+    buff: UpstreamBuff,
+    id: string,
+): "character" | "weapon" | null => {
+    if (optionalString(buff.weaponId)) return "weapon"
+    if (/^(?:tm_)?weapon_/.test(id)) return "weapon"
+    if (buff.sourceTag === "characterTemplate") return "character"
+    if (/^(?:tm_)?(?:pk|tb)_/.test(id)) return "character"
+    return null
+}
+
+/** 该 buff 挂在哪个站位上：成员级看 ownerIndex，队伍级看 `sourceMemberIndex` 或 id 前缀 */
+const ownerSlotOf = (
+    buff: UpstreamBuff,
+    id: string,
+    ownerIndex: number | null,
+): number => {
+    if (ownerIndex !== null) return ownerIndex
+    const declared = toInt(buff.sourceMemberIndex, -1)
+    if (declared >= 0 && declared < TEAM_SIZE) return declared
+    const matched = SOURCE_SLOT_PATTERN.exec(id)
+    if (matched) {
+        const slot = Number(matched[1])
+        if (slot >= 0 && slot < TEAM_SIZE) return slot
+    }
+    return -1
+}
+
+/**
+ * 这条 buff 是哪一档共鸣链的：上游**不在 `minResonance` 上写**这件事
+ * （实测 `【本体】4链·清宵` / `pk_0_qingxiao_c3_wanwu_mult` 的 `minResonance` 都是 0），
+ * 档位藏在 `templateKey`（`qingxiao_c4_team_atk`）、id 与名字（`【本体】3链`）里。
+ */
+const chainLevelOf = (buff: UpstreamBuff, id: string): number => {
+    const sources = [
+        optionalString(buff.templateKey) ?? "",
+        id,
+        optionalString(buff.name) ?? "",
+    ]
+    for (const text of sources) {
+        const token = /(?:^|_)c([1-6])(?:_|$)/i.exec(text)
+        if (token) return Number(token[1])
+        const label = /([1-6])\s*链/.exec(text)
+        if (label) return Number(label[1])
+    }
+    return 0
+}
+
+/**
+ * 给 buff 补一道**归属门**，让工具箱的左侧列表把它归档到正确目录
+ * （`buff-tree.ts` 的二级目录就是按链/阶条件分的）：
+ *
+ * | 归属 | 门 | 归档到 |
+ * | --- | --- | --- |
+ * | 角色本体 / 共鸣链（`pk_` / `tb_` / `characterTemplate`） | `chains: [{ charIdx, min }]` | `角色名本体`（`min = 0`）或 `角色名X链` |
+ * | 武器（`weapon_fx_` / `weapon_team_fx_` / 带 `weaponId`） | `refinements: [{ charIdx, min: 0 }]` | `角色名的武器名` |
+ *
+ * 「本体」用 0 链表达是工具箱自己的口径（`condition.ts` 的 `withOwnerBodyGate`）：
+ * 链 = 角色共鸣链，0 链即本体，且 `≥0 链` 恒成立，不会把效果挡掉。
+ */
+const ownerGateOf = (
+    buff: UpstreamBuff,
+    id: string,
+    ownerIndex: number | null,
+    effects: UpstreamEffect[],
+): CoconutBuffCondition | undefined => {
+    const kind = sourceKindOf(buff, id)
+    if (!kind) return undefined
+    const owner = ownerSlotOf(buff, id, ownerIndex)
+    if (owner < 0) return undefined
+
+    if (kind === "weapon") return { refinements: [{ charIdx: owner, min: 0 }] }
+
+    // 档位 = max(名字/templateKey 里写的链档, 效果上写的 minResonance 门槛)。
+    // `minResonance` 取**所有效果里最小**的那个：只要有一段不受链约束，
+    // 这条 buff 本身就算「本体」（那几段 `minResonance: 2` 只是本体 buff 的一部分）。
+    const gates = effects.map((effect) => toInt(effect.minResonance, 0))
+    const effectGate = gates.length ? Math.min(...gates) : 0
+    const min = Math.max(0, chainLevelOf(buff, id), effectGate)
+    return { chains: [{ charIdx: owner, min }] }
 }
 
 // ── 数值折算 ──────────────────────────────────────────────────────────────────
@@ -264,6 +364,51 @@ const applyExcludeSource = (
     return scope.filter((i) => i !== source)
 }
 
+/**
+ * 「分配覆盖」：上游「提供的全队 Buff」面板里，每个角色头像下可以取消勾选，
+ * 表示**这个角色全程吃不到这条全队 buff**（数据落在 `members[i].excludedTeamBuffIds`）。
+ *
+ * 漏读它的后果就是「只该给一个人的延奏落到全队头上」：实测 `MC-JXUQZU` 里
+ * 「弗洛洛·延奏」只勾了莫宁，但产物给的是 `[1,2]`（坎特蕾拉也吃了）。
+ */
+const excludedTeamBuffLookup = (
+    members: WuwaCalcMember[],
+): (memberIndex: number, buffId: string) => boolean => {
+    const byMember = members.map((member) => {
+        const set = new Set<string>()
+        for (
+            const list of [
+                member?.excludedTeamBuffIds,
+                member?.manuallyExcludedTeamBuffIds,
+            ]
+        ) {
+            for (const raw of list ?? []) {
+                const id = optionalString(raw)
+                if (id) set.add(id)
+            }
+        }
+        return set
+    })
+    return (memberIndex, buffId) => {
+        const set = byMember[memberIndex]
+        if (!set?.size) return false
+        // 两种 id 形态都试：上游有时写原始 id，有时写成员副本的 `tm_` id
+        return stateKeysOf(buffId).some((key) => set.has(key))
+    }
+}
+
+/** 按“不吃的人”收窄作用范围；一个人都不剩时返回空（调用方丢弃这条 buff） */
+const narrowScope = (
+    scope: "all" | number[],
+    buffId: string,
+    excludedBy: (memberIndex: number, buffId: string) => boolean,
+): number[] => {
+    const indices = scope === "all"
+        ? Array.from({ length: TEAM_SIZE }, (_, i) => i)
+        : scope
+    return indices.filter((index) => !excludedBy(index, buffId))
+}
+
 // ── 主流程 ────────────────────────────────────────────────────────────────────
 
 /**
@@ -312,7 +457,17 @@ const collectBuffs = (
     return result
 }
 
-/** 第 n 层的每层值：取第一条覆盖 n 的 segment 的 perStack */
+/**
+ * 第 n 层的每层值：取第一条覆盖 n 的 segment 的 `perStack`。
+ *
+ * `segments` 是**分段**的每层值，`upTo` 是该段的层数上限：
+ * 例「每拥有1层暴击伤害 +2.5%（至多24层），溢出后每层 +1%（至多100层）」
+ * = `[{upTo:24, perStack:2.5}, {upTo:124, perStack:1}]`。
+ *
+ * 超出最后一段 `upTo` 的层数**不再提供每层值**（返回 0）——不能沿用最后一段，
+ * 否则「每层余响使倍率额外增加（至多24层）」这类效果会一直涨到满层：
+ * 余响 124 层时会被算成 `124 × 82.55`，正确值是 `24 × 82.55`。
+ */
 const perStackAt = (
     segments: UpstreamSegment[] | null | undefined,
     n: number,
@@ -321,10 +476,10 @@ const perStackAt = (
         Number.isFinite(Number(s?.perStack))
     )
     if (!list.length) return 0
-    const hit =
-        list.find((seg) =>
-            seg.upTo === null || seg.upTo === undefined || n <= Number(seg.upTo)
-        ) ?? list[list.length - 1]
+    const hit = list.find((seg) =>
+        seg.upTo === null || seg.upTo === undefined || n <= Number(seg.upTo)
+    )
+    if (!hit) return 0
     return Number(hit?.perStack) || 0
 }
 
@@ -392,6 +547,8 @@ const toBuffVariants = (
     resonances: number[],
     /** 该 buff 在轴上用到过的层数（升序，均 > 0） */
     usedLayers: number[],
+    /** 该成员是否**不吃**这条全队 buff（「分配覆盖」的勾选） */
+    excludedBy: (memberIndex: number, buffId: string) => boolean,
 ): BuffVariant[] => {
     const id = optionalString(buff.id)
     if (!id) return []
@@ -489,7 +646,19 @@ const toBuffVariants = (
     })
 
     const baseName = optionalString(buff.name) ?? id
-    const scope = applyExcludeSource(scopeOf(ownerIndex), buff)
+    // 作用范围 = 队伍级/角色级 − 来源站位（excludeSource）− 各成员自己取消的勾选
+    const narrowed = narrowScope(
+        applyExcludeSource(scopeOf(ownerIndex), buff),
+        id,
+        excludedBy,
+    )
+    // 三个人都吃不到就别落表了（`scope: []` 在椰果里是「仅效应伤害」，不能拿来表达空集）
+    if (!narrowed.length) return []
+    const scope: "all" | number[] = narrowed.length === TEAM_SIZE
+        ? "all"
+        : narrowed
+    // 归属门：参考本体 / 参考武器 / 参考某人的共鸣链，工具箱据此归档
+    const ownerGate = ownerGateOf(buff, id, ownerIndex, rawEffects)
     const variants: BuffVariant[] = []
 
     groups.forEach((group, index) => {
@@ -525,6 +694,7 @@ const toBuffVariants = (
                     zones: [zone],
                     scope,
                     source: "builtin",
+                    ...(ownerGate ? { condition: ownerGate } : {}),
                 },
                 sourceId: id,
                 layer,
@@ -707,6 +877,9 @@ export const convertCalculationPhase = (
         return [...values].sort((a, b) => a - b)
     }
 
+    // 「分配覆盖」：每个角色可以取消勾选某条全队 buff
+    const excludedBy = excludedTeamBuffLookup(members)
+
     for (const { buff, ownerIndex } of collectBuffs(payload)) {
         const id = optionalString(buff.id)
         // 上游把队伍级 buff 复制进了每个角色的 buff 列表（`tm_` 前缀），必须按 id 去重，
@@ -719,6 +892,7 @@ export const convertCalculationPhase = (
             ownerIndex,
             resonances,
             usedLayers,
+            excludedBy,
         )
         if (!variants.length) continue
         if (id) buffIds.add(id)

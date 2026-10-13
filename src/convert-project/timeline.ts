@@ -41,7 +41,7 @@ export const UPSTREAM_PX_PER_SECOND = 40
  * 但整轴必须落在工具箱的 `MAX_POS`（`SIDE_PAD + MAX_TIME * PPS` = 10848）内，
  * 条数多时会等比收窄，保证一个工程内部仍然等距。
  */
-export const REF_LINE_STEP = 150
+export const REF_LINE_STEP = 120
 
 /** 工具箱 `MAX_POS = SIDE_PAD + MAX_TIME * PPS` = 48 + 180 × 60 */
 export const MAX_POS = 10848
@@ -96,6 +96,9 @@ const roundNumber = (value: number): number => Math.round(value * 100) / 100
  *
  * 生命 / 防御缩放的技能必须带后缀（`15.86%生命`），否则工具箱会按「攻击」缩放，
  * 既有伤害算错，伤害条目 id 也会落到 `#攻击` 上。
+ *
+ * ⚠️ 只在**上游没给 `multComponents`**（拿不到分段构成）时才用它，
+ * 正常路径走 {@link toRatioSegments}：多段要拆开，加总会把段信息吃掉。
  */
 const toRatio = (
     components: WuwaCalcMultComponent[] | null | undefined,
@@ -119,6 +122,60 @@ const toRatio = (
     if (parts.length) return parts.join("+")
     const single = Number(baseMult)
     return Number.isFinite(single) ? `${roundNumber(single)}%${suffix}` : ""
+}
+
+/** 拆出来的一段倍率：该段自己的 ratio 字符串 + 该段的段数 */
+export interface RatioSegment {
+    ratio: string
+    hits: number
+}
+
+/**
+ * 多段倍率 → **一段一条**。
+ *
+ * 上游 `multComponents` 是技能伤害的**分段**构成（`baseMult = Σ rate × count`）：
+ *
+ * ```
+ * 新世界狂想曲·亡与死的乐章   37.88% × 4 段 + 117.83% × 3 段   （baseMult 505.01）
+ * 生与死的乐章·谱曲终末      33.01% × 2 + 12.38% × 8 + 495.1% × 1（baseMult 660.16）
+ * ```
+ *
+ * 椰果侧一条 `skillHits` 会被 `parseValueString` 按基础类型**加总**成一个倍率
+ * （`pctMap` 累加），段信息就此消失：排轴上只剩「505.01%」一行，
+ * 拉表里也没法只看某一段。所以这里**每段拆成一条**，由调用方各挂一个伤害块
+ * （同一技能的各段共用同一条参考线，见 {@link TimelineResult} 的装配）。
+ *
+ * 段数落在 `hits` 上（`count × multCount`）：工具箱的
+ * `ratioValue = Σ(rate × mult) × hits`，所以拆段前后总伤害不变
+ * （都是 `Σ rate × count × multCount`）——拆开只是为了看清构成，不改数值。
+ */
+export const toRatioSegments = (
+    components: WuwaCalcMultComponent[] | null | undefined,
+    baseMult: unknown,
+    scaleStat: unknown,
+    multCount: number,
+): RatioSegment[] => {
+    const suffix = SCALE_SUFFIX[optionalString(scaleStat) ?? ""] ?? ""
+    const segments = (components ?? [])
+        .map((c) => ({
+            rate: Number(c?.rate),
+            count: Math.max(1, toInt(c?.count, 1)),
+        }))
+        .filter((c) => Number.isFinite(c.rate) && c.rate !== 0)
+        .map((c) => ({
+            ratio: `${roundNumber(c.rate)}%${suffix}`,
+            hits: c.count * multCount,
+        }))
+    if (segments.length) return segments
+
+    // 没有分段构成（老格式）：退回单段，`baseMult` 就是整段的倍率
+    const single = Number(baseMult)
+    return [{
+        ratio: Number.isFinite(single)
+            ? `${roundNumber(single)}%${suffix}`
+            : "",
+        hits: multCount,
+    }]
 }
 
 /**
@@ -235,6 +292,11 @@ interface AxisItem {
     nonDirect?: CoconutNonDirectEntry
     /** 非直伤是否有自己独立的参考线（效应为 true；处决/响应为 false，跟同组共用） */
     ownLine: boolean
+    /**
+     * 同组标记：**同一个技能拆出来的各段倍率**共用一条参考线。
+     * 只有第一条段落线，其余段贴在同一条线上（段是同一瞬间的同一招，不该各占一条）。
+     */
+    groupKey?: string
     /** 产生这条的技能选中态（叠层 / 生效），供拉表按层绑定 */
     state?: SkillState
 }
@@ -250,10 +312,11 @@ const toSkillHit = (
         // 有技能库名称就用库名，否则用实际名称（视作自定义）
         hitName: optionalString(entry.librarySkillName) ?? fallbackName,
         skillType: SKILL_TYPE_BY_DAMAGE_TYPE[damageType] ?? "",
-        ratio: toRatio(entry.multComponents, entry.baseMult, entry.scaleStat),
+        // 倍率与段数由调用方按段填（`toRatioSegments`）
+        ratio: "",
         element: optionalString(entry.damageElement) || element,
         character,
-        hits: toInt(entry.multCount, 1),
+        hits: 1,
         // 上游的伤害类型原样带走，拉表要用它落 `damageEntryDamageTypes`
         ...(damageType ? { damageType } : {}),
     }
@@ -311,30 +374,48 @@ const collectMemberItems = (
     }
 
     const items: AxisItem[] = []
+    /** 同组标记的自增号（每个技能段一个组，组内是它的各段倍率） */
+    let groupSeq = 0
 
-    // 1) 直伤：按阶段顺序拼接，catalogId 指回目录
+    // 1) 直伤：按阶段顺序拼接，catalogId 指回目录。
+    //    **多段倍率按段拆开**：一个技能拆成几条，各挂一个伤害块、共用同一条参考线，
+    //    这样排轴/拉表里都能逐段看到，而不是被 `parseValueString` 加总成一个数。
     for (const [index, skill] of source.skills.entries()) {
         const catalogId = optionalString(skill.catalogId)
         const entry = catalogId ? catalog.get(catalogId) : undefined
         const resolved = resolveStacks(source, catalogId ?? "", entry)
-        items.push({
-            seconds: secondsOf(entry, placement(index, source.skills.length)),
-            trackIndex,
+        const seconds = secondsOf(entry, placement(index, source.skills.length))
+        const state = skillStateOf(skill, resolved)
+        const base = toSkillHit(
+            entry ?? {
+                baseMult: skill.baseMult,
+                multCount: skill.multCount,
+                damageType: skill.damageType,
+            },
+            optionalString(skill.name) ?? "",
             character,
-            kind: "direct",
-            hit: toSkillHit(
-                entry ?? {
-                    baseMult: skill.baseMult,
-                    multCount: skill.multCount,
-                    damageType: skill.damageType,
-                },
-                optionalString(skill.name) ?? "",
+            element,
+        )
+        const segments = toRatioSegments(
+            entry?.multComponents,
+            entry?.baseMult ?? skill.baseMult,
+            entry?.scaleStat ?? skill.scaleStat,
+            toInt(entry?.multCount ?? skill.multCount, 1),
+        )
+        const groupKey = `sk${trackIndex}_${groupSeq++}`
+        for (const [segmentIndex, segment] of segments.entries()) {
+            items.push({
+                seconds,
+                trackIndex,
                 character,
-                element,
-            ),
-            ownLine: true,
-            state: skillStateOf(skill, resolved),
-        })
+                kind: "direct",
+                hit: { ...base, ratio: segment.ratio, hits: segment.hits },
+                // 第一段落线，其余段共用它的参考线
+                ownLine: segmentIndex === 0,
+                groupKey,
+                state,
+            })
+        }
     }
 
     // 2) 非直伤：specialSkills 里属于本站位的条目
@@ -390,6 +471,8 @@ const collectMemberItems = (
         })
     }
 
+    // 该站位自己的轴顺序（直伤 + 非直伤按各自 px 排在一起）；站位之间不再混排
+    items.sort((a, b) => a.seconds - b.seconds)
     return items
 }
 
@@ -646,6 +729,8 @@ export const convertTimelinePhase = (
     const items: AxisItem[] = []
 
     for (const round of rounds) {
+        // **按站位分组**：1 号位的倍率排完再排 2 号位、3 号位，最后补该轮的轴长参考线。
+        // 不跨站位按时间混排 —— 同一条轴上是同一时间点的三个人，混排会让人完全分不清谁是谁的段。
         const roundItems = members.flatMap((member, index) =>
             collectMemberItems(
                 member,
@@ -659,11 +744,6 @@ export const convertTimelinePhase = (
                         ? round.startSeconds + (i * round.duration) / count
                         : round.startSeconds,
             )
-        )
-        // **轮内**排序后按轮次顺序拼接：跨轮排序会让秒数区间重叠（各轮 px 比例不同），
-        // 打乱轮次分组
-        roundItems.sort((a, b) =>
-            a.seconds - b.seconds || a.trackIndex - b.trackIndex
         )
         items.push(...roundItems)
         roundBounds.push({
@@ -680,17 +760,32 @@ export const convertTimelinePhase = (
         }
     }
 
-    // 轴顺序：时间升序，同一时间按站位稳定排序
-    items.sort((a, b) => a.seconds - b.seconds || a.trackIndex - b.trackIndex)
-
     const refLines: CoconutRefLine[] = []
     const damageBlocks: CoconutDamageBlock[] = []
     const entries: CoconutDamageEntry[] = []
     const entryState = new Map<string, SkillState>()
 
+    /**
+     * 该条目是否与**上一条**共用参考线。
+     *
+     * - 同一技能拆出来的各段倍率（`groupKey` 相同）：同一瞬间的同一招，共用一条线；
+     * - 处决 / 响应（`ownLine === false`）：跟前一条非直伤同组，共用一条线。
+     */
+    const sharesLineWith = (
+        item: AxisItem,
+        prev: AxisItem | undefined,
+    ): boolean => {
+        if (item.groupKey !== undefined) return prev?.groupKey === item.groupKey
+        return item.ownLine === false && prev?.kind === "nonDirect" &&
+            prev.nonDirect?.category !== "效应"
+    }
+    const shared = items.map((item, index) =>
+        sharesLineWith(item, items[index - 1])
+    )
+
     // 参考线等距：条数多时等比收窄，保证整轴落在工具箱 MAX_POS 内
-    // （每个伤害一条 + 每轮一条轮次边界 + 末尾「结束」）
-    const lineCount = items.filter((it) => it.ownLine !== false).length +
+    // （真正落线的条目各一条 + 每轮一条轮次边界 + 末尾「结束」）
+    const lineCount = shared.filter((isShared) => !isShared).length +
         roundBounds.length
     const step = Math.max(
         1,
@@ -719,14 +814,11 @@ export const convertTimelinePhase = (
     }
 
     for (const [index, item] of items.entries()) {
-        // 处决/响应与前一条同组时共用参考线（`ownLine === false` 且上一条也是非直伤同组）
-        const shareLine = item.ownLine === false && refLines.length > 0 &&
-            items[index - 1]?.kind === "nonDirect" &&
-            items[index - 1]?.nonDirect?.category !== "效应"
+        const shareLine = shared[index]
 
         const refLineId = shareLine
             ? refLines[refLines.length - 1].id
-            : `r${index}`
+            : `r${refLines.length}`
 
         // `time` 只在轮次边界与收尾上写，普通伤害节点留空
         if (!shareLine) pushRefLine(refLineId, "")

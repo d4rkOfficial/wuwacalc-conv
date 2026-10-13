@@ -98,6 +98,14 @@ export interface WuwaCalcMember {
     /** 拉表选中态：该 Buff 当前是否生效 / 叠了几层 */
     globalBuffActive?: Record<string, boolean> | null
     globalBuffStacks?: Record<string, number> | null
+    /**
+     * **该角色不吃哪些全队 buff**（上游「提供的全队 Buff」面板里右侧头像下的勾选，
+     * UI 上叫「分配覆盖」）。漏读它，「弗洛洛·延奏」这种只该给一个人的 buff 会落到全队头上 ——
+     * 那些勾选在数据里就存在这一对数组里。
+     */
+    excludedTeamBuffIds?: string[] | null
+    /** 同上的手动子集（用户手动取消的那些），保留以防老方案只存了这一份 */
+    manuallyExcludedTeamBuffIds?: string[] | null
 }
 
 // ── 输入：排轴 / 拉表 ─────────────────────────────────────────────────────────

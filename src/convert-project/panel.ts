@@ -25,6 +25,7 @@
  */
 
 import { optionalString } from "../utils.ts"
+import { shouldSkipPanelSource } from "./special-rules.ts"
 import type { CoconutBuffCondition, WuwaCalcMember } from "./types.ts"
 
 /** 上游 `char.*Sources` 的键 → 椰果乘区 */
@@ -133,6 +134,8 @@ export const collectMemberPanelBuffs = (
             if (SKIP_SOURCE_PATTERNS.some((pattern) => pattern.test(id))) {
                 continue
             }
+            // 特殊规则：比如「本体属性·谐度破坏增幅」是工具箱角色数据自带的基数
+            if (shouldSkipPanelSource(source, key)) continue
 
             const name = optionalString(source?.name) ?? id
             const label = ZONE_LABELS[zoneId] ?? zoneId

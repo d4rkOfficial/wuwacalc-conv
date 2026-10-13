@@ -44,10 +44,25 @@ typeBonus  typeDeep  typeDefense  typeVulnerability
 | `elementResReduce` | 属性减抗（`洛瑟菈·全队·霜渐` 冷凝 8%） | `resDown` | `elements:[element]` |
 | `generalDefense` / `elementDefense` / `typeDefense` | 无视防御（`荣光` 30% / `穗穗` 湮灭 6% / `再无我·共鸣解放` 10%） | `defPen` | 按各自 element / damageType |
 | `offsetHarmonyEff` | 偏谐值累积效率（`莫宁` 50%） | `offTuneBuildupRate` | — |
-| `multAdd` / `multBoost` / `multBoostExtra` | 倍率追加 / 倍率提升（`锻雪·归刃`、`绯雪·1链` 120%、`达妮娅·2链·放逐` 40%） | `extraRatio` | — |
+| `multAdd` | **倍率追加**：「每层/每点/每超过X**增加**倍率 N%」（`命火` 劫魄 527.5 / 踏罡 541.25、`锯环残响` 每点 2.59%、`余响` 每层 82.55%） | `extraRatio` | — |
+| `multBoost` / `multBoostExtra` | **倍率提升**：「××伤害倍率**提升** N%」（`坎特蕾拉·一链` 50%、`弗洛洛·1链` 80%、`景燃·2链` 46%、`卡提希娅·3链` 100%） | `specialFinal1` | — |
 
 - 三个 `*Defense` **一律落 `defPen`**（实测样例都带 `defenseKind: 'ignore'`，即穿防）。
-- 三个倍率类 **一律落 `extraRatio`**（`core.js` 注释「与其它倍率提升叠加」）。
+- ⚠️ **两个倍率类不是一回事**（原先都落 `extraRatio`，是错的）：
+  - **追加**（`multAdd`）是往**倍率数值**上加 —— 工具箱 `extraRatio` 正是这个语义：
+    `compute.ts` 里 `effectiveRatio = ratio + extraRatio / 100 × hits`；
+  - **提升**（`multBoost`）是把**整段伤害**乘 `(1 + N%)` —— 工具箱里对应「特殊终伤(1)」：
+    `compute.ts` 里 `customMult = 1 + specialFinal1 / 100`（同乘区加算，再乘进总伤害），
+    这也是工具箱自己的命名口径（`ai/generate/prompts.config.ts`：普通相加语义的终伤/**倍率**用 `specialFinal1`）。
+  - 差别在技能倍率越高越明显：「伤害倍率提升 50%」在 100% 倍率的招式上恰好等于「追加 50」，
+    在 500% 倍率的招式上应是 ×1.5，而追加只会变成 550%（×1.1）——把提升当追加会**越算越少**。
+  - 上游自己的文案就把这件事写明了：景燃 2 链（`multBoost` 46）
+    「……伤害倍率提升46%；荧惑状态下【命火】对……的倍率增加效果提升46%
+    （**即最终倍率=基础+命火，整体×1.46**）」—— 命火那条是 `multAdd`，这回过头印证了两者的分工：
+    先追加（`extraRatio`）再整体乘（`specialFinal1`）。
+  - 两者都**不挂 `damageType` 条件**：上游 `multBoost` 的 `damageType` 只是**概要**
+    （卡提希娅 2 链「普攻、重击、闪避反击、变奏技能倍率提升50%」的 `dt` 写的是「普攻」），
+    当成条件会把重击/变奏那几条挡掉；定位一律靠 `skillNames` → 条目名。
 - `convergence` 落易伤区，依据 `core.js` 注释「集谐与陆·赫斯/达妮娅共用现有易伤计算」，且该 buff 只有 `convergenceVuln` 一个数值字段。
 
 ⚠️ **`damageTypes` 条件必须写全名**：工具箱的 `evaluateCondition` 拿它去比对
@@ -73,8 +88,16 @@ else  // 'stack'
   value = Σ_{s=1..stacks} perStackOf(s)
 ```
 
-`perStackOf(s)`：取第一条满足 `upTo === null || s <= upTo` 的 `segments[].perStack`。
+`perStackOf(s)`：取第一条满足 `upTo === null || s <= upTo` 的 `segments[].perStack`；
+**超出最后一段 `upTo` 的层数不再提供每层值（0）**。
 依据：露西那条 `segments:[{upTo:1,perStack:X},{upTo:MAX,perStack:Y}]` 配注释「1层+10%，2层再+5%，合计15%」。
+
+⚠️ 最后那条「封顶」不能漏：`segments` 是**分段**曲线，`upTo` 是该段的层数上限。
+`余响` 的 `multAdd` 是 `[{upTo:24, perStack:82.55}]`（「每层余响使本次伤害倍率额外增加」，
+至多 24 层），而同一个 buff 的暴击伤害那段的 `upTo` 是 124 —— 余响在轴上记到 124 层时，
+追加倍率应当停在 `24 × 82.55 = 1981.2`。若沿用「取最后一段」的旧写法，会一路涨到
+`124 × 82.55 = 10236.2`，凭空多出 4 倍倍率。
+（各层仍**逐层**落在产物里，只是 `≥25` 层的值都等于封顶值 —— 层数信息不能丢。）
 
 一条 buff 的 `zones[]` = 它所有**计入**的效果条目；顶层单乘区 buff 视作只有一条效果。
 
@@ -90,9 +113,20 @@ else  // 'stack'
 | 队伍级 `team.sharedBuffs.buffs[]` | `scope: 'all'` |
 | 角色级 `members[i].buffs[]` | `scope: [i]` |
 | `excludeSource: true`（延奏类，本人不吃） | `scope` 去掉 `sourceMemberIndex` 对应站位 |
+| **`members[i].excludedTeamBuffIds[]`（「分配覆盖」取消勾选）** | `scope` 去掉该站位 |
 | `effects[].skillScope === 'names'` | buff 本体照常写进 `zones`，但**只绑到**名称匹配的 `damageEntry`（`damageEntryBuffSetIds`） |
 | `skillScope === 'all'` | 绑到 `scope` 覆盖**且条件命中**的全部伤害条目 |
 | `onlyCharacterIds` / `onlyCombatModes` | 转换后为静态结果，直接体现在 `scope` 上 |
+
+⚠️ **「提供的全队 Buff」面板里右侧头像下的勾选必须读**（上游 UI 叫「分配覆盖」，
+玩家用它把「全程吃不到这条全队 buff」的角色取消掉）。数据落在
+`members[i].excludedTeamBuffIds`（手动的那部分另存 `manuallyExcludedTeamBuffIds`），
+读的时候两种 id 形态（原 id / `tm_` 副本 id）都要试。
+
+漏读的后果实测过：`MC-JXUQZU` 里「弗洛洛·延奏」只勾了莫宁，产物却给 `scope: [1,2]`
+（坎特蕾拉跟着吃了一份）；「坎特蕾拉·延奏」同理被莫宁白吃。
+三条规则**叠加**：`excludeSource` → 去掉来源；`excludedTeamBuffIds` → 去掉取消勾选的；
+**一个人都不剩时整条不落表**（椰果的 `scope: []` 是「仅效应伤害」，不能拿来表达空集）。
 
 ⚠️ **勾选要按条件判定，不能无脑全勾**。`damageEntryBuffSetIds` 就是拉表页每个格子的勾选状态，
 所以只绑「真的对该条目生效」的组合 —— 复刻工具箱 `evaluateCondition` 的口径：
@@ -187,7 +221,8 @@ else  // 'stack'
   `extraVulnerability`（最终伤害）。
 
 例：`[武器] 召鬼呼星·承天` 拆成「·暴击伤害」（叠层，1/5/6 层）与「·暴击率」（固定 12%，
-`minStacks: 6` + 重击条件）；`命火` 拆成「命火·额外倍率·劫魄」「命火·额外倍率·踏罡」。
+`minStacks: 6` + 重击条件）；`命火` 是两条 `multAdd`（劫魄 527.5 / 踏罡 541.25，技能名不同），
+拆成「命火·额外倍率·劫魄」「命火·额外倍率·踏罡」。
 
 ### 1.8 面板加成也 buff 化（一切皆 Buff）
 
@@ -203,6 +238,7 @@ else  // 'stack'
 | `char_kit_panel_*`（角色固有 / 共鸣链分支，如**阳变阴合 +1800 攻击固定**） | **buff 化** |
 | `echo_set_panel_*`（声骸套装面板部分，如「冥途夜行之灯 2 件 生命 +10%」） | **buff 化** |
 | `weapon_panel_*_passive`（武器被动） | **buff 化** |
+| `char_def_harmony_break_amp`（本体属性·谐度破坏增幅，恒为 10） | **跳过**：特殊规则，见下 |
 | 其它未知来源 | **buff 化**（宁可多一条，也别悄悄少数值） |
 | 值为 0 的来源（上游的「来源1」空行） | 跳过 |
 
@@ -214,6 +250,51 @@ else  // 'stack'
 对照椰果工坊的 Buff 库（`GET {工坊}/api/buff-sets`）可以印证这条路线：工坊自己也是把
 「套装 2 件」「套装 5 件每层」「角色固有」统统做成 Buff（如「冥途2 10生命」「冥途5 叠盾 暴击1层」）。
 
+#### 1.8.1 特殊规则：例外由 `special-rules.ts` 单独管
+
+默认口径是「除了声骸主副词条和敌怪，一切都 buff 化」，但上游把少数**角色固有基数**
+也当面板来源列了出来 —— 照默认口径 buff 化会和工具箱自己的基数**算两遍**。
+这类例外集中写在 `src/convert-project/special-rules.ts`，每条一个 `SpecialRule`
+（`id` + `reason` + `match`），`panel.ts` 在落表前调 `shouldSkipPanelSource(source, kind)`。
+
+| 规则 id | 命中 | 为什么丢 |
+| --- | --- | --- |
+| `char-def-harmony-break-amp` | `harmonyBreakAmpSources` 里的 `char_def_harmony_break_amp`（`<角色>·本体属性·谐度破坏增幅`，值 10、`locked: true`） | 工具箱角色数据自带：`nanoka/utils.ts` 里 `baseStats.tuneBreakBoost = hasTune ? 10 : 0`，`compute.ts` 直接读 `lv90BaseStats.tuneBreakBoost` —— 再 buff 化就是同一份 +10 算两遍 |
+
+- 命中判据取 `id`（上游稳定标识），并在同键下用「`char_def_` 前缀 + 名字含`谐度破坏增幅`」兜住换 id 的形态；
+  只有 `harmonyBreakAmpSources` 这一键参与兜底，不会误伤别的 `char_def_*`；
+- **只挡面板来源**：`echo_set_team_fx_*` 之类真正的 Buff（哪怕乘区也是 `harmonyBreakAmp`）不走这条规则，照常 buff 化；
+- 真面板加成照旧保留：莫宁 `char_kit_panel_moning_offset_harmony_eff`（偏谐累积效率 +50）、
+  `char_kit_panel_moning_innate_er`（共鸣效率 +10）、`*_branch_*` 等都在产物里。
+
+### 1.9 归属门：参考本体 / 参考武器 / 参考某人的共鸣链
+
+工具箱左侧 Buff 列表的**二级目录**是按 buff 的链/阶硬性条件分的（`buff-tree.ts`）：
+
+| 门 | 目录 |
+| --- | --- |
+| `condition.chains: [{ charIdx, min: 0 }]` | `角色名本体` |
+| `condition.chains: [{ charIdx, min: N }]` | `角色名N链` |
+| `condition.refinements: [{ charIdx, min }]` | `角色名的武器名`（按角色 + 武器分，不按阶数） |
+
+所以每条产物 buff 都要把「它是谁的、哪一档」写进门里：
+
+| 上游 | 门 |
+| --- | --- |
+| `pk_…` / `tb_…` / `sourceTag: 'characterTemplate'`（角色本体） | `chains: [{ charIdx: 站位, min: 链档 }]` |
+| `weapon_fx_…` / `weapon_team_fx_…` / 带 `weaponId`（武器） | `refinements: [{ charIdx: 站位, min: 0 }]` |
+| 声骸 / 套装（`echo_…`） | 不加门（工具箱按名字数字归并） |
+
+- 站位：成员级 buff 用 `ownerIndex`；队伍级用 `sourceMemberIndex`，再退到 id 前缀
+  （`pk_0_` / `tb_1_` / `weapon_team_fx_2_`）；
+- **链档不写在 `minResonance` 上**：实测「【本体】4链·清宵」「`pk_0_qingxiao_c3_wanwu_mult`」
+  的 `minResonance` 都是 0，档位藏在 `templateKey`（`qingxiao_c4_team_atk`）、id 与名字（`4链`）里
+  —— 三者都扫一遍，取 `max(名字里的档, 效果上最小的 minResonance)`；
+- 取**最小** `minResonance`：只要有一段不受链约束，这条就是「本体」
+  （尤诺「苍白死光的祝颂」里那段 `minResonance: 2` 只是本体 buff 的一部分）；
+- `min: 0` 也是工具箱自己的口径（`condition.ts` 的 `withOwnerBodyGate`）：链 = 角色共鸣链，
+  0 链即本体，`≥0 链` 恒成立，不会把效果挡掉。
+
 ---
 
 ## 二、排轴 · 转换规则（已确认）
@@ -224,7 +305,8 @@ else  // 'stack'
 | --- | --- |
 | 轴上的技能清单（直伤） | `members[i].phases[].skills[]`（数组顺序即轴顺序），每条 `catalogId` 指向 `rotationCatalog` |
 | 时间（像素偏移） | `rotationCatalog[].axisOffsetPx` |
-| 非直伤（处决 / 响应 / 效应） | `rotationCatalog` 里**未被任何 `skills[].catalogId` 引用**的条目 |
+| 非直伤（处决 / 响应 / 效应） | `specialSkills.items[]`（按 `sourceRosterSlot` 归站位、`linkedCatalogId` 定位置，见 2.4） |
+| 多段倍率构成 | `rotationCatalog[].multComponents[]`（`{ rate, count }`，见 2.3.3） |
 | 技能库名 | `rotationCatalog[].librarySkillName` |
 
 实测 `MC-KJ8VZL`：member0 的 `skills[]` 15 条 + 未被引用的 3 条（`处决` px=349、`绯雪·额外效应` px=875、`绯雪·额外效应6c` px=998）= `rotationCatalog` 18 条。
@@ -244,15 +326,20 @@ else  // 'stack'
 
 | 目标 | 规则 |
 | --- | --- |
-| 轴条目集合 | `skills[] ∪ 未被引用的 rotationCatalog 条目`，按 `axisOffsetPx` 升序；**每轮都铺出来**（见 2.5） |
-| `refLines` | **骨架用参考线**（不是 `opBlocks`），**每轮边界一条 + 末尾「结束」一条**；`time` = 边界标签（`+Ns` 轴长）或 `结束` |
+| 轴条目集合 | `skills[] ∪ 未被引用的 rotationCatalog 条目`；**每轮都铺出来**（见 2.5） |
+| **条目顺序** | **按站位分组**：1 号位的倍率全部排完，再排 2 号位、3 号位，最后补该轮的轴长参考线。站位内部按各自 `axisOffsetPx` 升序（直伤与非直伤混在同一条轴顺序里） |
+| `refLines` | **骨架用参考线**（不是 `opBlocks`）：**每个技能段一条 + 每轮边界一条 + 末尾「结束」一条**；同一技能拆出来的各段倍率共用一条线；只有轮边界（`+Ns` 轴长）与收尾（`结束`）带标签 |
 | `opBlocks` | **不生成**：鸣算屋的轴没有按键信息，凭空造 op 只会给出错误的手序 |
-| `damageBlocks` | 一条伤害一块；`sourceType: 'ref'`，`sourceId` = 该条所在**轮次**的参考线 id |
+| `damageBlocks` | 一条伤害一块（**多段倍率一段一块**，见 2.3.3）；`sourceType: 'ref'`，`sourceId` = 该条所在**轮次**的参考线 id |
 | `damageBlocks[].trackIndex` | **固定为 `getTRACKS().length - 1`（末轨「伤害绑定」）**。工具箱只渲染末轨的伤害块，挂到角色轨上等于不可见（`timeline-damage-overlay.svelte`）；角色归属由 `skillHits[].character` 表达 |
-| 直伤 | `skillHits: [{ hitName, skillType, ratio, element, character, hits }]` |
+| 直伤 | `skillHits: [{ hitName, skillType, ratio, element, character, hits }]`（每块一条，ratio 只写**这一段**） |
 | 处决 / 响应 / 效应 | `nonDirectEntries: [{ name, category: '处决'\|'响应'\|'效应', layers, hits }]`，**不进 `skillHits`** |
 | `ratio` 名称 | 有 `librarySkillName` 用技能库名，否则用实际 `name`（视作自定义） |
-| `hits` | 取 `multCount` |
+| `hits` | 该段的段数：`multComponents[].count × multCount`（没有分段构成时取 `multCount`） |
+
+⚠️ **不跨站位按时间混排**。同一条轴上同一时间点站着三个人，按秒数混排会让人完全分不清
+哪一段是谁的；按站位分组后，读轴就是「这个人打完了轮到下一个人」。轮次之间的顺序不变
+（仍然是轮 1 → 轮 2 → …），每轮末尾就是该轮的轴长参考线。
 
 ### 2.3.1 `ratio` 字符串与伤害条目 id（关键）
 
@@ -268,7 +355,7 @@ else  // 'stack'
 
 - 无后缀 → `攻击`（`SUFFIX_MAP['']`）；
 - `%生命` / `%防御` → 取后缀 —— 所以**生命 / 防御缩放的技能必须在 ratio 上带后缀**
-  （`15.85%生命`、`19.64%*3生命`），否则既算错伤害，id 也会落到 `#攻击` 上；
+  （`15.85%生命`），否则既算错伤害，id 也会落到 `#攻击` 上；
 - 纯数值分段 → `固定`。
 
 `damageEntryBuffSetIds` 的键必须与上式**逐字符一致**，否则拉表页的 buff 绑定全部对不上（表现为「buff 不勾选、结果页无 buff」）。本仓库有 `ratioBaseTypes()` 复刻该判定，并用真实工程交叉验证过（38 / 52 条条目 100% 命中）。
@@ -276,6 +363,36 @@ else  // 'stack'
 `hitName` 取**技能库名**（`rotationCatalog[].librarySkillName`，来自该技能段的 `catalogId`），
 查不到才退回轴上的短别名。这不只是显示问题：拉表里 `skillScope: 'names'` 的 buff 用
 `librarySkillNames` 限定技能，拿短别名（`苍A1`）去比会一条都匹配不上。
+
+### 2.3.3 多段倍率一段一块（关键）
+
+上游一个技能段的倍率是**分段**构成的（`rotationCatalog[].multComponents`，
+`baseMult = Σ rate × count`）：
+
+```
+新世界狂想曲·亡与死的乐章   37.88% × 4 段 + 117.83% × 3 段      baseMult 505.01
+生与死的乐章·谱曲终末      33.01% × 2 + 12.38% × 8 + 495.1% × 1  baseMult 660.16
+```
+
+椰果这边一条 `skillHits` 会被 `parseValueString()` 按 `baseType` **加总**成一个倍率
+（`calculation.store.svelte.ts` 的 `pctMap`），段信息就此消失：排轴上只剩「505.01%」一行、
+拉表里也没法只看某一段。所以**每个分量拆成一段、各挂一个伤害块**：
+
+| | 拆段前 | 拆段后 |
+| --- | --- | --- |
+| `damageBlocks` | 1 块 / 技能 | 每段 1 块（`d14`/`d15`/`d16`） |
+| `skillHits[].ratio` | `33.01%*2+12.38%*8+495.1%` | `33.01%` / `12.38%` / `495.1%` |
+| `skillHits[].hits` | `multCount` | `count × multCount`（该段的段数） |
+| `refLines` | — | **不增**：同一技能的各段共用一条参考线 |
+
+- 段数落在 `hits` 上：工具箱 `ratioValue = Σ(rate × mult) × hits`，所以
+  **拆段前后总伤害不变**（都是 `Σ rate × count × multCount`）——拆开只为看清构成；
+- **必须一段一块**：同一块里放两条同名同 `baseType` 的 hit，条目 id
+  `${blockId}-${skillType}|${hitName}#${baseType}` 会**撞 id**（拉表绑定与结果页都按 id 查），
+  而给 `hitName` 加「第N段」后缀又会让 `skillScope: 'names'` 的 buff 一条都匹配不上；
+- 各段**共用同一条参考线**（`AxisItem.groupKey`）：段是同一瞬间的同一招，
+  各占一条线会凭空造出「这一招打了三次、间隔还不一样」的假时间；
+- 各段仍带同一个 `hitName`（技能库名），所以按技能名限定的 buff 会照常绑到每一段上。
 
 ### 2.3.2 逐技能层数从哪来（关键）
 
@@ -347,11 +464,11 @@ resolved = { ...globalBuffStacks（缺省 0）, ...该技能目录条目的层�
 ### 2.5.1 参考线位置（pos 与 time）
 
 - `pos` **不代表真实时间**（工具箱早期遗留），只作排序键与视觉间距；
-- **参考线等距**排布，固定步长 `REF_LINE_STEP = 150`；条数多时等比收窄，
+- **参考线等距**排布，固定步长 `REF_LINE_STEP = 120`；条数多时等比收窄，
   保证整轴落在工具箱 `MAX_POS`（`SIDE_PAD + MAX_TIME * PPS` = 10848）内：
 
 ```
-step  = min(150, floor(MAX_POS / (条数 + 2)))
+step  = min(120, floor(MAX_POS / (条数 + 2)))
 pos_i = i × step
 ```
 
@@ -389,11 +506,11 @@ pos_i = i × step
 
 ## 四、覆盖度
 
-椰果 25 个乘区里，**上游有对应来源**的 12 个：
+椰果 25 个乘区里，**上游有对应来源**的 13 个：
 
 ```
 atkPct defPct critRate critDmg bonusDmg deepenDmg
-dmgTakenInc resDown defPen extraRatio offTuneBuildupRate
+dmgTakenInc resDown defPen extraRatio specialFinal1 offTuneBuildupRate
 ```
 
 **上游没有来源**的（转换后必然为空，不是漏转）：
@@ -402,7 +519,12 @@ dmgTakenInc resDown defPen extraRatio offTuneBuildupRate
 | --- | --- |
 | `atkFlat` `hpFlat` `defFlat` | 固定值类，鸣算屋把白值放在 `char.*Sources` 面板而不是 buff |
 | `hpPct` `recharge` | 无对应 `category`（共鸣效率只出现在面板来源里） |
-| `tuneBreakBoost` | 谐度破坏增幅 |
-| `finalDmg` `specialFinal1` `specialFinal2` | 终伤 / 特殊终伤 |
+| `tuneBreakBoost` | 谐度破坏增幅：只以面板来源 `<角色>·本体属性·谐度破坏增幅` 出现，且按 §1.8.1 特殊规则跳过（工具箱自带基数） |
+| `finalDmg` `specialFinal2` | 终伤 / 特殊终伤(2)（连乘语义，上游没有「与其它效果相乘」的写法） |
 | `resPen` `dmgRedPen` | 穿抗、穿免 |
 | `tuneStrainLayer` `unisonBoonLayer` | 层数类独立终伤 |
+
+注：上表说的是**上游 buff 的 `category`** 有没有对应来源。其中 `atkFlat` / `hpFlat` / `defFlat` /
+`hpPct` / `recharge` 虽然在 buff 里没有来源，却会从**面板来源**补上（§1.8 的 `panel_*`）；
+`tuneBreakBoost` 的面板来源则被 §1.8.1 的特殊规则挡掉，产物里应当为空。
+`specialFinal1` 来自 `multBoost`（倍率提升，§1.2）。
