@@ -80,6 +80,52 @@ const SKILL_TYPE_BY_DAMAGE_TYPE: Record<string, string> = {
     声骸: "声骸技能",
 }
 
+/**
+ * 技能名里的**招式类别** → 椰果 `skillType`（长的先匹配，`强化重击` 别被 `重击` 抢走）。
+ * 只在 `damageType: '声骸'` 时用，见 {@link skillTypeOf}。
+ */
+const ACTION_SKILL_TYPES: [string, string][] = [
+    ["强化重击", "常态攻击"],
+    ["强化攻击", "常态攻击"],
+    ["闪避反击", "常态攻击"],
+    ["空中攻击", "常态攻击"],
+    ["共鸣技能", "共鸣技能"],
+    ["共鸣回路", "共鸣回路"],
+    ["共鸣解放", "共鸣解放"],
+    ["延奏", "延奏技能"],
+    ["变奏", "变奏技能"],
+    ["重击", "常态攻击"],
+    ["普攻", "常态攻击"],
+]
+
+/**
+ * 上游 `damageType` → 椰果 `skillType`。
+ *
+ * ⚠️ 工具箱的 `声骸技能` **不是**「造成声骸技能伤害」，而是**装备声骸的技能**
+ * （`SKILL_TYPE_ECHO`）：技能选择器里的「装备声骸技能」分组
+ * （`appendEchoSkillToCache()`）、伤害类型规则 2 的声骸文案索引（`skill-infer.ts`）、
+ * 以及显示时自动加的 `echoes[0].name·` 前缀，都按它认人。
+ *
+ * 上游把「谁打出的」和「算哪种伤害」混在一个 `damageType` 里：弗洛洛的
+ * `普攻·赫卡忒第一段` / `强化攻击·彩乐·赫卡忒` 也标着 `声骸`（这些伤害**确实**是声骸技能伤害），
+ * 但招式是她自己的。一律落 `声骸技能`，工具箱就会给它们统统加上装备声骸
+ * （`梦魇·赫卡忒`）的前缀 —— 看着像声骸的技能，其实不是。
+ *
+ * 所以：名字里点明了招式类别的按招式类别落；名字里看不出招式的
+ * （`声骸·梦魇·赫卡忒`、轴上的 `Q`）才是装备声骸技能。**伤害类型不受影响** ——
+ * 那由拉表阶段的 `damageEntryDamageTypes` 显式落（上游给了 `damageType`）。
+ */
+const skillTypeOf = (damageType: string, names: string[]): string => {
+    if (damageType === "声骸") {
+        for (const name of names) {
+            for (const [keyword, skillType] of ACTION_SKILL_TYPES) {
+                if (name.includes(keyword)) return skillType
+            }
+        }
+    }
+    return SKILL_TYPE_BY_DAMAGE_TYPE[damageType] ?? ""
+}
+
 /** 上游 `scaleStat` → 椰果倍率的词条后缀（缺省即「攻击」，不写后缀） */
 const SCALE_SUFFIX: Record<string, string> = {
     hp: "生命",
@@ -297,21 +343,28 @@ interface AxisItem {
      * 只有第一条段落线，其余段贴在同一条线上（段是同一瞬间的同一招，不该各占一条）。
      */
     groupKey?: string
+    /**
+     * 该条目**认**的名字：技能库全名 / 轴上短名 / 目录名。
+     *
+     * 显示名被缩成短名后，上游 buff 的 `librarySkillNames`（全名）就对不上了，
+     * 所以拉表阶段拿这份名单做名称匹配（见 `docs` 2.3.4）。
+     */
+    names?: string[]
     /** 产生这条的技能选中态（叠层 / 生效），供拉表按层绑定 */
     state?: SkillState
 }
 
 const toSkillHit = (
     entry: WuwaCalcRotationEntry,
-    fallbackName: string,
+    hitName: string,
+    names: string[],
     character: string,
     element: string,
 ): CoconutSkillHit => {
     const damageType = optionalString(entry.damageType) ?? ""
     return {
-        // 有技能库名称就用库名，否则用实际名称（视作自定义）
-        hitName: optionalString(entry.librarySkillName) ?? fallbackName,
-        skillType: SKILL_TYPE_BY_DAMAGE_TYPE[damageType] ?? "",
+        hitName,
+        skillType: skillTypeOf(damageType, names),
         // 倍率与段数由调用方按段填（`toRatioSegments`）
         ratio: "",
         element: optionalString(entry.damageElement) || element,
@@ -320,6 +373,38 @@ const toSkillHit = (
         // 上游的伤害类型原样带走，拉表要用它落 `damageEntryDamageTypes`
         ...(damageType ? { damageType } : {}),
     }
+}
+
+/**
+ * 用户看到的倍率名（工具箱 `hitName`）。
+ *
+ * - **装备声骸技能**（`skillType === '声骸技能'`）用工具箱**自己的**叫法 `伤害N`：
+ *   这类条目显示时工具箱会自动拼上「装备声骸名·」前缀（`echoes[0].name·`），
+ *   行名再用声骸名就成了 `梦魇·赫卡忒·梦魇·赫卡忒`；而工具箱原生工程里，
+ *   声骸技能的命中名本来就是 `伤害1` / `伤害2`（`nanoka/utils.ts` 的
+ *   `makeEchoSkillValues()` 逐个 damage 条目命名），所以这里跟它对齐。
+ *   序号 = **倍率分量的序号**：实测上游分量与椰果声骸库的 `伤害N` 一一对应
+ *   （`梦魇·赫卡忒` 一段 152.38% ↔ `伤害1`；没有分量的「（短按）」条目
+ *   `baseMult` 就是 `伤害1`，如 `无归的谬误（短按）` 15.85% / `迷胧幻蛾（短按）` 405%）。
+ * - 其余技能用**鸣算屋轴上的短名**（`skills[].name`：`亡与死的乐章` / `普攻·赫卡忒第二段` /
+ *   `蛰幻第一段`），不用技能库全名（`新世界狂想曲·亡与死的乐章`）—— 排轴与拉表里显示的就是
+ *   这个名字，全名太长，把真正要看的「第几段」挤没了；
+ * - 多段倍率**一律**补段号（`谱曲终末·2段`）：拆段后几行本来完全同名，分不出谁是谁。
+ *   名字里自带「第N段」的照样补（`普攻·广域观测模式第三段·1段`）——
+ *   那个「第三段」是**招式本身**的第几段，跟倍率分量的序号不是一回事，不补反而重名；
+ * - **id 的唯一性不靠这个名字**（同一技能的多段各占一个伤害块，`blockId` 已经区分），
+ *   所以重名不会撞 id；需要按名称匹配 Buff 时走 `CoconutDamageEntry.skillNames`。
+ */
+const displayNameOf = (
+    candidates: (string | undefined)[],
+    segmentIndex: number,
+    segmentCount: number,
+    skillType: string,
+): string => {
+    if (skillType === "声骸技能") return `伤害${segmentIndex + 1}`
+    const base = candidates.find((name) => name) ?? ""
+    if (segmentCount <= 1) return base
+    return `${base}·${segmentIndex + 1}段`
 }
 
 /** 非直伤规范化：归一到椰果的 9 个规范名之一，认不出来就返回 null */
@@ -386,13 +471,24 @@ const collectMemberItems = (
         const resolved = resolveStacks(source, catalogId ?? "", entry)
         const seconds = secondsOf(entry, placement(index, source.skills.length))
         const state = skillStateOf(skill, resolved)
+        const shortName = optionalString(skill.name)
+        const libraryName = optionalString(entry?.librarySkillName)
+        /** 这条技能认的名字（短名 / 目录名 / 技能库全名，去重） */
+        const nameCandidates = [
+            ...new Set(
+                [shortName, optionalString(entry?.name), libraryName].filter(
+                    (name): name is string => !!name,
+                ),
+            ),
+        ]
         const base = toSkillHit(
             entry ?? {
                 baseMult: skill.baseMult,
                 multCount: skill.multCount,
                 damageType: skill.damageType,
             },
-            optionalString(skill.name) ?? "",
+            "",
+            nameCandidates,
             character,
             element,
         )
@@ -409,7 +505,19 @@ const collectMemberItems = (
                 trackIndex,
                 character,
                 kind: "direct",
-                hit: { ...base, ratio: segment.ratio, hits: segment.hits },
+                hit: {
+                    ...base,
+                    hitName: displayNameOf(
+                        nameCandidates,
+                        segmentIndex,
+                        segments.length,
+                        base.skillType,
+                    ),
+                    ratio: segment.ratio,
+                    hits: segment.hits,
+                },
+                // 名称匹配用的名字集（显示名之外的都在这，见 `displayNameOf`）
+                names: nameCandidates,
                 // 第一段落线，其余段共用它的参考线
                 ownLine: segmentIndex === 0,
                 groupKey,
@@ -428,20 +536,22 @@ const collectMemberItems = (
         const normalized = normalizeNonDirect(item)
         if (!normalized) {
             // 认不出来的特殊技能（如「欺骗程式·运动失能」）按直伤落，别丢伤害
+            const name = optionalString(item.libraryKey) ??
+                optionalString(item.name) ?? ""
             items.push({
                 seconds: px,
                 trackIndex,
                 character,
                 kind: "direct",
                 hit: {
-                    hitName: optionalString(item.libraryKey) ??
-                        optionalString(item.name) ?? "",
+                    hitName: name,
                     skillType: optionalString(item.skillType) ?? "",
                     ratio: toRatio(null, item.baseMult, undefined),
                     element,
                     character,
                     hits: toInt(item.multCount, 1),
                 },
+                names: name ? [name] : [],
                 ownLine: true,
             })
             continue
@@ -861,6 +971,8 @@ export const convertTimelinePhase = (
                     sourceTimelineBlockId: refLineId,
                     hits: item.hit!.hits ?? 1,
                     ratioUnit: unit,
+                    // 显示名是短名，名称匹配靠这份名单（含技能库全名）
+                    ...(item.names?.length ? { skillNames: item.names } : {}),
                     ...(item.hit!.damageType
                         ? { damageType: item.hit!.damageType }
                         : {}),

@@ -432,6 +432,14 @@ export interface CoconutDamageEntry {
     damageElement: string
     sourceTimelineBlockId: string
     hits: number
+    /**
+     * 该条目**认**的名字：显示用的短名之外，还带技能库全名 / 目录名。
+     *
+     * 轴上显示名被缩成鸣算屋短名（`谱曲终末·2段`）后，上游 buff 的
+     * `librarySkillNames`（`生与死的乐章·谱曲终末`）就与 `hitName` 对不上了，
+     * 拉表阶段用这份名单做名称匹配。
+     */
+    skillNames?: string[]
     ratioUnit?: "%" | "fixed"
     burstLayers?: number
     /** 上游 `damageType`（`普攻` / `重击` / …）；拿来落 `damageEntryDamageTypes` */

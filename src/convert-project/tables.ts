@@ -24,6 +24,16 @@ export const TABLE_TTL_MS = 6 * 60 * 60 * 1000
 /** 表文件本身只有几十 KB，但上游站点响应波动大，超时给宽一点 */
 const TABLE_TIMEOUT_MS = 20_000
 
+/**
+ * 每张表的尝试次数与重试间隔。
+ *
+ * 实测下载端会「三张表同时被上游抖掉」→ 产物里武器名/套装名全空（上游只给 id），
+ * 用户看到的就是队伍配置页上「武器 / 触发套装」两格空白。表是静态小文件，
+ * 多试一次成本极低，能把这类抖动挡掉大半。
+ */
+export const TABLE_ATTEMPTS = 2
+const TABLE_RETRY_DELAY_MS = 300
+
 /** 套装信息：名称 + 该套装实际存在的档位（来自上游 `bonuses` 的键，降序） */
 export interface EchoSetInfo {
     name: string
@@ -53,6 +63,16 @@ export const EMPTY_TABLES: ProjectTables = {
     echoes: new Map(),
 }
 
+/**
+ * 三张表**一张都没拉到**（降级转换）。
+ *
+ * 这种产物里武器名 / 套装名是空的（上游只给 id），属于「能导入但缺信息」。
+ * 下载端据此**不写缓存**：否则一次上游抖动会把「没有武器名」固化一整个缓存周期。
+ */
+export const isProjectTablesEmpty = (tables: ProjectTables): boolean =>
+    tables.weapons.size === 0 && tables.echoSets.size === 0 &&
+    tables.echoes.size === 0
+
 // ── 缓存 ──────────────────────────────────────────────────────────────────────
 
 let cached: { at: number; tables: ProjectTables } | null = null
@@ -67,21 +87,28 @@ export const resetProjectTablesCache = (): void => {
 const apiBaseOf = (env: Bindings): string =>
     (env.WUWACALC_API_BASE || DEFAULT_API_BASE).replace(/\/+$/, "")
 
-/** 拉一个表文件；任何失败都返回 `null`（由调用方决定是否降级） */
+/** 拉一个表文件；失败重试一次（几十 KB 的静态资源，抖动比真挂更常见），仍失败返回 `null` */
 const fetchTable = async <T>(
     env: Bindings,
     file: string,
 ): Promise<T | null> => {
-    try {
-        const res = await fetch(`${apiBaseOf(env)}/${file}`, {
-            headers: { accept: "application/json" },
-            signal: AbortSignal.timeout(TABLE_TIMEOUT_MS),
-        })
-        if (!res.ok) return null
-        return await res.json() as T
-    } catch {
-        return null
+    for (let attempt = 1; attempt <= TABLE_ATTEMPTS; attempt++) {
+        try {
+            const res = await fetch(`${apiBaseOf(env)}/${file}`, {
+                headers: { accept: "application/json" },
+                signal: AbortSignal.timeout(TABLE_TIMEOUT_MS),
+            })
+            if (res.ok) return await res.json() as T
+        } catch {
+            // 落到下一次尝试（或返回 null）
+        }
+        if (attempt < TABLE_ATTEMPTS) {
+            await new Promise((resolve) =>
+                setTimeout(resolve, TABLE_RETRY_DELAY_MS)
+            )
+        }
     }
+    return null
 }
 
 const toNameMap = (

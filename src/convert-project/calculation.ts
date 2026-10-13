@@ -926,10 +926,14 @@ export const convertCalculationPhase = (
                 }
 
                 if (variant.skillNames.length > 0) {
-                    return (
-                        variant.skillNames.includes(entry.hitName) ||
-                        variant.skillNames.includes(entry.displayName)
-                    )
+                    // 条目显示名是**短名**（`谱曲终末·2段`），上游 buff 里写的是技能库全名
+                    // （`生与死的乐章·谱曲终末`），所以拿条目认的**全部名字**去比
+                    const accepted = new Set([
+                        entry.hitName,
+                        entry.displayName,
+                        ...(entry.skillNames ?? []),
+                    ])
+                    return variant.skillNames.some((name) => accepted.has(name))
                 }
                 if (!scopeCovers(variant.instance.scope, entry, members)) {
                     return false

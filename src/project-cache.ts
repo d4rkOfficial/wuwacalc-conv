@@ -19,6 +19,13 @@ export interface CachedProject {
     title: string
     /** 转换完成时刻（毫秒），用来判断新鲜度 */
     convertedAt: number
+    /**
+     * 这次转换**没拿到名称表**（武器 / 套装名缺失，见 `tables.ts` 的
+     * `isProjectTablesEmpty`）。降级产物不算「新鲜」：下次请求要重新转一遍，
+     * 免得一次上游抖动把「没有武器名」钉死一整个缓存周期。
+     * 老缓存条目没有这个字段，按 `undefined`（= 正常）处理。
+     */
+    degraded?: boolean
 }
 
 export interface ProjectCache {

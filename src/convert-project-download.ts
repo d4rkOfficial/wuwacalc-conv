@@ -17,7 +17,10 @@
 
 import type { WuwaCalcSchemeDetail } from "./types.ts"
 import { convertWuwaCalcProjectToCoconutProjectFile } from "./convert-project/index.ts"
-import { loadProjectTables } from "./convert-project/tables.ts"
+import {
+    isProjectTablesEmpty,
+    loadProjectTables,
+} from "./convert-project/tables.ts"
 import type { CoconutProjectFile } from "./convert-project/types.ts"
 import {
     DETAIL_TIMEOUT_MS,
@@ -83,7 +86,14 @@ const fetchAndConvert = async (
     code: string,
     env: Bindings,
 ): Promise<
-    { ok: true; file: CoconutProjectFile; title: string } | {
+    | {
+        ok: true
+        file: CoconutProjectFile
+        title: string
+        /** 名称表没拉到（武器 / 套装名会缺），这类产物不进缓存 */
+        degraded: boolean
+    }
+    | {
         ok: false
         response: Response
     }
@@ -104,6 +114,7 @@ const fetchAndConvert = async (
         ok: true,
         file: convertWuwaCalcProjectToCoconutProjectFile(parsed.data, tables),
         title: parsed.data?.title ?? "",
+        degraded: isProjectTablesEmpty(tables),
     }
 }
 
@@ -119,7 +130,11 @@ export const handleDownloadProject = async (
 
     const cache = projectCache()
     const cached = await cache.get(code, baseUrl)
-    if (cached && Date.now() - cached.convertedAt < PROJECT_CACHE_FRESH_MS) {
+    // 降级产物（没有名称表）不算新鲜：这次请求重新转一遍，别把「武器名缺了」钉住
+    if (
+        cached && !cached.degraded &&
+        Date.now() - cached.convertedAt < PROJECT_CACHE_FRESH_MS
+    ) {
         return attachmentResponse(cached.file, code, cached.title, {
             "x-project-cache": "hit",
         })
@@ -130,13 +145,17 @@ export const handleDownloadProject = async (
         const startedAt = Date.now()
         const result = await fetchAndConvert(code, env)
         if (result.ok) {
-            await cache.put(code, baseUrl, {
-                file: result.file,
-                title: result.title,
-                convertedAt: Date.now(),
-            })
+            // 名称表缺失时**不写缓存**：产物本身可用，但这次抖动不该被固化
+            if (!result.degraded) {
+                await cache.put(code, baseUrl, {
+                    file: result.file,
+                    title: result.title,
+                    convertedAt: Date.now(),
+                })
+            }
             return attachmentResponse(result.file, code, result.title, {
                 "x-project-cache": cached ? "refresh" : "miss",
+                ...(result.degraded ? { "x-project-tables": "empty" } : {}),
             })
         }
         lastError = result.response

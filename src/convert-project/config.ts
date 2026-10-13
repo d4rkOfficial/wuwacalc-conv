@@ -9,10 +9,10 @@
  *
  * | 目标 | 源 | 说明 |
  * | --- | --- | --- |
- * | `enemy.level` | `team.monsterLevel` | 缺省 90 |
+ * | `enemy.level` | `team.monsterLevel` | 缺省 100 |
  * | `enemy.defense` | 由 level 推导 | 工坊同款公式 `792 + 8 × level` |
  * | `enemy.resistances` | `team.monsterRes` | 上游只有一个全局值，按元素均摊 |
- * | `enemy.type` | 上游不区分怪物类型 | 取工坊默认 `精英怪` |
+ * | `enemy.type` | 上游不区分怪物类型 | 固定 `BOSS`（100 级 Boss，见下） |
  * | `echoes[].cost` | `members[i].echoConfig.slots[].cost` | |
  * | `echoes[].mainStat` | `slots[].main1` + `main1Element` | 数值取椰果满级上限（见 `stat-tables.ts`） |
  * | `echoes[].substats` | `slots[].subs[]` | 数值吸附到椰果合法档位 |
@@ -49,9 +49,16 @@ const ELEMENTS = [
     "湮灭",
 ] as const
 
-/** 工坊默认等级与防御公式（`defaultEnemy()` / `792 + 8 × level`） */
-const DEFAULT_LEVEL = 90
-const DEFAULT_ENEMY_TYPE = "精英怪"
+/**
+ * 敌怪：**100 级 Boss**（不是工具箱默认的「精英怪」）。
+ *
+ * 上游只给 `team.monsterLevel` / `team.monsterRes`（实测社区工程都是 100 级 / 20 抗），
+ * **不给怪物类型**；而工具箱的 `enemy.type` 是会改数值的 —— 处决 / 响应 / 效应走系数基类公式，
+ * 偏谐系数按类型取（`compute.ts` 的 `TUNE_COEFF_MAP`：BOSS 10027 / 精英怪 2149 / 小怪 716.2）。
+ * 鸣算屋那边的处决口径按 Boss 算，所以这里固定落 `BOSS`，等级缺省也按 100 级。
+ */
+const DEFAULT_LEVEL = 100
+const DEFAULT_ENEMY_TYPE: CoconutEnemyConfig["type"] = "BOSS"
 const defenseForLevel = (level: number): number => 792 + 8 * level
 
 /** 副主词条由 cost 决定（`SECOND_MAIN_STAT`），与上游填了什么无关 */
