@@ -842,8 +842,8 @@ export const convertCalculationPhase = (
                 }
 
                 // 追加倍率（上游 `multAdd`）是**技能级**的一次性追加，而工具箱按
-                // `extraRatio / 100 × hits` 逐命中加算 —— 绑到拆开的每一段上就会被
-                // 乘 `Σhits` 倍。所以只认排轴阶段为它建的「（额外）」条目：
+                // `extraRatio / 100 × hits` 逐命中加算 —— 绑到技能本体上就会被
+                // 乘 `hits` 倍。所以只认排轴阶段为它建的「（额外）」条目：
                 // 那个条目 `hits = 1` 且倍率≈0，正好「每个技能加一次」。
                 // 同一条 buff 可能有多条效果（命火：劫魄 / 踏罡），用技能名键区分。
                 if (variant.zoneId === EXTRA_RATIO_ZONE_ID) {
@@ -856,7 +856,7 @@ export const convertCalculationPhase = (
                 }
 
                 if (variant.skillNames.length > 0) {
-                    // 条目显示名是**短名**（`谱曲终末·2段`），上游 buff 里写的是技能库全名
+                    // 条目显示名是**短名**（`谱曲终末`），上游 buff 里写的是技能库全名
                     // （`生与死的乐章·谱曲终末`），所以拿条目认的**全部名字**去比
                     const accepted = new Set([
                         entry.hitName,

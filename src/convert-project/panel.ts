@@ -17,11 +17,19 @@
  * | 来源 id | 处理 |
  * | --- | --- |
  * | `*_base`（基础属性） | 跳过：工具箱按角色数据自己算 |
- * | `echo_agg_total` / `echo_main_panel_*` / `echo_panel_*` | 跳过：声骸主副词条走配置阶段（`config.ts`） |
+ * | `echo_agg_total` / `echo_panel_*` | 跳过：声骸主副词条走配置阶段（`config.ts`） |
+ * | `echo_main_panel_*`（**主位声骸的专属被动**，名如 `主位·冷凝伤` / `主位·共鸣解放伤加成`） | **buff 化**：工具箱的声骸数据只有主副词条，没有这条被动，跳过就丢数值（绯雪的 12% 冷凝伤） |
  * | `weapon_panel_sub`（武器副词条） | 跳过：工具箱按武器数据自己算 |
  * | `char_kit_panel_*`（角色固有 / 分支） | **buff 化** |
  * | `echo_set_panel_*`（声骸套装面板部分） | **buff 化** |
  * | 其它未知来源 | **buff 化**（宁可多一条，也别悄悄少数值） |
+ *
+ * ⚠️ `echo_main_panel_*` **不是**「声骸主词条」。实测（绯雪 / 洛瑟菈 / 莫宁 / 陆·赫斯 /
+ * 卡提希娅 / 景燃 / 弗洛洛 / 坎特蕾拉）它的值都是 **10 / 12 / 20** 这种「主位专属被动」的
+ * 量级（`echo_main_panel_attr_冷凝` = `主位·冷凝伤` 12、`echo_main_panel_type_声骸` = 20），
+ * 与配置阶段写进去的主词条（暴伤 44 / 属性伤 30 / 共鸣效率 32…）完全对不上；
+ * 莫宁甚至同时有「共鸣效率主词条 32×2」和「主位·共鸣效率 10」两条。
+ * 主副词条的合计另由 `echo_agg_total` / `echo_panel_*` 表达（那两条才是走配置阶段的）。
  */
 
 import { optionalString } from "../utils.ts"
@@ -51,8 +59,7 @@ const PANEL_ZONES: Record<string, string> = {
 const SKIP_SOURCE_PATTERNS = [
     /_base$/, // 基础属性
     /^echo_agg_total$/, // 声骸主副词条合计
-    /^echo_main_panel_/, // 声骸主词条
-    /^echo_panel_/, // 声骸副词条（注意不匹配 echo_set_panel_）
+    /^echo_panel_/, // 声骸副词条（注意不匹配 echo_set_panel_ / echo_main_panel_）
     /^weapon_panel_sub$/, // 武器副词条
 ]
 

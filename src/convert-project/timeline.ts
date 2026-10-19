@@ -146,13 +146,18 @@ const SCALE_SUFFIX: Record<string, string> = {
 const roundNumber = (value: number): number => Math.round(value * 100) / 100
 
 /**
- * 倍率分量 → 椰果的 ratio 字符串：`13.92%*4`，多条用 `+` 连接。
+ * 倍率 → 椰果的 ratio 字符串：**直接用上游的原始复合倍率 `baseMult`**。
+ *
+ * 上游多段技能的 `baseMult` 就是「总倍率」（`Σ rate × count`，如
+ * `37.88%×4 + 117.83%×3 → 505.01%`），`multComponents` 只是给「倍率拆分」用的构成。
+ * 既然不再拆段，就把这条原始数值原样写成一条 ratio（`505.01%`），
+ * 工具箱 `ratioValue = Σ(rate × mult) × hits` 得到的仍是同一个总伤害。
  *
  * 生命 / 防御缩放的技能必须带后缀（`15.86%生命`），否则工具箱会按「攻击」缩放，
  * 既有伤害算错，伤害条目 id 也会落到 `#攻击` 上。
  *
- * ⚠️ 只在**上游没给 `multComponents`**（拿不到分段构成）时才用它，
- * 正常路径走 {@link toRatioSegments}：多段要拆开，加总会把段信息吃掉。
+ * 只有 `baseMult` 缺失 / 为 0（老格式）时才退回 `multComponents` 求和。
+ * **追加倍率**（`multAdd`）不在这里，另开「（额外）」条目，见 `extra-ratio.ts`。
  */
 const toRatio = (
     components: WuwaCalcMultComponent[] | null | undefined,
@@ -160,76 +165,18 @@ const toRatio = (
     scaleStat: unknown,
 ): string => {
     const suffix = SCALE_SUFFIX[optionalString(scaleStat) ?? ""] ?? ""
-    const parts = (components ?? [])
-        .map((c) => ({
-            rate: Number(c?.rate),
-            count: Math.max(1, toInt(c?.count, 1)),
-        }))
-        .filter((c) => Number.isFinite(c.rate))
-        .map((c) => {
-            const rate = roundNumber(c.rate)
-            return c.count > 1
-                ? `${rate}%*${c.count}${suffix}`
-                : `${rate}%${suffix}`
-        })
-
-    if (parts.length) return parts.join("+")
     const single = Number(baseMult)
-    return Number.isFinite(single) ? `${roundNumber(single)}%${suffix}` : ""
-}
+    if (Number.isFinite(single) && single !== 0) {
+        return `${roundNumber(single)}%${suffix}`
+    }
 
-/** 拆出来的一段倍率：该段自己的 ratio 字符串 + 该段的段数 */
-export interface RatioSegment {
-    ratio: string
-    hits: number
-}
-
-/**
- * 多段倍率 → **一段一条**。
- *
- * 上游 `multComponents` 是技能伤害的**分段**构成（`baseMult = Σ rate × count`）：
- *
- * ```
- * 新世界狂想曲·亡与死的乐章   37.88% × 4 段 + 117.83% × 3 段   （baseMult 505.01）
- * 生与死的乐章·谱曲终末      33.01% × 2 + 12.38% × 8 + 495.1% × 1（baseMult 660.16）
- * ```
- *
- * 椰果侧一条 `skillHits` 会被 `parseValueString` 按基础类型**加总**成一个倍率
- * （`pctMap` 累加），段信息就此消失：排轴上只剩「505.01%」一行，
- * 拉表里也没法只看某一段。所以这里**每段拆成一条**，由调用方各挂一个伤害块
- * （同一技能的各段共用同一条参考线，见 {@link TimelineResult} 的装配）。
- *
- * 段数落在 `hits` 上（`count × multCount`）：工具箱的
- * `ratioValue = Σ(rate × mult) × hits`，所以拆段前后总伤害不变
- * （都是 `Σ rate × count × multCount`）——拆开只是为了看清构成，不改数值。
- */
-export const toRatioSegments = (
-    components: WuwaCalcMultComponent[] | null | undefined,
-    baseMult: unknown,
-    scaleStat: unknown,
-    multCount: number,
-): RatioSegment[] => {
-    const suffix = SCALE_SUFFIX[optionalString(scaleStat) ?? ""] ?? ""
-    const segments = (components ?? [])
-        .map((c) => ({
-            rate: Number(c?.rate),
-            count: Math.max(1, toInt(c?.count, 1)),
-        }))
-        .filter((c) => Number.isFinite(c.rate) && c.rate !== 0)
-        .map((c) => ({
-            ratio: `${roundNumber(c.rate)}%${suffix}`,
-            hits: c.count * multCount,
-        }))
-    if (segments.length) return segments
-
-    // 没有分段构成（老格式）：退回单段，`baseMult` 就是整段的倍率
-    const single = Number(baseMult)
-    return [{
-        ratio: Number.isFinite(single)
-            ? `${roundNumber(single)}%${suffix}`
-            : "",
-        hits: multCount,
-    }]
+    // 老格式没有 `baseMult`：按分段构成自己求和
+    const total = (components ?? []).reduce((sum, c) => {
+        const rate = Number(c?.rate)
+        if (!Number.isFinite(rate)) return sum
+        return sum + rate * Math.max(1, toInt(c?.count, 1))
+    }, 0)
+    return total !== 0 ? `${roundNumber(total)}%${suffix}` : ""
 }
 
 /**
@@ -347,8 +294,8 @@ interface AxisItem {
     /** 非直伤是否有自己独立的参考线（效应为 true；处决/响应为 false，跟同组共用） */
     ownLine: boolean
     /**
-     * 同组标记：**同一个技能拆出来的各段倍率**共用一条参考线。
-     * 只有第一条段落线，其余段贴在同一条线上（段是同一瞬间的同一招，不该各占一条）。
+     * 同组标记：**同一个技能的倍率条目与它的「（额外）」条目**共用一条参考线。
+     * 技能本体落线，「（额外）」贴在它上面 —— 同一瞬间的同一招不该占两条线。
      */
     groupKey?: string
     /**
@@ -383,7 +330,7 @@ const toSkillHit = (
     return {
         hitName,
         skillType: skillTypeOf(damageType, names),
-        // 倍率与段数由调用方按段填（`toRatioSegments`）
+        // 倍率由调用方填（`toRatio`），段数放在 `hits` 上
         ratio: "",
         element: optionalString(entry.damageElement) || element,
         character,
@@ -406,23 +353,18 @@ const toSkillHit = (
  *   `baseMult` 就是 `伤害1`，如 `无归的谬误（短按）` 15.85% / `迷胧幻蛾（短按）` 405%）。
  * - 其余技能用**鸣算屋轴上的短名**（`skills[].name`：`亡与死的乐章` / `普攻·赫卡忒第二段` /
  *   `蛰幻第一段`），不用技能库全名（`新世界狂想曲·亡与死的乐章`）—— 排轴与拉表里显示的就是
- *   这个名字，全名太长，把真正要看的「第几段」挤没了；
- * - 多段倍率**一律**补段号（`谱曲终末·2段`）：拆段后几行本来完全同名，分不出谁是谁。
- *   名字里自带「第N段」的照样补（`普攻·广域观测模式第三段·1段`）——
- *   那个「第三段」是**招式本身**的第几段，跟倍率分量的序号不是一回事，不补反而重名；
- * - **id 的唯一性不靠这个名字**（同一技能的多段各占一个伤害块，`blockId` 已经区分），
+ *   这个名字，全名太长，把真正要看的招式名挤没了；
+ * - **一个技能只落一条**，所以不需要段号。名字里自带的「第N段」是**招式本身**的第几段
+ *   （`广域观测模式第三段`），照原样保留；
+ * - **id 的唯一性不靠这个名字**（每个技能各占一个伤害块，`blockId` 已经区分），
  *   所以重名不会撞 id；需要按名称匹配 Buff 时走 `CoconutDamageEntry.skillNames`。
  */
 const displayNameOf = (
     candidates: (string | undefined)[],
-    segmentIndex: number,
-    segmentCount: number,
     skillType: string,
 ): string => {
-    if (skillType === "声骸技能") return `伤害${segmentIndex + 1}`
-    const base = candidates.find((name) => name) ?? ""
-    if (segmentCount <= 1) return base
-    return `${base}·${segmentIndex + 1}段`
+    if (skillType === "声骸技能") return "伤害1"
+    return candidates.find((name) => name) ?? ""
 }
 
 /** 非直伤规范化：归一到椰果的 9 个规范名之一，认不出来就返回 null */
@@ -481,12 +423,12 @@ const collectMemberItems = (
     }
 
     const items: AxisItem[] = []
-    /** 同组标记的自增号（每个技能段一个组，组内是它的各段倍率） */
+    /** 同组标记的自增号（每个技能段一个组，组内是它和「（额外）」条目） */
     let groupSeq = 0
 
     // 1) 直伤：按阶段顺序拼接，catalogId 指回目录。
-    //    **多段倍率按段拆开**：一个技能拆成几条，各挂一个伤害块、共用同一条参考线，
-    //    这样排轴/拉表里都能逐段看到，而不是被 `parseValueString` 加总成一个数。
+    //    **一个技能只落一条倍率**：直接用上游的原始复合倍率 `baseMult`（Σ rate × count），
+    //    只有追加倍率（`multAdd`）另开一条「（额外）」条目，见 `extra-ratio.ts`。
     for (const [index, skill] of source.skills.entries()) {
         const catalogId = optionalString(skill.catalogId)
         const entry = catalogId ? catalog.get(catalogId) : undefined
@@ -514,42 +456,35 @@ const collectMemberItems = (
             character,
             element,
         )
-        const segments = toRatioSegments(
-            entry?.multComponents,
-            entry?.baseMult ?? skill.baseMult,
-            entry?.scaleStat ?? skill.scaleStat,
-            toInt(entry?.multCount ?? skill.multCount, 1),
-        )
         const groupKey = `sk${trackIndex}_${groupSeq++}`
-        for (const [segmentIndex, segment] of segments.entries()) {
-            items.push({
-                seconds,
-                trackIndex,
-                character,
-                kind: "direct",
-                hit: {
-                    ...base,
-                    hitName: displayNameOf(
-                        nameCandidates,
-                        segmentIndex,
-                        segments.length,
-                        base.skillType,
-                    ),
-                    ratio: segment.ratio,
-                    hits: segment.hits,
-                },
-                // 名称匹配用的名字集（显示名之外的都在这，见 `displayNameOf`）
-                names: nameCandidates,
-                // 第一段落线，其余段共用它的参考线
-                ownLine: segmentIndex === 0,
-                groupKey,
-                state,
-            })
-        }
+        items.push({
+            seconds,
+            trackIndex,
+            character,
+            kind: "direct",
+            hit: {
+                ...base,
+                hitName: displayNameOf(nameCandidates, base.skillType),
+                ratio: toRatio(
+                    entry?.multComponents,
+                    entry?.baseMult ?? skill.baseMult,
+                    entry?.scaleStat ?? skill.scaleStat,
+                ),
+                // ratio 就是上游的原始复合倍率 `baseMult`（= Σ rate × count），
+                // 这里只再乘技能自己的 `multCount`
+                hits: toInt(entry?.multCount ?? skill.multCount, 1),
+            },
+            // 名称匹配用的名字集（显示名之外的都在这，见 `displayNameOf`）
+            names: nameCandidates,
+            // 技能本体落线；「（额外）」条目同组共用这条线
+            ownLine: true,
+            groupKey,
+            state,
+        })
 
         // **（额外）条目**：追加倍率（上游 `multAdd`）是技能级的一次性追加，
-        // 但工具箱的 `extraRatio` 是逐命中加算的 —— 绑到拆开的每一段上会被乘
-        // `Σhits` 倍（景燃的劫魄：命火 527.5% 被算成近 5 倍）。所以给它单开一条
+        // 但工具箱的 `extraRatio` 是逐命中加算的 —— 绑到技能本体上会被乘
+        // `hits` 倍（景燃的劫魄：命火 527.5% 被算成近 5 倍）。所以给它单开一条
         // 倍率≈0、`hits = 1` 的条目，追加倍率类 buff 只挂这里（见 `extra-ratio.ts`）。
         const extraKeys = resolveSkillMultAdds({
             effects: multAdds,
@@ -574,13 +509,13 @@ const collectMemberItems = (
                 hit: {
                     ...base,
                     hitName: `${
-                        displayNameOf(nameCandidates, 0, 1, base.skillType)
+                        displayNameOf(nameCandidates, base.skillType)
                     }${EXTRA_RATIO_SUFFIX}`,
                     ratio: `${EXTRA_RATIO_PLACEHOLDER}${suffix}`,
                     hits: 1,
                 },
                 names: nameCandidates,
-                // 与各段同组：共用同一条参考线，轴不会因此变长
+                // 与技能本体同组：共用同一条参考线，轴不会因此变长
                 ownLine: false,
                 groupKey,
                 state,
@@ -946,7 +881,7 @@ export const convertTimelinePhase = (
     /**
      * 该条目是否与**上一条**共用参考线。
      *
-     * - 同一技能拆出来的各段倍率（`groupKey` 相同）：同一瞬间的同一招，共用一条线；
+     * - 同一技能的倍率条目与「（额外）」条目（`groupKey` 相同）：同一瞬间的同一招，共用一条线；
      * - 处决 / 响应（`ownLine === false`）：跟前一条非直伤同组，共用一条线。
      */
     const sharesLineWith = (

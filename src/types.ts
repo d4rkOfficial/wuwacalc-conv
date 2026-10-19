@@ -33,6 +33,20 @@ export interface WuwaCalcSchemeMemberSummary {
     damageTypes?: { type: string; total: number; sharePct: number }[]
 }
 
+/** 鸣算屋方案的多档配置变体（`summary.configVariants[]`） */
+export interface WuwaCalcSchemeConfigVariant {
+    /** 形如 `0+1|0+1|0+1`（各站位链+精炼用 `|` 连接） */
+    key?: string
+    /** 展示名，形如 `0+1 · 0+1 · 0+1` */
+    label?: string
+    teamConfig?: string
+    teamDps?: number
+    teamTotal?: number
+    axisDuration?: number
+    /** 各站位的链+精炼，与 `memberNames` 同序 */
+    memberConfigs?: string[]
+}
+
 /** 鸣算屋方案摘要（列表接口 `summary` 字段） */
 export interface WuwaCalcSchemeSummary {
     teamDps?: number
@@ -55,7 +69,7 @@ export interface WuwaCalcSchemeSummary {
     /** 服务端重算过轴伤时才有的逐站位摘要，是列表接口里唯一的武器名称来源 */
     members?: WuwaCalcSchemeMemberSummary[] | null
     snapshotsFresh?: boolean
-    configVariants?: unknown[]
+    configVariants?: WuwaCalcSchemeConfigVariant[] | null
 }
 
 /** 鸣算屋方案作者信息 */

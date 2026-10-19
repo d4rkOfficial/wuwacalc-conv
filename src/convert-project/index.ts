@@ -16,7 +16,7 @@
  * 不夹带鸣算屋的原始快照。
  */
 
-import { optionalString, toEpochMillis } from "../utils.ts"
+import { clamp, optionalString, toEpochMillis } from "../utils.ts"
 import { convertCalculationPhase } from "./calculation.ts"
 import { convertConfigPhase } from "./config.ts"
 import { convertTeamPhase } from "./team.ts"
@@ -30,6 +30,11 @@ import {
     type WuwaCalcProjectSnapshot,
 } from "./types.ts"
 
+/** 详情摘要里的单档配置（只关心各站位的链 + 武器精炼） */
+export interface ConvertProjectConfigVariant {
+    memberConfigs?: string[] | null
+}
+
 /** 汇总器的输入：鸣算屋方案详情里跟工程转换相关的部分 */
 export interface ConvertProjectInput {
     id?: string | null
@@ -37,6 +42,10 @@ export interface ConvertProjectInput {
     share_code?: string | null
     approved_at?: string | null
     updated_at?: string | null
+    /** 列表 / 详情摘要：下载时据此挑「全队 0+1」变体 */
+    summary?: {
+        configVariants?: ConvertProjectConfigVariant[] | null
+    } | null
     payload?: WuwaCalcProjectSnapshot | null
 }
 
@@ -45,6 +54,63 @@ export interface ConvertProjectOptions {
     exportedAt?: number
     /** 工程 id；缺省沿用鸣算屋方案 id，再退到分享码 */
     projectId?: string
+}
+
+/** 解析 `0+1` 形式的站位配置（共鸣链 + 武器精炼） */
+const parseMemberConfig = (
+    raw: unknown,
+): { chain: number; refinement: number } | null => {
+    const matched = /^(\d+)\s*\+\s*(\d+)$/.exec(String(raw ?? "").trim())
+    if (!matched) return null
+    return { chain: Number(matched[1]), refinement: Number(matched[2]) }
+}
+
+/**
+ * 下载时优先转成「全队 0+1」那一档工程。
+ *
+ * 上游详情里的 `payload.data.members[]` 是**当前主配置**（例如全员 6+5），
+ * 而摘要的 `summary.configVariants[]` 才列出同一方案的其他档位。
+ * 上游自己按变体导入时也是先改写每个成员的 `resonanceUnlocked` 与
+ * `weaponSelection.refinement`，再走正常导入流程（`public-db.js` 的 `importShare()`）——
+ * 这里做同样的事：链 Buff 会按新链档重新过滤，武器 / 套装面板仍按 payload 走。
+ *
+ * 只改副本，不动传入的详情（下载缓存会复用 detail）。
+ */
+const applyZeroOneConfigVariant = (
+    payload: WuwaCalcProjectPayload,
+    summary: ConvertProjectInput["summary"],
+): WuwaCalcProjectPayload => {
+    const members = payload.members ?? []
+    if (!members.length) return payload
+
+    const variant = (summary?.configVariants ?? []).find((candidate) => {
+        const configs = candidate?.memberConfigs
+        if (!Array.isArray(configs) || configs.length < members.length) {
+            return false
+        }
+        return configs.slice(0, members.length).every((raw) => {
+            const parsed = parseMemberConfig(raw)
+            return parsed?.chain === 0 && parsed.refinement === 1
+        })
+    })
+    const configs = variant?.memberConfigs
+    if (!variant || !configs) return payload
+
+    return {
+        ...payload,
+        members: members.map((member, index) => {
+            const parsed = parseMemberConfig(configs[index])
+            if (!parsed) return member
+            return {
+                ...member,
+                resonanceUnlocked: clamp(parsed.chain, 0, 6),
+                weaponSelection: {
+                    ...member.weaponSelection,
+                    refinement: clamp(parsed.refinement, 1, 5),
+                },
+            }
+        }),
+    }
 }
 
 /**
@@ -62,7 +128,10 @@ export const convertWuwaCalcProjectToCoconutProjectFile = (
     tables: ProjectTables = EMPTY_TABLES,
     options: ConvertProjectOptions = {},
 ): CoconutProjectFile => {
-    const payload: WuwaCalcProjectPayload = detail.payload?.data ?? {}
+    const payload = applyZeroOneConfigVariant(
+        detail.payload?.data ?? {},
+        detail.summary,
+    )
 
     const team = convertTeamPhase(payload, tables)
     const timeline = convertTimelinePhase(payload)

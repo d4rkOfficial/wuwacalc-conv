@@ -18,7 +18,7 @@
  * | 字段 | 列表接口可得性 |
  * | --- | --- |
  * | `character` | ✅ `summary.memberNames` |
- * | `chain` / `refinement` | ✅ `summary.memberConfigs`（`"3+1"`） |
+ * | `chain` / `refinement` | ✅ `summary.configVariants` 里的**全队 0+1** 变体优先，没有该档时用 `summary.memberConfigs`（`"3+1"`） |
  * | `weapon` | ⚠️ 仅 `summary.members[].weaponName`（服务端重算过轴伤的条目才有）；其余条目只有 `memberWeaponIds` 纯 ID |
  * | `echoes` | ❌ 列表接口完全没有，需方案详情接口 `payload.data.members[].echoConfig.slots[].name` |
  * | `triggerSets` | ❌ 同上，需 `echoConfig.setLoadout[].setId` 再配合套装 ID→名称表 |
@@ -121,6 +121,63 @@ const parseMemberConfig = (
     return { chain: Number(matched[1]), refinement: Number(matched[2]) }
 }
 
+/** 该档配置是否「全队 0+1」（0 共鸣链 + 1 武器精炼） */
+const isAllZeroOne = (configs: readonly string[]): boolean => {
+    if (!configs.length) return false
+    return configs.every((raw) => {
+        const { chain, refinement } = parseMemberConfig(raw)
+        return chain === 0 && refinement === 1
+    })
+}
+
+/** 列表卡片要展示的配置档位（连同该档的统计值） */
+export interface ListConfigVariant {
+    /** 各站位的 `链+精炼`，与 `memberNames` 同序 */
+    memberConfigs: string[]
+    /** 该档的队伍 DPS；没有变体数据时回退 `summary` */
+    teamDps: number
+    /** 该档的全队总伤；没有变体数据时回退 `summary` */
+    teamTotal: number
+    /** 该档的轴长（秒）；没有变体数据时回退 `summary` */
+    axisDuration: number
+    /** 是否命中了「全队 0+1」变体 */
+    allZeroOne: boolean
+}
+
+/**
+ * 列表卡片用哪一档配置。
+ *
+ * 上游把同一方案的多档配置放在 `summary.configVariants[]`（如 `6+5 · 6+5 · 6+5`
+ * 与 `0+1 · 0+1 · 0+1`），主配置 `summary.memberConfigs` 往往是最高的那一档。
+ * 列表卡片默认展示**全队 0+1** 那一档（存在时）—— 它是社区里对照成本最低的档位，
+ * 与上游列表「全部专区」默认取最低总伤变体的口径一致；没有这一档才回退主配置。
+ *
+ * 统计值（DPS / 总伤 / 轴长）也一起取该变体的：否则卡片会显示 `0+1` 的配置
+ * 却挂着主配置 `6+5` 的伤害数字，自相矛盾。
+ */
+export const pickListConfigVariant = (
+    summary: WuwaCalcSchemeSummary,
+    count: number,
+): ListConfigVariant => {
+    const zeroOne = (summary.configVariants ?? []).find((variant) => {
+        const configs = variant?.memberConfigs
+        return Array.isArray(configs) && configs.length === count &&
+            isAllZeroOne(configs)
+    })
+    const number = (value: unknown): number => {
+        const n = Number(value)
+        return Number.isFinite(n) && n > 0 ? n : 0
+    }
+    return {
+        memberConfigs: zeroOne?.memberConfigs ?? summary.memberConfigs ?? [],
+        teamDps: number(zeroOne?.teamDps) || number(summary.teamDps),
+        teamTotal: number(zeroOne?.teamTotal) || number(summary.teamTotal),
+        axisDuration: number(zeroOne?.axisDuration) ||
+            number(summary.axisDuration),
+        allZeroOne: zeroOne !== undefined,
+    }
+}
+
 /** 上游时间统一成 ISO 字符串；缺失或非法时回落到纪元起点（下游要求必填字符串） */
 const toIsoString = (value: unknown): string => {
     if (typeof value === "string" && value) {
@@ -139,7 +196,9 @@ const buildEmptyEchoSlots = () =>
  * 构造 `teamPreview.slots`。
  *
  * 三路取数：
- * - `character` / `chain` / `refinement` 来自 `memberNames` / `memberConfigs`，**所有**条目都有；
+ * - `character` 来自 `memberNames`；`chain` / `refinement` 优先取
+ *   `configVariants` 里「全队 0+1」那一档（见 {@link pickListConfigVariant}），
+ *   没有该档时用 `memberConfigs`，**所有**条目都有；
  * - `weapon` 只有服务端重算过轴伤的条目才有（`summary.members[].weaponName`），
  *   其余条目列表接口只给 `memberWeaponIds`（纯 ID），没有 ID→名称映射，只能置空；
  * - 声骸名与套装名**列表接口完全没有**（`members[]` 里也没有），只有方案详情接口的
@@ -149,7 +208,7 @@ const buildTeamPreviewSlots = (
     summary: WuwaCalcSchemeSummary,
 ): CoconutTeamPreviewSlot[] => {
     const names = summary.memberNames ?? []
-    const configs = summary.memberConfigs ?? []
+    const configs = pickListConfigVariant(summary, names.length).memberConfigs
 
     // members 自带 index，按 index 对齐而不是数组下标
     const weaponNameByIndex = new Map<number, string>()

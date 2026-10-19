@@ -11,6 +11,7 @@
 import {
     buildWuwaCalcListQuery,
     convertWuwaCalcProjectListToCoconutProjectList,
+    pickListConfigVariant,
 } from "./convert-project-list.ts"
 import { fetchUpstream, LIST_TIMEOUT_MS, readUpstreamJson } from "./http.ts"
 import type { Bindings } from "./http.ts"
@@ -125,11 +126,18 @@ interface HomeProject {
     duration: number
     level: number
     res: number
+    /** 全队链阶，如 `0+1 / 0+1 / 0+1`（不再只写主 C 的 `teamConfig`） */
     config: string
     description: string
 }
 
-const toHomeProject = (
+/**
+ * 列表项 → 首页卡片视图模型。
+ *
+ * 配置档位统一走 {@link pickListConfigVariant}：有「全队 0+1」变体时取那一档，
+ * 并把 DPS / 轴长一起换成该变体的值 —— 卡片上的链阶和伤害数字必须属于同一档配置。
+ */
+export const toHomeProject = (
     item: WuwaCalcSchemeListItem,
     index: number,
 ): HomeProject => {
@@ -141,23 +149,23 @@ const toHomeProject = (
         const n = Number(value)
         return Number.isFinite(n) && n > 0 ? n : 0
     }
+    const names = project.teamPreview?.names ?? []
+    const picked = pickListConfigVariant(summary, names.length)
 
     return {
         order: String(index + 1).padStart(2, "0"),
         title: project.title || "（未命名方案）",
         author: project.authorName,
         code: project.code,
-        names: project.teamPreview?.names ?? [],
+        names,
         tags: project.tags,
         downloads: project.downloads,
         createdAt: project.createdAt,
-        dps: number(summary.teamDps),
-        duration: number(summary.axisDuration),
+        dps: picked.teamDps,
+        duration: picked.axisDuration,
         level: number(summary.monsterLevel),
         res: Number(summary.monsterRes) || 0,
-        config: typeof summary.teamConfig === "string"
-            ? summary.teamConfig
-            : "",
+        config: picked.memberConfigs.join(" / "),
         description: typeof item.description === "string"
             ? item.description
             : "",
