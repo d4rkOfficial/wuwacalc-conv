@@ -134,11 +134,12 @@ export const convertWuwaCalcProjectToCoconutProjectFile = (
     )
 
     const team = convertTeamPhase(payload, tables)
-    const timeline = convertTimelinePhase(payload)
+    const timeline = convertTimelinePhase(payload, tables)
     const calculation = convertCalculationPhase(
         payload,
         timeline.entries,
         timeline.entryState,
+        tables,
     )
     const config = convertConfigPhase(payload)
 

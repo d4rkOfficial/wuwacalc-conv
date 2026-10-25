@@ -1,0 +1,1733 @@
+{
+  "version": 1,
+  "updated": "2026-09-29",
+  "source": "nanoka.cc 3.7.3",
+  "note": "echo set 2/3/5-piece bonuses",
+  "sets": [
+    {
+      "id": "1",
+      "name": "凝夜白霜",
+      "bonuses": {
+        "2": {
+          "desc": "冷凝伤害提升10%",
+          "param": [
+            "10%"
+          ],
+          "resolved": "冷凝伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "冷凝",
+            "value": 10,
+            "label": "冷凝伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "使用普攻或重击时，冷凝伤害提升10%，该效果可叠加三层，持续15秒",
+          "param": [
+            "30%",
+            "15"
+          ],
+          "resolved": "使用普攻或重击时，冷凝伤害提升10%，该效果可叠加三层，持续15秒",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "冷凝伤害提升",
+              "mode": "stack",
+              "perStack": 10,
+              "value": 0,
+              "maxStacks": 3,
+              "element": "冷凝",
+              "label": "冷凝伤害提升10%（可叠加3层）"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "390070070",
+      "sampleEchoName": "破霜猎手",
+      "iconUrl": "assets/echo-sets/1.webp"
+    },
+    {
+      "id": "2",
+      "name": "熔山裂谷",
+      "bonuses": {
+        "2": {
+          "desc": "热熔伤害提升10%",
+          "param": [
+            "10%"
+          ],
+          "resolved": "热熔伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "热熔",
+            "value": 10,
+            "label": "热熔伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "使用共鸣技能时，热熔伤害提升30%，持续15秒",
+          "param": [
+            "30%"
+          ],
+          "resolved": "使用共鸣技能时，热熔伤害提升30%，持续15秒",
+          "effects": {
+            "kind": "buff",
+            "category": "elementBonus",
+            "name": "热熔伤害提升",
+            "value": 30,
+            "element": "热熔",
+            "label": "热熔伤害提升30%"
+          }
+        }
+      },
+      "sampleEchoId": "390070053",
+      "sampleEchoName": "惊蛰猎手",
+      "iconUrl": "assets/echo-sets/2.webp"
+    },
+    {
+      "id": "3",
+      "name": "彻空冥雷",
+      "bonuses": {
+        "2": {
+          "desc": "导电伤害提升10%",
+          "param": [
+            "10%"
+          ],
+          "resolved": "导电伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "导电",
+            "value": 10,
+            "label": "导电伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "使用重击或共鸣技能时，各获得一层导电伤害提升15%的效果，该效果可叠加两层，每层各持续15秒",
+          "param": [
+            "15%",
+            "15"
+          ],
+          "resolved": "使用重击或共鸣技能时，各获得一层导电伤害提升15%的效果，该效果可叠加两层，每层各持续15秒",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "mode": "stack",
+              "name": "导电伤害提升",
+              "perStack": 15,
+              "value": 0,
+              "maxStacks": 2,
+              "element": "导电",
+              "label": "导电伤害提升15%（可叠加2层）"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "390070051",
+      "sampleEchoName": "先锋幼岩",
+      "iconUrl": "assets/echo-sets/3.webp"
+    },
+    {
+      "id": "4",
+      "name": "啸谷长风",
+      "bonuses": {
+        "2": {
+          "desc": "气动伤害提升10%",
+          "param": [
+            "10%"
+          ],
+          "resolved": "气动伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "气动",
+            "value": 10,
+            "label": "气动伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "使用变奏技能登场时，气动伤害提升30%，持续15秒",
+          "param": [
+            "30%"
+          ],
+          "resolved": "使用变奏技能登场时，气动伤害提升30%，持续15秒",
+          "effects": {
+            "kind": "buff",
+            "category": "elementBonus",
+            "name": "气动伤害提升",
+            "value": 30,
+            "element": "气动",
+            "label": "气动伤害提升30%"
+          }
+        }
+      },
+      "sampleEchoId": "390070064",
+      "sampleEchoName": "鸣泣战士",
+      "iconUrl": "assets/echo-sets/4.webp"
+    },
+    {
+      "id": "5",
+      "name": "浮星祛暗",
+      "bonuses": {
+        "2": {
+          "desc": "衍射伤害提升10%",
+          "param": [
+            "10%"
+          ],
+          "resolved": "衍射伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "衍射",
+            "value": 10,
+            "label": "衍射伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "使用变奏技能登场时，衍射伤害提升30%，持续15秒",
+          "param": [
+            "30%"
+          ],
+          "resolved": "使用变奏技能登场时，衍射伤害提升30%，持续15秒",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "衍射伤害提升",
+              "value": 30,
+              "element": "衍射",
+              "label": "衍射伤害提升30%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "390070065",
+      "sampleEchoName": "审判战士",
+      "iconUrl": "assets/echo-sets/5.webp"
+    },
+    {
+      "id": "6",
+      "name": "沉日劫明",
+      "bonuses": {
+        "2": {
+          "desc": "湮灭伤害提升10%",
+          "param": [
+            "10%"
+          ],
+          "resolved": "湮灭伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "湮灭",
+            "value": 10,
+            "label": "湮灭伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "使用普攻或重击时，湮灭伤害提升7.5%，该效果可叠加四层，持续15秒",
+          "param": [
+            "6%",
+            "5",
+            "15"
+          ],
+          "resolved": "使用普攻或重击时，湮灭伤害提升7.5%，该效果可叠加四层，持续15秒",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "mode": "stack",
+              "name": "湮灭伤害提升",
+              "perStack": 7.5,
+              "value": 0,
+              "maxStacks": 4,
+              "element": "湮灭",
+              "label": "湮灭伤害提升7.5%（可叠加4层）"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "390070065",
+      "sampleEchoName": "审判战士",
+      "iconUrl": "assets/echo-sets/6.webp"
+    },
+    {
+      "id": "7",
+      "name": "隐世回光",
+      "bonuses": {
+        "2": {
+          "desc": "治疗效果提升10%",
+          "param": [
+            "10%"
+          ],
+          "resolved": "治疗效果提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "displayOnly",
+            "label": "治疗效果",
+            "value": 10
+          }
+        },
+        "5": {
+          "desc": "自身为友方提供治疗时，全队共鸣者攻击提升15%，持续30秒",
+          "param": [
+            "15%",
+            "30"
+          ],
+          "resolved": "自身为友方提供治疗时，全队共鸣者攻击提升15%，持续30秒",
+          "effects": {
+            "kind": "teamBuff",
+            "category": "generalAttack",
+            "name": "全队共鸣者攻击提升",
+            "value": 15,
+            "label": "全队共鸣者攻击提升15%"
+          }
+        }
+      },
+      "sampleEchoId": "390070051",
+      "sampleEchoName": "先锋幼岩",
+      "iconUrl": "assets/echo-sets/7.webp"
+    },
+    {
+      "id": "8",
+      "name": "轻云出月",
+      "bonuses": {
+        "2": {
+          "desc": "共鸣效率提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "共鸣效率提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "energyRegenPct",
+            "sourceKey": "displayOnly",
+            "label": "共鸣效率",
+            "value": 10
+          }
+        },
+        "5": {
+          "desc": "使用延奏技能后，下一个登场的共鸣者攻击提升22.5%，持续15秒",
+          "param": [
+            "22.5%",
+            "15"
+          ],
+          "resolved": "使用延奏技能后，下一个登场的共鸣者攻击提升22.5%，持续15秒",
+          "effects": {
+            "kind": "teamBuff",
+            "category": "generalAttack",
+            "name": "下一个登场共鸣者攻击提升",
+            "value": 22.5,
+            "label": "下一个登场的共鸣者攻击提升22.5%"
+          }
+        }
+      },
+      "sampleEchoId": "6000052",
+      "sampleEchoName": "无常凶鹭",
+      "iconUrl": "assets/echo-sets/8.webp"
+    },
+    {
+      "id": "9",
+      "name": "不绝余音",
+      "bonuses": {
+        "2": {
+          "desc": "攻击提升10%",
+          "param": [
+            "10%"
+          ],
+          "resolved": "攻击提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "atkPercent",
+            "value": 10,
+            "label": "攻击提升10%"
+          }
+        },
+        "5": {
+          "desc": "在场时，自身攻击每1.5秒提升5%，该效果最多叠加四层。延奏技能伤害提升60%",
+          "param": [
+            "1.5",
+            "5%",
+            "20%",
+            "60%"
+          ],
+          "resolved": "在场时，自身攻击每1.5秒提升5%，该效果最多叠加四层。延奏技能伤害提升60%",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "generalAttack",
+              "mode": "stack",
+              "name": "自身攻击提升",
+              "perStack": 5,
+              "value": 0,
+              "maxStacks": 4,
+              "label": "自身攻击每1.5秒提升5%（最多4层）"
+            },
+            {
+              "kind": "buff",
+              "category": "typeBonus",
+              "name": "延奏技能伤害提升",
+              "value": 60,
+              "damageType": "延奏",
+              "label": "延奏技能伤害提升60%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "390070051",
+      "sampleEchoName": "先锋幼岩",
+      "iconUrl": "assets/echo-sets/9.webp"
+    },
+    {
+      "id": "10",
+      "name": "凌冽决断之心",
+      "bonuses": {
+        "2": {
+          "desc": "共鸣技能伤害提升{0}",
+          "param": [
+            "12%"
+          ],
+          "resolved": "共鸣技能伤害提升12%",
+          "effects": {
+            "kind": "panel",
+            "stat": "typeDmgBonus",
+            "damageType": "共鸣技能",
+            "value": 12,
+            "label": "共鸣技能伤害提升12%"
+          }
+        },
+        "5": {
+          "desc": "施放共鸣技能时，自身冷凝伤害提升{0}，持续{1}秒；施放共鸣解放时，自身共鸣技能伤害提升{2}，持续{3}秒，可叠加{4}层。",
+          "param": [
+            "22.5%",
+            "15",
+            "18%",
+            "5",
+            "2"
+          ],
+          "resolved": "施放共鸣技能时，自身冷凝伤害提升22.5%，持续15秒；施放共鸣解放时，自身共鸣技能伤害提升18%，持续5秒，可叠加2层。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "自身冷凝伤害提升",
+              "value": 22.5,
+              "element": "冷凝",
+              "label": "自身冷凝伤害提升22.5%"
+            },
+            {
+              "kind": "buff",
+              "category": "typeBonus",
+              "name": "自身共鸣技能伤害提升",
+              "mode": "stack",
+              "perStack": 18,
+              "value": 0,
+              "maxStacks": 2,
+              "damageType": "共鸣技能",
+              "label": "自身共鸣技能伤害提升18%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000061",
+      "sampleEchoName": "风鬃狼",
+      "iconUrl": "assets/echo-sets/10.webp"
+    },
+    {
+      "id": "11",
+      "name": "此间永驻之光",
+      "bonuses": {
+        "2": {
+          "desc": "衍射伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "衍射伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "衍射",
+            "value": 10,
+            "label": "衍射伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色为敌人添加【光噪效应】时，自身暴击提升{0}，持续{1}秒；攻击存在{2}层【光噪效应】的敌人时，自身衍射伤害加成提升{3}，持续{4}秒。",
+          "param": [
+            "20%",
+            "15",
+            "10",
+            "15%",
+            "15"
+          ],
+          "resolved": "角色为敌人添加【光噪效应】时，自身暴击提升20%，持续15秒；攻击存在10层【光噪效应】的敌人时，自身衍射伤害加成提升15%，持续15秒。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "generalCritRate",
+              "name": "自身暴击提升",
+              "value": 20,
+              "label": "自身暴击提升20%"
+            },
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "自身衍射伤害加成提升",
+              "value": 15,
+              "element": "衍射",
+              "label": "自身衍射伤害加成提升15%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000063",
+      "sampleEchoName": "霜鬃狼",
+      "iconUrl": "assets/echo-sets/11.webp"
+    },
+    {
+      "id": "12",
+      "name": "幽夜隐匿之帷",
+      "bonuses": {
+        "2": {
+          "desc": "湮灭属性伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "湮灭属性伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "湮灭",
+            "value": 10,
+            "label": "湮灭属性伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色触发延奏技能离场时，额外对周围敌人造成{0}的湮灭伤害，该伤害为延奏技能伤害，并使下一个登场角色湮灭属性伤害加成提升{1}，持续{2}秒。",
+          "param": [
+            "480%",
+            "15%",
+            "15"
+          ],
+          "resolved": "角色触发延奏技能离场时，额外对周围敌人造成480%的湮灭伤害，该伤害为延奏技能伤害，并使下一个登场角色湮灭属性伤害加成提升15%，持续15秒。",
+          "effects": [
+            {
+              "kind": "skillMult",
+              "name": "幽夜·延奏离场伤害",
+              "value": 480,
+              "damageType": "延奏",
+              "element": "湮灭",
+              "label": "延奏离场480%湮灭伤害"
+            },
+            {
+              "kind": "teamBuff",
+              "category": "elementBonus",
+              "name": "下一个登场角色湮灭伤害加成提升",
+              "value": 15,
+              "element": "湮灭",
+              "label": "下一个登场角色湮灭属性伤害加成提升15%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000062",
+      "sampleEchoName": "雷鬃狼",
+      "iconUrl": "assets/echo-sets/12.webp"
+    },
+    {
+      "id": "13",
+      "name": "高天共奏之曲",
+      "bonuses": {
+        "2": {
+          "desc": "共鸣效率提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "共鸣效率提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "energyRegenPct",
+            "sourceKey": "displayOnly",
+            "label": "共鸣效率",
+            "value": 10
+          }
+        },
+        "5": {
+          "desc": "当前角色协同攻击造成的伤害提升{0}；协同攻击命中敌人且暴击时，队伍中登场角色攻击力提升{1}，持续{2}秒。",
+          "param": [
+            "80%",
+            "20%",
+            "4"
+          ],
+          "resolved": "当前角色协同攻击造成的伤害提升80%；协同攻击命中敌人且暴击时，队伍中登场角色攻击力提升20%，持续4秒。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "typeBonus",
+              "damageType": "协同攻击",
+              "name": "协同攻击造成的伤害提升",
+              "value": 80,
+              "label": "协同攻击造成的伤害提升80%"
+            },
+            {
+              "kind": "teamBuff",
+              "category": "generalAttack",
+              "name": "队伍中登场角色攻击提升",
+              "value": 20,
+              "label": "队伍中登场角色攻击力提升20%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000061",
+      "sampleEchoName": "风鬃狼",
+      "iconUrl": "assets/echo-sets/13.webp"
+    },
+    {
+      "id": "14",
+      "name": "无惧浪涛之勇",
+      "bonuses": {
+        "2": {
+          "desc": "共鸣效率提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "共鸣效率提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "energyRegenPct",
+            "sourceKey": "displayOnly",
+            "label": "共鸣效率",
+            "value": 10
+          }
+        },
+        "5": {
+          "desc": "角色攻击提升{0}，共鸣效率达到{1}后，当前角色全属性伤害提升{2}。",
+          "param": [
+            "15%",
+            "250%",
+            "30%"
+          ],
+          "resolved": "角色攻击提升15%，共鸣效率达到250%后，当前角色全属性伤害提升30%。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "generalAttack",
+              "name": "角色攻击提升",
+              "value": 15,
+              "label": "角色攻击提升15%"
+            },
+            {
+              "kind": "buff",
+              "category": "generalBonus",
+              "name": "全属性伤害提升",
+              "value": 30,
+              "label": "全属性伤害提升30%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000064",
+      "sampleEchoName": "浮灵偶·海德",
+      "iconUrl": "assets/echo-sets/14.webp"
+    },
+    {
+      "id": "16",
+      "name": "流云逝尽之空",
+      "bonuses": {
+        "2": {
+          "desc": "气动伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "气动伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "气动",
+            "value": 10,
+            "label": "气动伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色为敌人添加【风蚀效应】时，队伍中角色气动伤害提升{0}，自身气动伤害额外提升{1}，持续{2}秒。",
+          "param": [
+            "15%",
+            "15%",
+            "20"
+          ],
+          "resolved": "角色为敌人添加【风蚀效应】时，队伍中角色气动伤害提升15%，自身气动伤害额外提升15%，持续20秒。",
+          "effects": [
+            {
+              "kind": "teamBuff",
+              "category": "elementBonus",
+              "name": "队伍中角色气动伤害提升",
+              "value": 15,
+              "element": "气动",
+              "label": "队伍中角色气动伤害提升15%"
+            },
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "自身气动伤害额外提升",
+              "value": 15,
+              "element": "气动",
+              "label": "自身气动伤害额外提升15%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000096",
+      "sampleEchoName": "重塑雕像的拳砾",
+      "iconUrl": "assets/echo-sets/16.webp"
+    },
+    {
+      "id": "17",
+      "name": "愿戴荣光之旅",
+      "bonuses": {
+        "2": {
+          "desc": "气动伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "气动伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "气动",
+            "value": 10,
+            "label": "气动伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "攻击命中存在【风蚀效应】的敌人时，自身暴击提升{0}，气动伤害提升{1}，持续{2}秒。",
+          "param": [
+            "10%",
+            "30%",
+            "10"
+          ],
+          "resolved": "攻击命中存在【风蚀效应】的敌人时，自身暴击提升10%，气动伤害提升30%，持续10秒。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "generalCritRate",
+              "name": "自身暴击提升",
+              "value": 10,
+              "label": "自身暴击提升10%"
+            },
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "气动伤害提升",
+              "value": 30,
+              "element": "气动",
+              "label": "气动伤害提升30%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000100",
+      "sampleEchoName": "慈悲节使",
+      "iconUrl": "assets/echo-sets/17.webp"
+    },
+    {
+      "id": "18",
+      "name": "奔狼燎原之焰",
+      "bonuses": {
+        "2": {
+          "desc": "热熔伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "热熔伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "热熔",
+            "value": 10,
+            "label": "热熔伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "施放共鸣解放时，队伍中角色热熔伤害提升{0}，自身共鸣解放伤害提升{1}，持续{2}秒。",
+          "param": [
+            "15%",
+            "20%",
+            "35"
+          ],
+          "resolved": "施放共鸣解放时，队伍中角色热熔伤害提升15%，自身共鸣解放伤害提升20%，持续35秒。",
+          "effects": [
+            {
+              "kind": "teamBuff",
+              "category": "elementBonus",
+              "name": "队伍中角色热熔伤害提升",
+              "value": 15,
+              "element": "热熔",
+              "label": "队伍中角色热熔伤害提升15%"
+            },
+            {
+              "kind": "buff",
+              "category": "typeBonus",
+              "name": "自身共鸣解放伤害提升",
+              "value": 20,
+              "damageType": "共鸣解放",
+              "label": "自身共鸣解放伤害提升20%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000098",
+      "sampleEchoName": "卫冕节使",
+      "iconUrl": "assets/echo-sets/18.webp"
+    },
+    {
+      "id": "19",
+      "name": "失序彼岸之梦",
+      "bonuses": {
+        "3": {
+          "desc": "角色共鸣能量为{0}时，自身暴击率提升{1}，声骸技能伤害加成提升{2}。",
+          "param": [
+            "0",
+            "20%",
+            "35%"
+          ],
+          "resolved": "角色共鸣能量为0时，自身暴击率提升20%，声骸技能伤害加成提升35%。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "generalCritRate",
+              "name": "自身暴击率提升",
+              "value": 20,
+              "label": "自身暴击率提升20%"
+            },
+            {
+              "kind": "buff",
+              "category": "typeBonus",
+              "name": "声骸技能伤害加成提升",
+              "value": 35,
+              "damageType": "声骸",
+              "label": "声骸技能伤害加成提升35%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000067",
+      "sampleEchoName": "幽翎火",
+      "iconUrl": "assets/echo-sets/19.webp"
+    },
+    {
+      "id": "20",
+      "name": "荣斗铸锋之冠",
+      "bonuses": {
+        "3": {
+          "desc": "角色获得护盾时，自身攻击提升{0}，暴击伤害提升{1}，该效果可叠加{2}层，持续{3}秒，每{4}秒可触发一次。",
+          "param": [
+            "6%",
+            "4%",
+            "5",
+            "4",
+            "0.5"
+          ],
+          "resolved": "角色获得护盾时，自身攻击提升6%，暴击伤害提升4%，该效果可叠加5层，持续4秒，每0.5秒可触发一次。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "composite",
+              "mode": "stack",
+              "name": "??????",
+              "perStack": 0,
+              "value": 0,
+              "maxStacks": 5,
+              "label": "??????6%???????4%",
+              "effects": [
+                {
+                  "zone": "generalAttack",
+                  "valueMode": "stack",
+                  "value": 0,
+                  "segments": [
+                    {
+                      "upTo": null,
+                      "perStack": 6
+                    }
+                  ],
+                  "skillScope": "all"
+                },
+                {
+                  "zone": "generalCritDmg",
+                  "valueMode": "stack",
+                  "value": 0,
+                  "segments": [
+                    {
+                      "upTo": null,
+                      "perStack": 4
+                    }
+                  ],
+                  "skillScope": "all"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000094",
+      "sampleEchoName": "釉变幼岩",
+      "iconUrl": "assets/echo-sets/20.webp"
+    },
+    {
+      "id": "21",
+      "name": "息界同调之律",
+      "bonuses": {
+        "3": {
+          "desc": "角色施放声骸技能时，自身重击伤害加成提升{0}，持续{1}秒；队伍中角色声骸技能伤害加成提升{2}，该效果可叠加{3}层，持续{4}秒，同名声骸仅可触发1次该效果，效果消失时重置同名声骸记录，{3}层时施放声骸技能可刷新持续时间。",
+          "param": [
+            "30%",
+            "4",
+            "4%",
+            "4",
+            "30"
+          ],
+          "resolved": "角色施放声骸技能时，自身重击伤害加成提升30%，持续4秒；队伍中角色声骸技能伤害加成提升4%，该效果可叠加4层，持续30秒，同名声骸仅可触发1次该效果，效果消失时重置同名声骸记录，4层时施放声骸技能可刷新持续时间。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "typeBonus",
+              "name": "自身重击伤害加成提升",
+              "value": 30,
+              "damageType": "重击",
+              "label": "自身重击伤害加成提升30%"
+            },
+            {
+              "kind": "teamBuff",
+              "category": "typeBonus",
+              "mode": "stack",
+              "name": "队伍中角色声骸技能伤害加成提升",
+              "perStack": 4,
+              "value": 0,
+              "maxStacks": 4,
+              "damageType": "声骸",
+              "label": "队伍中角色声骸技能伤害加成提升4%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000093",
+      "sampleEchoName": "愚金幼岩",
+      "iconUrl": "assets/echo-sets/21.webp"
+    },
+    {
+      "id": "22",
+      "name": "焚羽猎魔之影",
+      "bonuses": {
+        "3": {
+          "desc": "角色造成声骸技能伤害时，重击伤害的暴击提升{0}，持续{1}秒；造成重击伤害时，声骸技能伤害的暴击提升{2}，持续{3}秒。同时拥有两种效果时，自身热熔伤害提升{4}。",
+          "param": [
+            "20%",
+            "6",
+            "20%",
+            "6",
+            "16%"
+          ],
+          "resolved": "角色造成声骸技能伤害时，重击伤害的暴击提升20%，持续6秒；造成重击伤害时，声骸技能伤害的暴击提升20%，持续6秒。同时拥有两种效果时，自身热熔伤害提升16%。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "typeCritRate",
+              "name": "重击伤害的暴击提升",
+              "value": 20,
+              "damageType": "重击",
+              "label": "重击伤害的暴击提升20%"
+            },
+            {
+              "kind": "buff",
+              "category": "typeCritRate",
+              "name": "声骸技能伤害的暴击提升",
+              "value": 20,
+              "damageType": "声骸",
+              "label": "声骸技能伤害的暴击提升20%"
+            },
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "自身热熔伤害提升",
+              "value": 16,
+              "element": "热熔",
+              "label": "自身热熔伤害提升16%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000068",
+      "sampleEchoName": "云海妖精",
+      "iconUrl": "assets/echo-sets/22.webp"
+    },
+    {
+      "id": "23",
+      "name": "命理崩毁之弦",
+      "bonuses": {
+        "3": {
+          "desc": "角色为敌人添加【虚湮效应】时，自身攻击提升{0}，共鸣解放伤害加成提升{1}，持续{2}秒。",
+          "param": [
+            "20%",
+            "30%",
+            "5"
+          ],
+          "resolved": "角色为敌人添加【虚湮效应】时，自身攻击提升20%，共鸣解放伤害加成提升30%，持续5秒。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "generalAttack",
+              "name": "自身攻击提升",
+              "value": 20,
+              "label": "自身攻击提升20%"
+            },
+            {
+              "kind": "buff",
+              "category": "typeBonus",
+              "name": "共鸣解放伤害加成提升",
+              "value": 30,
+              "damageType": "共鸣解放",
+              "label": "共鸣解放伤害加成提升30%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000077",
+      "sampleEchoName": "持刃贵族",
+      "iconUrl": "assets/echo-sets/23.webp"
+    },
+    {
+      "id": "24",
+      "name": "逆光跃彩之约",
+      "bonuses": {
+        "2": {
+          "desc": "衍射伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "衍射伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "衍射",
+            "value": 10,
+            "label": "衍射伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色施放延奏技能后，下一个变奏技能登场的角色攻击提升{0}，其每点谐度破坏增幅还会使攻击额外提升{1}，上限{2}，持续{3}秒，若切换至其他角色则该效果提前结束。",
+          "param": [
+            "15%",
+            "0.3%",
+            "15%",
+            "15"
+          ],
+          "resolved": "角色施放延奏技能后，下一个变奏技能登场的角色攻击提升15%，其每点谐度破坏增幅还会使攻击额外提升0.3%，上限15%，持续15秒，若切换至其他角色则该效果提前结束。",
+          "effects": {
+            "kind": "teamBuff",
+            "category": "generalAttack",
+            "name": "变奏登场攻击提升",
+            "mode": "fixed",
+            "value": 15,
+            "harmonyAtkPerPoint": 0.3,
+            "harmonyAtkCap": 15,
+            "label": "攻击提升15%+谐幅额外（上限15%）"
+          }
+        }
+      },
+      "sampleEchoId": "6000175",
+      "sampleEchoName": "莳植熊蜂",
+      "iconUrl": "assets/echo-sets/24.webp"
+    },
+    {
+      "id": "25",
+      "name": "星构寻辉之环",
+      "bonuses": {
+        "2": {
+          "desc": "治疗效果提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "治疗效果提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "displayOnly",
+            "label": "治疗效果",
+            "value": 10
+          }
+        },
+        "5": {
+          "desc": "为队伍中角色提供治疗时，自身每{0}的偏谐值累积效率使队伍中角色攻击提升{1}，上限{2}，持续{3}秒，同名效果之间不可叠加。",
+          "param": [
+            "1%",
+            "0.2%",
+            "25%",
+            "4"
+          ],
+          "resolved": "为队伍中角色提供治疗时，自身每1%的偏谐值累积效率使队伍中角色攻击提升0.2%，上限25%，持续4秒，同名效果之间不可叠加。",
+          "effects": {
+            "kind": "teamBuff",
+            "category": "generalAttack",
+            "name": "队伍中角色攻击提升",
+            "value": 25,
+            "label": "队伍中角色攻击提升25%"
+          }
+        }
+      },
+      "sampleEchoId": "6000174",
+      "sampleEchoName": "颤栗战士",
+      "iconUrl": "assets/echo-sets/25.webp"
+    },
+    {
+      "id": "26",
+      "name": "流金溯真之式",
+      "bonuses": {
+        "2": {
+          "desc": "衍射伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "衍射伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "衍射",
+            "value": 10,
+            "label": "衍射伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色造成普攻伤害时，自身衍射伤害提升{0}，该效果可叠加{1}层，持续{2}秒。叠至{1}层时，施放共鸣解放时，普攻伤害加成提升{3}。",
+          "param": [
+            "10%",
+            "3",
+            "5",
+            "40%"
+          ],
+          "resolved": "角色造成普攻伤害时，自身衍射伤害提升10%，该效果可叠加3层，持续5秒。叠至3层时，施放共鸣解放时，普攻伤害加成提升40%。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "自身衍射伤害提升",
+              "mode": "stack",
+              "perStack": 10,
+              "value": 0,
+              "maxStacks": 3,
+              "element": "衍射",
+              "label": "自身衍射伤害提升10%"
+            },
+            {
+              "kind": "buff",
+              "category": "typeBonus",
+              "name": "普攻伤害加成提升",
+              "value": 40,
+              "damageType": "普攻",
+              "label": "普攻伤害加成提升40%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000175",
+      "sampleEchoName": "莳植熊蜂",
+      "iconUrl": "assets/echo-sets/26.webp"
+    },
+    {
+      "id": "27",
+      "name": "长路启航之星",
+      "bonuses": {
+        "2": {
+          "desc": "热熔伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "热熔伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "热熔",
+            "value": 10,
+            "label": "热熔伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色为敌人添加【聚爆效应】或【震谐·偏移】时，自身暴击提升{0}，热熔伤害提升{1}，持续{2}秒。",
+          "param": [
+            "20%",
+            "20%",
+            "8"
+          ],
+          "resolved": "角色为敌人添加【聚爆效应】或【震谐·偏移】时，自身暴击提升20%，热熔伤害提升20%，持续8秒。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "generalCritRate",
+              "name": "自身暴击提升",
+              "value": 20,
+              "label": "自身暴击提升20%"
+            },
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "热熔伤害提升",
+              "value": 20,
+              "element": "热熔",
+              "label": "热熔伤害提升20%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000177",
+      "sampleEchoName": "岩蛛S4型",
+      "iconUrl": "assets/echo-sets/27.webp"
+    },
+    {
+      "id": "28",
+      "name": "斑驳粉饰之沫",
+      "bonuses": {
+        "2": {
+          "desc": "热熔伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "热熔伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "热熔",
+            "value": 10,
+            "label": "热熔伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色为敌人添加【聚爆效应】时，自身获得下述效果：热熔伤害提升{0}，持续{1}秒。持续期间内施放延奏技能后，下一个变奏技能登场的角色热熔伤害提升{2}，持续{3}秒。",
+          "param": [
+            "10%",
+            "15",
+            "25%",
+            "15"
+          ],
+          "resolved": "角色为敌人添加【聚爆效应】时，自身获得下述效果：热熔伤害提升10%，持续15秒。持续期间内施放延奏技能后，下一个变奏技能登场的角色热熔伤害提升25%，持续15秒。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "热熔伤害提升",
+              "value": 10,
+              "element": "热熔",
+              "label": "热熔伤害提升10%"
+            },
+            {
+              "kind": "teamBuff",
+              "category": "elementBonus",
+              "name": "下一个变奏登场角色热熔伤害提升",
+              "value": 25,
+              "element": "热熔",
+              "label": "下一个变奏技能登场的角色热熔伤害提升25%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000174",
+      "sampleEchoName": "颤栗战士",
+      "iconUrl": "assets/echo-sets/28.webp"
+    },
+    {
+      "id": "29",
+      "name": "听唤语义之愿",
+      "bonuses": {
+        "2": {
+          "desc": "气动伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "气动伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "气动",
+            "value": 10,
+            "label": "气动伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色造成声骸技能伤害时，声骸技能伤害的暴击提升{0}，自身气动伤害提升{1}，持续{2}秒。",
+          "param": [
+            "20%",
+            "15%",
+            "5"
+          ],
+          "resolved": "角色造成声骸技能伤害时，声骸技能伤害的暴击提升20%，自身气动伤害提升15%，持续5秒。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "typeCritRate",
+              "name": "声骸技能伤害的暴击提升",
+              "value": 20,
+              "damageType": "声骸",
+              "label": "声骸技能伤害的暴击提升20%"
+            },
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "自身气动伤害提升",
+              "value": 15,
+              "element": "气动",
+              "label": "自身气动伤害提升15%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000175",
+      "sampleEchoName": "莳植熊蜂",
+      "iconUrl": "assets/echo-sets/29.webp"
+    },
+    {
+      "id": "30",
+      "name": "雪落无声之愿",
+      "bonuses": {
+        "2": {
+          "desc": "冷凝伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "冷凝伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "冷凝",
+            "value": 10,
+            "label": "冷凝伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色为敌人添加【霜渐效应】时，冷凝伤害提升{0}，持续{1}秒。自身获得【落雪】效果，持续{11}秒，该效果每{2}秒可触发1次。拥有【落雪】效果时：\n·角色造成共鸣解放伤害时，将清除【落雪】效果，使自身暴击提升{4}，持续{5}秒。该效果持续期间角色造成共鸣解放伤害时，将延长{8}秒的持续时间，每{9}秒可触发1次，每次清除【落雪】后该效果至多触发{10}次。\n·角色施放延奏技能时，将清除【落雪】效果，使下一个变奏技能登场的角色冷凝伤害提升{6}，持续{7}秒。\n每次清除【落雪】效果时，上述效果仅能同时触发一个。",
+          "param": [
+            "10%",
+            "15",
+            "25",
+            "1",
+            "25%",
+            "6",
+            "25%",
+            "15",
+            "4",
+            "0.5",
+            "6",
+            "15"
+          ],
+          "resolved": "角色为敌人添加【霜渐效应】时，冷凝伤害提升10%，持续15秒。自身获得【落雪】效果，持续15秒，该效果每25秒可触发1次。拥有【落雪】效果时：\n·角色造成共鸣解放伤害时，将清除【落雪】效果，使自身暴击提升25%，持续6秒。该效果持续期间角色造成共鸣解放伤害时，将延长4秒的持续时间，每0.5秒可触发1次，每次清除【落雪】后该效果至多触发6次。\n·角色施放延奏技能时，将清除【落雪】效果，使下一个变奏技能登场的角色冷凝伤害提升25%，持续15秒。\n每次清除【落雪】效果时，上述效果仅能同时触发一个。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "冷凝伤害提升",
+              "value": 10,
+              "element": "冷凝",
+              "label": "冷凝伤害提升10%"
+            },
+            {
+              "kind": "buff",
+              "category": "generalCritRate",
+              "name": "自身暴击提升",
+              "value": 25,
+              "label": "自身暴击提升25%"
+            },
+            {
+              "kind": "teamBuff",
+              "category": "elementBonus",
+              "name": "下一个变奏登场角色冷凝伤害提升",
+              "value": 25,
+              "element": "冷凝",
+              "label": "下一个变奏技能登场的角色冷凝伤害提升25%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000174",
+      "sampleEchoName": "颤栗战士",
+      "iconUrl": "assets/echo-sets/30.webp"
+    },
+    {
+      "id": "31",
+      "name": "剪心辑梦之影",
+      "bonuses": {
+        "2": {
+          "desc": "攻击提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "攻击提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "atkPercent",
+            "value": 10,
+            "label": "攻击提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色为敌人添加【震谐·偏移】或【集谐·偏移】时，队伍中角色谐度破坏增幅提升{0}点，持续{1}秒，同名效果之间不可叠加。",
+          "param": [
+            "20",
+            "30"
+          ],
+          "resolved": "角色为敌人添加【震谐·偏移】或【集谐·偏移】时，队伍中角色谐度破坏增幅提升20点，持续30秒，同名效果之间不可叠加。",
+          "effects": {
+            "kind": "teamBuff",
+            "category": "harmonyBreakAmp",
+            "name": "队伍中角色谐度破坏增幅提升",
+            "value": 20,
+            "label": "队伍中角色谐度破坏增幅提升20点"
+          }
+        }
+      },
+      "sampleEchoId": "6000175",
+      "sampleEchoName": "莳植熊蜂",
+      "iconUrl": "assets/echo-sets/31.webp"
+    },
+    {
+      "id": "32",
+      "name": "碎梦亡鬼之魇",
+      "bonuses": {
+        "1": {
+          "desc": "角色为敌人添加【骇破·偏移】时，自身普攻伤害加成和重击伤害加成提升{1}，持续{2}秒。",
+          "param": [
+            "15%",
+            "35%",
+            "15"
+          ],
+          "resolved": "角色为敌人添加【骇破·偏移】时，自身普攻伤害加成和重击伤害加成提升35%，持续15秒。",
+          "effects": [
+            {
+              "kind": "panel",
+              "stat": "typeDmgBonus",
+              "damageType": "普攻",
+              "value": 35,
+              "label": "普攻伤害加成提升35%"
+            },
+            {
+              "kind": "panel",
+              "stat": "typeDmgBonus",
+              "damageType": "重击",
+              "value": 35,
+              "label": "重击伤害加成提升35%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000201",
+      "sampleEchoName": "共鸣回响·梦魇亚当·重锤",
+      "iconUrl": "assets/echo-sets/32.webp"
+    },
+    {
+      "id": "33",
+      "name": "羽落空尘之歌",
+      "bonuses": {
+        "2": {
+          "desc": "共鸣效率提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "共鸣效率提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "energyRegenPct",
+            "sourceKey": "displayOnly",
+            "label": "共鸣效率",
+            "value": 10
+          }
+        },
+        "5": {
+          "desc": "角色为敌人添加【虚湮效应】时，获得【玄翎之羽】：自身暴击提升{0}，重击伤害加成提升{1}，持续{2}秒。\n角色为敌人添加【霜渐效应】时，获得【重明之羽】：自身每{3}的共鸣效率使队伍中角色攻击提升{4}，上限{5}，持续{6}秒。",
+          "param": [
+            "20%",
+            "35%",
+            "15",
+            "1%",
+            "0.1%",
+            "25%",
+            "10"
+          ],
+          "resolved": "角色为敌人添加【虚湮效应】时，获得【玄翎之羽】：自身暴击提升20%，重击伤害加成提升35%，持续15秒。\n角色为敌人添加【霜渐效应】时，获得【重明之羽】：自身每1%的共鸣效率使队伍中角色攻击提升0.1%，上限25%，持续10秒。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "generalCritRate",
+              "name": "自身暴击提升",
+              "value": 20,
+              "label": "自身暴击提升20%"
+            },
+            {
+              "kind": "buff",
+              "category": "typeBonus",
+              "name": "重击伤害加成提升",
+              "value": 35,
+              "damageType": "重击",
+              "label": "重击伤害加成提升35%"
+            },
+            {
+              "kind": "teamBuff",
+              "category": "generalAttack",
+              "name": "队伍中角色攻击提升",
+              "value": 25,
+              "label": "队伍中角色攻击提升25%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000216",
+      "sampleEchoName": "封庭械囿",
+      "iconUrl": "assets/echo-sets/33.webp"
+    },
+    {
+      "id": "34",
+      "name": "清邪荡煞之心",
+      "bonuses": {
+        "2": {
+          "desc": "气动伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "气动伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "气动",
+            "value": 10,
+            "label": "气动伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色为敌人添加【集谐·偏移】时，自身暴击伤害提升{0}，气动伤害提升{1}，持续{2}秒。",
+          "param": [
+            "20%",
+            "30%",
+            "15"
+          ],
+          "resolved": "角色为敌人添加【集谐·偏移】时，自身暴击伤害提升20%，气动伤害提升30%，持续15秒。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "generalCritDmg",
+              "name": "自身暴击伤害提升",
+              "value": 20,
+              "label": "自身暴击伤害提升20%"
+            },
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "气动伤害提升",
+              "value": 30,
+              "element": "气动",
+              "label": "气动伤害提升30%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000217",
+      "sampleEchoName": "万囮牢·朽躯",
+      "iconUrl": "assets/echo-sets/34.webp"
+    },
+    {
+      "id": "35",
+      "name": "冥途夜行之灯",
+      "bonuses": {
+        "2": {
+          "desc": "生命提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "生命提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "hpPercent",
+            "value": 10,
+            "label": "生命提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色获得护盾时，自身暴击提升{0}，该效果可叠加{1}层，持续{2}秒，每{3}秒可触发一次。叠至满层时，自身造成的热熔伤害提升{4}。",
+          "param": [
+            "5%",
+            "4",
+            "5",
+            "0.5",
+            "15%"
+          ],
+          "resolved": "角色获得护盾时，自身暴击提升5%，该效果可叠加4层，持续5秒，每0.5秒可触发一次。叠至满层时，自身造成的热熔伤害提升15%。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "generalCritRate",
+              "name": "自身暴击提升",
+              "mode": "stack",
+              "perStack": 5,
+              "value": 0,
+              "maxStacks": 4,
+              "label": "自身暴击提升5%"
+            },
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "自身造成的热熔伤害提升",
+              "value": 15,
+              "element": "热熔",
+              "label": "自身造成的热熔伤害提升15%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000203",
+      "sampleEchoName": "瓷庭候",
+      "iconUrl": "assets/echo-sets/35.webp"
+    },
+    {
+      "id": "36",
+      "name": "衔梦照世之心",
+      "bonuses": {
+        "2": {
+          "desc": "导电伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "导电伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "导电",
+            "value": 10,
+            "label": "导电伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色为敌人添加【电磁效应】时，或自身获得同奏、响应同奏时，自身暴击提升{0}，导电伤害提升{1}，持续{2}秒。",
+          "param": [
+            "15%",
+            "22.5%",
+            "30"
+          ],
+          "resolved": "角色为敌人添加【电磁效应】时，或自身获得同奏、响应同奏时，自身暴击提升15%，导电伤害提升22.5%，持续30秒。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "generalCritRate",
+              "name": "自身暴击提升",
+              "value": 15,
+              "label": "自身暴击提升15%"
+            },
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "导电伤害提升",
+              "value": 22.5,
+              "element": "导电",
+              "label": "导电伤害提升22.5%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000206",
+      "sampleEchoName": "心傀·喜",
+      "iconUrl": "assets/echo-sets/36.webp"
+    },
+    {
+      "id": "37",
+      "name": "镜影流电之瞬",
+      "bonuses": {
+        "2": {
+          "desc": "导电伤害提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "导电伤害提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "attrBonus",
+            "element": "导电",
+            "value": 10,
+            "label": "导电伤害提升10%"
+          }
+        },
+        "5": {
+          "desc": "角色为敌人添加【电磁效应】时，自身获得下述效果：导电伤害提升{0}，持续{1}秒。持续期间内施放延奏技能后，下一个变奏技能登场的角色导电伤害提升{2}，持续{3}秒。",
+          "param": [
+            "10%",
+            "15",
+            "25%",
+            "15"
+          ],
+          "resolved": "角色为敌人添加【电磁效应】时，自身获得下述效果：导电伤害提升10%，持续15秒。持续期间内施放延奏技能后，下一个变奏技能登场的角色导电伤害提升25%，持续15秒。",
+          "effects": [
+            {
+              "kind": "buff",
+              "category": "elementBonus",
+              "name": "导电伤害提升",
+              "value": 10,
+              "element": "导电",
+              "label": "导电伤害提升10%"
+            },
+            {
+              "kind": "teamBuff",
+              "category": "elementBonus",
+              "name": "下一个变奏登场角色导电伤害提升",
+              "value": 25,
+              "element": "导电",
+              "label": "下一个变奏技能登场的角色导电伤害提升25%"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000203",
+      "sampleEchoName": "瓷庭候",
+      "iconUrl": "assets/echo-sets/37.webp"
+    },
+    {
+      "id": "38",
+      "name": "茜染怀想之花",
+      "bonuses": {
+        "2": {
+          "desc": "治疗效果提升{0}",
+          "param": [
+            "10%"
+          ],
+          "resolved": "治疗效果提升10%",
+          "effects": {
+            "kind": "panel",
+            "stat": "displayOnly",
+            "label": "治疗效果",
+            "value": 10
+          }
+        },
+        "5": {
+          "desc": "为队伍中角色提供治疗时，队伍中角色攻击提升{0}，持续{1}秒，同名效果之间不可叠加。上述效果持续期间，若角色获得同奏、响应同奏，攻击额外提升{2}。",
+          "param": [
+            "10%",
+            "30",
+            "15%"
+          ],
+          "resolved": "为队伍中角色提供治疗时，队伍中角色攻击提升10%，持续30秒，同名效果之间不可叠加。上述效果持续期间，若角色获得同奏、响应同奏，攻击额外提升15%。",
+          "effects": [
+            {
+              "kind": "teamBuff",
+              "category": "generalAttack",
+              "name": "治疗后队伍攻击提升",
+              "value": 10,
+              "label": "治疗后队伍角色攻击提升10%，持续30秒"
+            },
+            {
+              "kind": "teamBuff",
+              "category": "generalAttack",
+              "name": "同奏额外攻击提升",
+              "value": 15,
+              "label": "获得同奏/响应同奏时攻击额外提升15%（条件效果）"
+            }
+          ]
+        }
+      },
+      "sampleEchoId": "6000220",
+      "sampleEchoName": "巡霄枪卫",
+      "iconUrl": "assets/echo-sets/38.webp"
+    }
+  ]
+}

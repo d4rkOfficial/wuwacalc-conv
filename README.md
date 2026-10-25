@@ -26,7 +26,8 @@
 
 ```sh
 deno task dev     # 本地起 wrangler dev
-deno task test    # 单元测试
+deno task test    # 单元测试 + 转换差分验收
+deno task test:parity  # 只跑真实工程差分（4 个 gate + 6 个诊断）
 deno fmt src && deno lint src && deno check src/
 ```
 
@@ -44,6 +45,14 @@ deno run -A scripts/build-usage-images.ts <暗色截图> <亮色截图>
 
 字段级映射规则（乘区对照、`ratio` 与伤害条目 id、轮次与参考线、叠层拆条）见
 [`docs/convert-phase-mapping.md`](docs/convert-phase-mapping.md)。
+
+**计算引擎与差分验收**见 [`engines/README.md`](engines/README.md)：
+
+- `engines/wuwacalc/`：鸣算屋线上前端快照 + jsdom 跑法，导出逐技能乘区金标准；
+- `engines/coconut/`：椰果工具箱 `compute.ts` 等原样抽取，喂转换后的工程；
+- `fixtures/wuwacalc/`：多份真实方案 + 金标准；
+- `src/convert-project/parity_test.ts`：总伤 / 逐条目 / 逐乘区 TDD；
+- `src/convert-project/data/`：固定词表 / 乘区对照 / 面板来源；转换核心不再内联这些魔法字符串。
 
 ## 说明
 

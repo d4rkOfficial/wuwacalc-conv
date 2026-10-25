@@ -19,6 +19,7 @@ import {
     type MultAddEffect,
     resolveSkillMultAdds,
 } from "./extra-ratio.ts"
+import { EMPTY_TABLES, type ProjectTables } from "./tables.ts"
 import {
     type CoconutDamageBlock,
     type CoconutDamageEntry,
@@ -36,6 +37,13 @@ import {
     type WuwaCalcRotationEntry,
     type WuwaCalcSpecialSkillItem,
 } from "./types.ts"
+import {
+    ACTION_SKILL_TYPES,
+    EFFECT_ELEMENTS,
+    NON_DIRECT_NAMES,
+    SCALE_SUFFIX,
+    SKILL_TYPE_BY_DAMAGE_TYPE,
+} from "./data/game.ts"
 
 // ── 常量 ──────────────────────────────────────────────────────────────────────
 
@@ -69,59 +77,11 @@ export const END_REF_LINE_ID = "end"
  */
 export const DAMAGE_TRACK_INDEX = TEAM_SIZE
 
-/** 未识别为规范非直伤名的 `kind: 'execution'` 条目，按直伤处理 */
-const NON_DIRECT_NAMES = {
-    谐度破坏: "处决",
-    震谐响应: "响应",
-    骇破响应: "响应",
-} as const
-
-/** 鸣算屋 `damageType` → 椰果 `SKILL_TYPES` */
-const SKILL_TYPE_BY_DAMAGE_TYPE: Record<string, string> = {
-    普攻: "常态攻击",
-    重击: "常态攻击",
-    共鸣技能: "共鸣技能",
-    共鸣回路: "共鸣回路",
-    共鸣解放: "共鸣解放",
-    变奏: "变奏技能",
-    延奏: "延奏技能",
-    声骸: "声骸技能",
-}
-
-/**
- * 技能名里的**招式类别** → 椰果 `skillType`（长的先匹配，`强化重击` 别被 `重击` 抢走）。
- * 只在 `damageType: '声骸'` 时用，见 {@link skillTypeOf}。
- */
-const ACTION_SKILL_TYPES: [string, string][] = [
-    ["强化重击", "常态攻击"],
-    ["强化攻击", "常态攻击"],
-    ["闪避反击", "常态攻击"],
-    ["空中攻击", "常态攻击"],
-    ["共鸣技能", "共鸣技能"],
-    ["共鸣回路", "共鸣回路"],
-    ["共鸣解放", "共鸣解放"],
-    ["延奏", "延奏技能"],
-    ["变奏", "变奏技能"],
-    ["重击", "常态攻击"],
-    ["普攻", "常态攻击"],
-]
-
 /**
  * 上游 `damageType` → 椰果 `skillType`。
  *
- * ⚠️ 工具箱的 `声骸技能` **不是**「造成声骸技能伤害」，而是**装备声骸的技能**
- * （`SKILL_TYPE_ECHO`）：技能选择器里的「装备声骸技能」分组
- * （`appendEchoSkillToCache()`）、伤害类型规则 2 的声骸文案索引（`skill-infer.ts`）、
- * 以及显示时自动加的 `echoes[0].name·` 前缀，都按它认人。
- *
- * 上游把「谁打出的」和「算哪种伤害」混在一个 `damageType` 里：弗洛洛的
- * `普攻·赫卡忒第一段` / `强化攻击·彩乐·赫卡忒` 也标着 `声骸`（这些伤害**确实**是声骸技能伤害），
- * 但招式是她自己的。一律落 `声骸技能`，工具箱就会给它们统统加上装备声骸
- * （`梦魇·赫卡忒`）的前缀 —— 看着像声骸的技能，其实不是。
- *
- * 所以：名字里点明了招式类别的按招式类别落；名字里看不出招式的
- * （`声骸·梦魇·赫卡忒`、轴上的 `Q`）才是装备声骸技能。**伤害类型不受影响** ——
- * 那由拉表阶段的 `damageEntryDamageTypes` 显式落（上游给了 `damageType`）。
+ * 工具箱的 `声骸技能` **不是**「造成声骸技能伤害」，而是**装备声骸的技能**；
+ * 名字里点明了招式类别的按招式类别落，名字里看不出招式的才是装备声骸技能。
  */
 const skillTypeOf = (damageType: string, names: string[]): string => {
     if (damageType === "声骸") {
@@ -132,12 +92,6 @@ const skillTypeOf = (damageType: string, names: string[]): string => {
         }
     }
     return SKILL_TYPE_BY_DAMAGE_TYPE[damageType] ?? ""
-}
-
-/** 上游 `scaleStat` → 椰果倍率的词条后缀（缺省即「攻击」，不写后缀） */
-const SCALE_SUFFIX: Record<string, string> = {
-    hp: "生命",
-    def: "防御",
 }
 
 // ── 小工具 ────────────────────────────────────────────────────────────────────
@@ -163,11 +117,16 @@ const toRatio = (
     components: WuwaCalcMultComponent[] | null | undefined,
     baseMult: unknown,
     scaleStat: unknown,
+    fixedDamage = false,
 ): string => {
     const suffix = SCALE_SUFFIX[optionalString(scaleStat) ?? ""] ?? ""
     const single = Number(baseMult)
     if (Number.isFinite(single) && single !== 0) {
-        return `${roundNumber(single)}%${suffix}`
+        // 固定伤害（上游 `fixedDamage: true`）不能写成百分比：工具箱会按
+        // 「倍率 × 面板」算，666 会变成 666% × 攻击；不带 % 才是固定值 666。
+        return fixedDamage
+            ? `${roundNumber(single)}`
+            : `${roundNumber(single)}%${suffix}`
     }
 
     // 老格式没有 `baseMult`：按分段构成自己求和
@@ -317,6 +276,8 @@ interface AxisItem {
     names?: string[]
     /** 产生这条的技能选中态（叠层 / 生效），供拉表按层绑定 */
     state?: SkillState
+    /** 特殊技能条目的上游 id（同一份团队特殊技能会在每个成员里各复制一份，用它去重） */
+    specialKey?: string
 }
 
 const toSkillHit = (
@@ -325,11 +286,14 @@ const toSkillHit = (
     names: string[],
     character: string,
     element: string,
+    librarySkillType?: string,
 ): CoconutSkillHit => {
     const damageType = optionalString(entry.damageType) ?? ""
     return {
         hitName,
-        skillType: skillTypeOf(damageType, names),
+        // 技能库的 skillType 是权威口径（damageType 只表示「算哪种伤害」）；
+        // 查不到时才退回 damageType/名字推断。
+        skillType: librarySkillType || skillTypeOf(damageType, names),
         // 倍率由调用方填（`toRatio`），段数放在 `hits` 上
         ratio: "",
         element: optionalString(entry.damageElement) || element,
@@ -337,6 +301,11 @@ const toSkillHit = (
         hits: 1,
         // 上游的伤害类型原样带走，拉表要用它落 `damageEntryDamageTypes`
         ...(damageType ? { damageType } : {}),
+        // 同时视为某种效应（如卡提希娅部分普攻同时算风蚀）：
+        // 拉表阶段会把它追加成第二伤害类型，Buff 条件按「类型数组任一命中」生效
+        ...(optionalString(entry.alsoAsEffect)
+            ? { alsoAsEffect: optionalString(entry.alsoAsEffect) }
+            : {}),
     }
 }
 
@@ -367,15 +336,34 @@ const displayNameOf = (
     return candidates.find((name) => name) ?? ""
 }
 
-/** 非直伤规范化：归一到椰果的 9 个规范名之一，认不出来就返回 null */
+
 const normalizeNonDirect = (
     item: WuwaCalcSpecialSkillItem,
-): { name: string; category: "处决" | "响应" | "效应" } | null => {
+): {
+    name: string
+    category: "处决" | "响应" | "效应"
+    baseMult?: number
+    element?: string
+} | null => {
     if (item.kind === "effect") {
         const effectType = optionalString(item.effectType)
-        return effectType
-            ? { name: `${effectType}效应`, category: "效应" }
-            : null
+        if (!effectType) return null
+        const rawName = optionalString(item.name)
+        // 「效应」是通用名，落规范名（聚爆效应）；具名效应（聚爆·普通光翼）保留原名，
+        // 否则会被当成同一条 13 层聚爆，倍率与条目数都会错。
+        const generic = !rawName || rawName === "效应" ||
+            rawName === `${effectType}效应`
+        // 上游 `baseMult` 是百分比数值（1397.26 = 1397.26%），引擎内部按倍率用，要 /100
+        const rawBase = Number(item.baseMult ?? item.libraryBaseMult)
+        const baseMult = Number.isFinite(rawBase) ? rawBase / 100 : NaN
+        const element = optionalString(item.element) ||
+            EFFECT_ELEMENTS[effectType] || ""
+        return {
+            name: generic ? `${effectType}效应` : rawName,
+            category: "效应",
+            ...(Number.isFinite(baseMult) ? { baseMult } : {}),
+            ...(element ? { element } : {}),
+        }
     }
 
     const name = optionalString(item.name) ?? ""
@@ -405,9 +393,15 @@ const collectMemberItems = (
     placement: (index: number, count: number) => number,
     multAdds: MultAddEffect[],
     activeById: Map<string, boolean>,
+    tables: ProjectTables,
+    hasAmisC6Burst = false,
 ): AxisItem[] => {
     const character = optionalString(member.name) ?? ""
-    const element = characterElement(member)
+    const characterId = optionalString(member.characterId) ?? ""
+    // 角色元素必须来自角色本身（技能库），不能用主位声骸的元素：
+    // 洛瑟菈主位是湮灭声骸，但她本人是冷凝，按主位落会把 12% 湮灭伤错算到她头上。
+    const element = tables.characterElements.get(characterId) ||
+        characterElement(member)
     const catalog = new Map<string, WuwaCalcRotationEntry>()
     for (const entry of source.catalog) {
         const id = optionalString(entry?.id)
@@ -433,8 +427,31 @@ const collectMemberItems = (
         const catalogId = optionalString(skill.catalogId)
         const entry = catalogId ? catalog.get(catalogId) : undefined
         const resolved = resolveStacks(source, catalogId ?? "", entry)
+        // 技能自己的叠层（上游 `unit.buffStacks`）优先级最高：6 链「铭记」这类
+        // 只在某一招上打满 3 层的 buff，目录/阶段层数里都是 0，漏了会把整招伤害算低。
+        if (skill.buffMode === "custom") {
+            for (const [id, value] of Object.entries(skill.buffStacks ?? {})) {
+                const n = Number(value)
+                if (!Number.isFinite(n)) continue
+                // 同一层数要写进两种 id 形态：队伍 buff 在成员列表里是 `tm_*`，
+                // 而 sharedBuffs / 全局层数用的是原始 id；只写一种会让查层数时
+                // 先命中旧的全队层数（例：追猎全局 3 层盖掉技能自己的 1 层）。
+                resolved[id] = n
+                if (id.startsWith("tm_")) resolved[id.slice(3)] = n
+                else resolved["tm_" + id] = n
+            }
+        }
+        // 集谐系统 Buff：模态开启时引擎按「模态层数」统一结算，逐技能层数没记时
+        // 用该轮出现过的最大值补上（清宵 4 层 -> 所有技能都吃 4×14.4%）。
+        for (const [id, n] of Object.entries(source.convergenceStacks)) {
+            if (!resolved[id] && n > 0) resolved[id] = n
+        }
         const seconds = secondsOf(entry, placement(index, source.skills.length))
-        const state = skillStateOf(skill, resolved)
+        let state = skillStateOf(skill, resolved, source.phaseActive)
+        if (source.convergenceIds.length) {
+            state ??= { active: {}, stacks: { ...resolved } }
+            for (const id of source.convergenceIds) state.active[id] = true
+        }
         const shortName = optionalString(skill.name)
         const libraryName = optionalString(entry?.librarySkillName)
         /** 这条技能认的名字（短名 / 目录名 / 技能库全名，去重） */
@@ -445,16 +462,28 @@ const collectMemberItems = (
                 ),
             ),
         ]
-        const base = toSkillHit(
-            entry ?? {
+        const librarySkill = characterId && libraryName
+            ? tables.skills.get(`${characterId}|${libraryName}`)
+            : undefined
+        // `alsoAsEffect` 在**技能段**上，不在目录条目上；目录条目存在时也要合并，
+        // 否则卡提希娅部分普攻会丢掉「同时视为风蚀」这层第二类型。
+        const alsoAsEffect = optionalString(entry?.alsoAsEffect) ||
+            optionalString(skill.alsoAsEffect)
+        const catalogEntry = entry
+            ? { ...entry, alsoAsEffect }
+            : {
                 baseMult: skill.baseMult,
                 multCount: skill.multCount,
                 damageType: skill.damageType,
-            },
+                alsoAsEffect,
+            }
+        const base = toSkillHit(
+            catalogEntry,
             "",
             nameCandidates,
             character,
             element,
+            librarySkill?.skillType,
         )
         const groupKey = `sk${trackIndex}_${groupSeq++}`
         items.push({
@@ -469,6 +498,7 @@ const collectMemberItems = (
                     entry?.multComponents,
                     entry?.baseMult ?? skill.baseMult,
                     entry?.scaleStat ?? skill.scaleStat,
+                    entry?.fixedDamage ?? skill.fixedDamage ?? false,
                 ),
                 // ratio 就是上游的原始复合倍率 `baseMult`（= Σ rate × count），
                 // 这里只再乘技能自己的 `multCount`
@@ -529,8 +559,12 @@ const collectMemberItems = (
         if (toInt(item?.sourceRosterSlot, -1) !== trackIndex) continue
         // 非直伤只在**当前轮**的目录里查得到位置，多层轴时归到该轮起点之后
         const linkedCatalogId = optionalString(item.linkedCatalogId) ?? ""
-        if (!catalog.has(linkedCatalogId)) continue
-        const px = secondsOf(catalog.get(linkedCatalogId), 0)
+        // 高难循环轴里的处决/效应常常没有 `linkedCatalogId`（不在技能目录里），
+        // 不能因此丢掉：放到该轮起点，伤害与位置无关，但条目必须存在。
+        const linkedEntry = linkedCatalogId
+            ? catalog.get(linkedCatalogId)
+            : undefined
+        const px = linkedEntry ? secondsOf(linkedEntry, 0) : secondsBase
         const normalized = normalizeNonDirect(item)
         if (!normalized) {
             // 认不出来的特殊技能（如「欺骗程式·运动失能」）按直伤落，别丢伤害
@@ -564,18 +598,65 @@ const collectMemberItems = (
         }
         if (isEffect) {
             entry.hits = toInt(item.effectCount, 1)
+            // 效应伤害由某个角色施加，Buff 作用域要按该角色算；显示层仍走「无角色」
+            entry.character =
+                roster.get(optionalString(item.characterId) ?? "") ??
+                    character
+            if (normalized.baseMult !== undefined) {
+                entry.baseMult = normalized.baseMult
+            }
+            if (normalized.element) entry.element = normalized.element
+            // 爱弥斯 6 链（聚爆模态）：全队聚爆效应固定双暴 80% / 275%
+            if (hasAmisC6Burst && item.effectType === "聚爆") {
+                entry.critRate = 80
+                entry.critDmg = 275
+            }
         } else {
             const responder =
                 roster.get(optionalString(item.characterId) ?? "") ?? character
             entry.responders = responder ? [responder] : []
         }
+        // 特殊技能自己的逐项开关/层数（`custom`）不能丢：效应伤害吃哪条加深、
+        // 暴击覆盖，全看 item.buffActive / buffStacks。
+        const itemStacks: Record<string, number> = { ...source.defaultStacks }
+        if (item.buffMode === "custom") {
+            for (const [id, value] of Object.entries(item.buffStacks ?? {})) {
+                const n = Number(value)
+                if (!Number.isFinite(n)) continue
+                itemStacks[id] = n
+                if (id.startsWith("tm_")) itemStacks[id.slice(3)] = n
+                else itemStacks["tm_" + id] = n
+            }
+        }
+        let state = skillStateOf(
+            {
+                buffMode: item.buffMode,
+                buffActive: item.buffActive,
+            } as WuwaCalcAxisSkill,
+            itemStacks,
+            source.phaseActive,
+        )
+        if (source.convergenceIds.length) {
+            state ??= { active: {}, stacks: { ...itemStacks } }
+            for (const id of source.convergenceIds) state.active[id] = true
+        }
         items.push({
             seconds: px,
             trackIndex,
-            character,
+            character: entry.character ?? character,
             kind: "nonDirect",
             nonDirect: entry,
             ownLine: isEffect,
+            state,
+            specialKey: [
+                optionalString(item.id) ?? "",
+                entry.category,
+                entry.name,
+                entry.layers,
+                entry.hits ?? 1,
+                entry.baseMult ?? "",
+                optionalString(item.characterId) ?? "",
+            ].join("|"),
         })
     }
 
@@ -589,10 +670,16 @@ const skillStateOf = (
     skill: WuwaCalcAxisSkill,
     /** 该技能解析出来的叠层数（见 {@link resolveStacks}） */
     resolvedStacks: Record<string, number> = {},
+    /** 该阶段合并后的勾选态：技能没显式写的键回落到它 */
+    phaseActive: Record<string, boolean> = {},
 ): SkillState | undefined => {
-    const active: Record<string, boolean> = {}
-    for (const [id, value] of Object.entries(skill.buffActive ?? {})) {
-        if (typeof value === "boolean") active[id] = value
+    // inherit 技能不吃自己的 buffActive（上游 resolveBuffActive 同义）；
+    // custom 技能在自己的开关之上回落阶段开关。
+    const active: Record<string, boolean> = { ...phaseActive }
+    if (skill.buffMode === "custom") {
+        for (const [id, value] of Object.entries(skill.buffActive ?? {})) {
+            if (typeof value === "boolean") active[id] = value
+        }
     }
     const stacks: Record<string, number> = { ...resolvedStacks }
     return Object.keys(active).length || Object.keys(stacks).length
@@ -619,11 +706,22 @@ const resolveStacks = (
     catalogId: string,
     entry: WuwaCalcRotationEntry | undefined,
 ): Record<string, number> => {
+    /** 同一层数写进两种 id 形态（`tb_x` / `tm_tb_x`），查层数时不会先命中旧键 */
+    const put = (
+        target: Record<string, number>,
+        id: string,
+        value: unknown,
+    ) => {
+        const n = Number(value)
+        if (!Number.isFinite(n)) return
+        target[id] = n
+        if (id.startsWith("tm_")) target[id.slice(3)] = n
+        else target["tm_" + id] = n
+    }
     const catalogLayers: Record<string, number> = {}
     // 单轮模式：层数挂在目录条目自己的 `stackLayers` 上
     for (const [id, value] of Object.entries(entry?.stackLayers ?? {})) {
-        const n = Number(value)
-        if (Number.isFinite(n)) catalogLayers[id] = n
+        put(catalogLayers, id, value)
     }
     // 多轮模式：层数在该轮的 `catalogStacks[catalogId]` 上
     for (
@@ -631,18 +729,21 @@ const resolveStacks = (
             (catalogId ? source.catalogStacks[catalogId] : undefined) ?? {},
         )
     ) {
-        const n = Number(value)
-        if (Number.isFinite(n)) catalogLayers[id] = n
+        put(catalogLayers, id, value)
     }
 
-    const stacks: Record<string, number> = { ...source.defaultStacks }
-    if (source.hasCatalogLayers) {
-        // 有 catalog 数据：catalog 没提到这个 buff 就是 0 层，不再拿旧快照补
-        return { ...stacks, ...catalogLayers }
+    const stacks: Record<string, number> = {}
+    for (const [id, value] of Object.entries(source.defaultStacks)) {
+        put(stacks, id, value)
     }
+    // 上游 `resolveCycleStepStacksForRound` 的顺序：全局 → 阶段 → 目录条目。
+    // 阶段层数**不能因为目录存在就跳过**：例如却邪武器叠层写在 phase.buffStacks
+    // （5 层 = 112% 气动增伤），目录里没有它，跳过就会整轮少 112% 增伤。
     for (const [id, value] of Object.entries(source.phaseStacks)) {
-        const n = Number(value)
-        if (Number.isFinite(n)) stacks[id] = n
+        put(stacks, id, value)
+    }
+    for (const [id, value] of Object.entries(catalogLayers)) {
+        put(stacks, id, value)
     }
     return stacks
 }
@@ -672,6 +773,12 @@ interface MemberRoundSource {
     defaultStacks: Record<string, number>
     /** 该轮各阶段上的层数（`phases[].buffStacks`） */
     phaseStacks: Record<string, number>
+    /** 该轮各阶段的勾选态合并结果（`phases[].buffMode/buffActive`，后者覆盖前者） */
+    phaseActive: Record<string, boolean>
+    /** 集谐系统 Buff 的 id（模态开启时这些 Buff 无视逐技能开关，强制生效） */
+    convergenceIds: string[]
+    /** 集谐系统 Buff 的层数：取该轮所有技能/目录里出现过的最大值（引擎按模态层数统一） */
+    convergenceStacks: Record<string, number>
     /** 多轮模式：`catalogId → buffId → 层数` */
     catalogStacks: Record<string, Record<string, number>>
     /** 这份数据里到底有没有 catalog 层数（决定要不要退回阶段 / 技能级旧快照） */
@@ -736,6 +843,18 @@ const resolveRounds = (
             ),
         )
 
+    /** 阶段勾选态：custom 阶段自己的开关覆盖前一阶段；inherit 阶段继承 */
+    const phaseActiveOf = (phases: WuwaCalcAxisPhase[] | null | undefined) => {
+        const result: Record<string, boolean> = {}
+        for (const phase of phases ?? []) {
+            if (phase?.buffMode !== "custom") continue
+            for (const [id, value] of Object.entries(phase.buffActive ?? {})) {
+                if (typeof value === "boolean") result[id] = value
+            }
+        }
+        return result
+    }
+
     const asLayerMap = (
         raw: unknown,
     ): Record<string, Record<string, number>> => {
@@ -754,6 +873,48 @@ const resolveRounds = (
             if (Object.keys(normalized).length) result[catalogId] = normalized
         }
         return result
+    }
+
+    /**
+     * 集谐系统 Buff：模态开启时 W 引擎强制生效，且层数是**模态层数**而不是技能层数。
+     * 工程里这份层数常常只记在某个技能的 `catalogStacks` 上（例如只记一次 4 层），
+     * 但结算时全轮所有技能都按 4 层算；这里取该轮所有出现过的最大值。
+     */
+    const convergenceInfoOf = (
+        member: WuwaCalcMember,
+        defaultStacks: Record<string, number>,
+        phaseStacks: Record<string, number>,
+        skills: WuwaCalcAxisSkill[],
+        catalogStacks: Record<string, Record<string, number>>,
+    ): { ids: string[]; stacks: Record<string, number> } => {
+        const ids = ((member.buffs ?? []) as {
+            category?: string
+            id?: string
+        }[])
+            .filter((buff) => buff?.category === "convergence" && buff.id)
+            .map((buff) => String(buff.id))
+        const stacks: Record<string, number> = {}
+        for (const id of ids) stacks[id] = 0
+        const consider = (id: string, value: unknown) => {
+            if (stacks[id] === undefined) return
+            const n = Number(value)
+            if (Number.isFinite(n) && n > stacks[id]) stacks[id] = n
+        }
+        for (const id of ids) {
+            consider(id, defaultStacks[id])
+            consider(id, phaseStacks[id])
+        }
+        for (const skill of skills) {
+            for (const [id, value] of Object.entries(skill.buffStacks ?? {})) {
+                consider(id, value)
+            }
+        }
+        for (const layerMap of Object.values(catalogStacks)) {
+            for (const [id, value] of Object.entries(layerMap)) {
+                consider(id, value)
+            }
+        }
+        return { ids, stacks }
     }
 
     /** catalog 条目上有没有单轮模式的 `stackLayers` */
@@ -779,16 +940,32 @@ const resolveRounds = (
                         member.rotationCatalog ??
                         []) as WuwaCalcRotationEntry[]
                     const catalogStacks = asLayerMap(round?.catalogStacks)
+                    const skills = skillsOfRound(member, roundIndex)
+                    const defaultStacks = mergeStacks(
+                        member.globalBuffStacks,
+                        round?.globalBuffStacks,
+                    )
+                    const phaseStacks = phaseStacksOf(round?.phases)
+                    const convergence = convergenceInfoOf(
+                        member,
+                        defaultStacks,
+                        phaseStacks,
+                        skills,
+                        catalogStacks,
+                    )
                     return {
-                        skills: skillsOfRound(member, roundIndex),
+                        skills,
                         catalog,
+                        // 优先顶层 specialSkills：轮内 items 往往是同一份团队列表的副本，
+                        // 按成员/轮各收一次会重复计入（SCJ322 的 2 条效应被算成 15 条）。
+                        // 多轮：每轮有自己的特殊技能快照，W 的 specialTotal 是逐轮求和
                         specialSkills: round?.specialSkills?.items ??
                             payload?.specialSkills?.items ?? [],
-                        defaultStacks: mergeStacks(
-                            member.globalBuffStacks,
-                            round?.globalBuffStacks,
-                        ),
-                        phaseStacks: phaseStacksOf(round?.phases),
+                        defaultStacks,
+                        phaseStacks,
+                        phaseActive: phaseActiveOf(round?.phases),
+                        convergenceIds: convergence.ids,
+                        convergenceStacks: convergence.stacks,
                         catalogStacks,
                         hasCatalogLayers:
                             Object.keys(catalogStacks).length > 0 ||
@@ -808,17 +985,31 @@ const resolveRounds = (
         sources: members.map((member) => {
             const catalog =
                 (member.rotationCatalog ?? []) as WuwaCalcRotationEntry[]
+            // 单轮模式没有 `catalogStacks`，层数在目录条目的 `stackLayers` 上
+            const catalogStacks: Record<string, Record<string, number>> = {}
+            const skills = skillsOfPhases(member.phases)
+            const defaultStacks = mergeStacks(
+                member.globalBuffStacks,
+                payload?.team?.sharedBuffs?.globalBuffStacks,
+            )
+            const phaseStacks = phaseStacksOf(member.phases)
+            const convergence = convergenceInfoOf(
+                member,
+                defaultStacks,
+                phaseStacks,
+                skills,
+                catalogStacks,
+            )
             return {
-                skills: skillsOfPhases(member.phases),
+                skills,
                 catalog,
                 specialSkills: payload?.specialSkills?.items ?? [],
-                defaultStacks: mergeStacks(
-                    member.globalBuffStacks,
-                    payload?.team?.sharedBuffs?.globalBuffStacks,
-                ),
-                phaseStacks: phaseStacksOf(member.phases),
-                // 单轮模式没有 `catalogStacks`，层数在目录条目的 `stackLayers` 上
-                catalogStacks: {},
+                defaultStacks,
+                phaseStacks,
+                phaseActive: phaseActiveOf(member.phases),
+                convergenceIds: convergence.ids,
+                convergenceStacks: convergence.stacks,
+                catalogStacks,
                 hasCatalogLayers: hasEntryStackLayers(catalog),
             }
         }),
@@ -827,22 +1018,29 @@ const resolveRounds = (
 
 export const convertTimelinePhase = (
     payload: WuwaCalcProjectPayload | null | undefined,
+    tables: ProjectTables = EMPTY_TABLES,
 ): TimelineResult => {
     const members = (payload?.members ?? []).slice(0, TEAM_SIZE)
     const roster = rosterNames(payload)
     const rounds = resolveRounds(payload)
+    const hasAmisC6Burst = members.some((member) =>
+        (optionalString(member.name) ?? "").includes("爱弥斯") &&
+        toInt(member.resonanceUnlocked, 0) >= 6 &&
+        (optionalString(member.combatMode) === "burst" ||
+            (optionalString(member.combatMode) ?? "").includes("聚爆"))
+    )
     // 追加倍率（`multAdd`）与全局 buff 开关：用来给技能补「（额外）」条目
     const multAdds = collectMultAddEffects(payload)
     const activeById = globalBuffActiveOf(payload)
 
     // 每轮：本条轴上的结束下标，用来把轮次边界参考线放准
     const roundBounds: { duration: number; endIndex: number }[] = []
-    const items: AxisItem[] = []
+    let items: AxisItem[] = []
 
     for (const round of rounds) {
         // **按站位分组**：1 号位的倍率排完再排 2 号位、3 号位，最后补该轮的轴长参考线。
         // 不跨站位按时间混排 —— 同一条轴上是同一时间点的三个人，混排会让人完全分不清谁是谁的段。
-        const roundItems = members.flatMap((member, index) =>
+        let roundItems = members.flatMap((member, index) =>
             collectMemberItems(
                 member,
                 index,
@@ -856,8 +1054,19 @@ export const convertTimelinePhase = (
                         : round.startSeconds,
                 multAdds,
                 activeById,
+                tables,
+                hasAmisC6Burst,
             )
         )
+        // 特殊技能列表是团队级的，payload 会把它复制到每个成员里；**每轮内**按上游 id 去重，
+        // 但不同轮的同一条要保留（W 的 specialTotal 是逐轮求和）。
+        const seenSpecialKeys = new Set<string>()
+        roundItems = roundItems.filter((item) => {
+            if (!item.specialKey) return true
+            if (seenSpecialKeys.has(item.specialKey)) return false
+            seenSpecialKeys.add(item.specialKey)
+            return true
+        })
         items.push(...roundItems)
         roundBounds.push({
             duration: round.duration,
@@ -983,6 +1192,9 @@ export const convertTimelinePhase = (
                     ...(item.hit!.damageType
                         ? { damageType: item.hit!.damageType }
                         : {}),
+                    ...(item.hit!.alsoAsEffect
+                        ? { alsoAsEffect: item.hit!.alsoAsEffect }
+                        : {}),
                 })
                 if (item.state) entryState.set(id, item.state)
             }
@@ -1025,26 +1237,45 @@ export const convertTimelinePhase = (
                 damageElement: "",
                 sourceTimelineBlockId: refLineId,
                 hits: item.nonDirect.hits ?? item.nonDirect.layers ?? 1,
+                ...(category === "效应"
+                    ? {
+                        ratioValue: item.nonDirect.layers,
+                        ...(item.nonDirect.baseMult !== undefined
+                            ? { effectBaseMult: item.nonDirect.baseMult }
+                            : {}),
+                        ...(item.nonDirect.critRate !== undefined
+                            ? { effectCritRate: item.nonDirect.critRate }
+                            : {}),
+                        ...(item.nonDirect.critDmg !== undefined
+                            ? { effectCritDmg: item.nonDirect.critDmg }
+                            : {}),
+                    }
+                    : {}),
             }
             if (category === "响应") {
                 // 响应按 responders 一人一条：`${blockId}-nd|${name}#${responder}`
                 for (const responder of responders) {
+                    const id =
+                        `${blockId}-nd|${item.nonDirect.name}#${responder}`
                     entries.push({
                         ...common,
-                        id: `${blockId}-nd|${item.nonDirect.name}#${responder}`,
+                        id,
                         character: responder,
                         damageBaseType: "偏谐系数",
                     })
+                    if (item.state) entryState.set(id, item.state)
                 }
             } else {
+                const id = `${blockId}-nd|${item.nonDirect.name}`
                 entries.push({
                     ...common,
-                    id: `${blockId}-nd|${item.nonDirect.name}`,
+                    id,
                     character: item.character,
                     damageBaseType: category === "处决"
                         ? "偏谐系数"
                         : "效应系数",
                 })
+                if (item.state) entryState.set(id, item.state)
             }
         }
 

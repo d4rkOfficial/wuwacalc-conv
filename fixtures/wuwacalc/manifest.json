@@ -1,0 +1,611 @@
+{
+  "fetchedAt": "2026-10-25T15:21:30.264Z",
+  "base": "https://wuwacalc.cn",
+  "items": [
+    {
+      "code": "MC-J2UPE8",
+      "title": "仇洛莫双c队",
+      "updatedAt": "2026-10-24T17:31:49.09+00:00",
+      "summary": {
+        "teamDps": 320831.88256,
+        "axisKind": "loop",
+        "entryType": "表级14词条",
+        "teamTotal": 8020797.064,
+        "difficulty": "最简单",
+        "monsterRes": 20,
+        "teamConfig": "6+5",
+        "memberNames": [
+          "仇远",
+          "洛瑟菈",
+          "莫宁"
+        ],
+        "performance": "适应强",
+        "axisDuration": 25,
+        "characterIds": [
+          "1411",
+          "1109",
+          "1209"
+        ],
+        "monsterLevel": 100,
+        "memberConfigs": [
+          "6+5",
+          "6+5",
+          "6+5"
+        ],
+        "configVariants": [
+          {
+            "key": "6+5|6+5|6+5",
+            "label": "6+5 · 6+5 · 6+5",
+            "teamDps": 320831.88256,
+            "teamTotal": 8020797.064,
+            "teamConfig": "6+5",
+            "axisDuration": 25,
+            "memberConfigs": [
+              "6+5",
+              "6+5",
+              "6+5"
+            ]
+          }
+        ],
+        "snapshotsFresh": true,
+        "_serverComputed": true,
+        "memberWeaponIds": [
+          "21020066",
+          "21050066",
+          "21010066"
+        ]
+      },
+      "file": "MC-J2UPE8.json"
+    },
+    {
+      "code": "MC-X859HC",
+      "title": "嘉露斐循环",
+      "updatedAt": "2026-10-24T10:56:41.329+00:00",
+      "summary": {
+        "teamDps": 80563.64136,
+        "axisKind": "loop",
+        "entryType": "表级14词条",
+        "teamTotal": 2014091.034,
+        "difficulty": "进阶适中",
+        "monsterRes": 20,
+        "teamConfig": "6+1",
+        "memberNames": [
+          "嘉贝莉娜",
+          "莫特斐",
+          "露帕"
+        ],
+        "performance": "适中看操作",
+        "axisDuration": 25,
+        "characterIds": [
+          "1208",
+          "1204",
+          "1207"
+        ],
+        "monsterLevel": 100,
+        "memberConfigs": [
+          "0+1",
+          "6+1",
+          "0+1"
+        ],
+        "configVariants": [
+          {
+            "key": "0+1|6+1|0+1",
+            "label": "0+1 · 6+1 · 0+1",
+            "teamDps": 80563.64136,
+            "teamTotal": 2014091.034,
+            "teamConfig": "6+1",
+            "axisDuration": 25,
+            "memberConfigs": [
+              "0+1",
+              "6+1",
+              "0+1"
+            ]
+          }
+        ],
+        "snapshotsFresh": true,
+        "_serverComputed": true,
+        "memberWeaponIds": [
+          "21030036",
+          "21030015",
+          "21010036"
+        ]
+      },
+      "file": "MC-X859HC.json"
+    },
+    {
+      "code": "MC-88TES9",
+      "title": "嘉露斐循环",
+      "updatedAt": "2026-10-24T10:37:34.397+00:00",
+      "summary": {
+        "teamDps": 77219.46836,
+        "axisKind": "loop",
+        "entryType": "表级14词条",
+        "teamTotal": 1930486.709,
+        "difficulty": "进阶适中",
+        "monsterRes": 20,
+        "teamConfig": "6+1",
+        "memberNames": [
+          "嘉贝莉娜",
+          "莫特斐",
+          "露帕"
+        ],
+        "performance": "适中看操作",
+        "axisDuration": 25,
+        "characterIds": [
+          "1208",
+          "1204",
+          "1207"
+        ],
+        "monsterLevel": 100,
+        "memberConfigs": [
+          "0+1",
+          "6+1",
+          "0+1"
+        ],
+        "configVariants": [
+          {
+            "key": "0+1|6+1|0+1",
+            "label": "0+1 · 6+1 · 0+1",
+            "teamDps": 77219.46836,
+            "teamTotal": 1930486.709,
+            "teamConfig": "6+1",
+            "axisDuration": 25,
+            "memberConfigs": [
+              "0+1",
+              "6+1",
+              "0+1"
+            ]
+          }
+        ],
+        "snapshotsFresh": true,
+        "_serverComputed": true,
+        "memberWeaponIds": [
+          "21030036",
+          "21030015",
+          "21010036"
+        ]
+      },
+      "file": "MC-88TES9.json"
+    },
+    {
+      "code": "MC-AAG7TK",
+      "title": "嘉露斐循环",
+      "updatedAt": "2026-10-24T10:37:30.653+00:00",
+      "summary": {
+        "teamDps": 77219.46836,
+        "axisKind": "loop",
+        "entryType": "表级14词条",
+        "teamTotal": 1930486.709,
+        "difficulty": "进阶适中",
+        "monsterRes": 20,
+        "teamConfig": "6+1",
+        "memberNames": [
+          "嘉贝莉娜",
+          "莫特斐",
+          "露帕"
+        ],
+        "performance": "适中看操作",
+        "axisDuration": 25,
+        "characterIds": [
+          "1208",
+          "1204",
+          "1207"
+        ],
+        "monsterLevel": 100,
+        "memberConfigs": [
+          "0+1",
+          "6+1",
+          "0+1"
+        ],
+        "configVariants": [
+          {
+            "key": "0+1|6+1|0+1",
+            "label": "0+1 · 6+1 · 0+1",
+            "teamDps": 77219.46836,
+            "teamTotal": 1930486.709,
+            "teamConfig": "6+1",
+            "axisDuration": 25,
+            "memberConfigs": [
+              "0+1",
+              "6+1",
+              "0+1"
+            ]
+          }
+        ],
+        "snapshotsFresh": true,
+        "_serverComputed": true,
+        "memberWeaponIds": [
+          "21030036",
+          "21030015",
+          "21010036"
+        ]
+      },
+      "file": "MC-AAG7TK.json"
+    },
+    {
+      "code": "MC-QFT4PS",
+      "title": "嘉露离循环",
+      "updatedAt": "2026-10-24T07:55:28.058+00:00",
+      "summary": {
+        "teamDps": 80272.02799999999,
+        "axisKind": "loop",
+        "entryType": "表级14词条",
+        "teamTotal": 2006800.7,
+        "difficulty": "椰果轴",
+        "monsterRes": 20,
+        "teamConfig": "0+1",
+        "memberNames": [
+          "嘉贝莉娜",
+          "长离",
+          "露帕"
+        ],
+        "performance": "坐牢打桩",
+        "axisDuration": 25,
+        "characterIds": [
+          "1208",
+          "1205",
+          "1207"
+        ],
+        "monsterLevel": 100,
+        "memberConfigs": [
+          "0+1",
+          "0+1",
+          "0+1"
+        ],
+        "configVariants": [
+          {
+            "key": "0+1|0+1|0+1",
+            "label": "0+1 · 0+1 · 0+1",
+            "teamDps": 80272.02799999999,
+            "teamTotal": 2006800.7,
+            "teamConfig": "0+1",
+            "axisDuration": 25,
+            "memberConfigs": [
+              "0+1",
+              "0+1",
+              "0+1"
+            ]
+          }
+        ],
+        "snapshotsFresh": true,
+        "_serverComputed": true,
+        "memberWeaponIds": [
+          "21030036",
+          "21020016",
+          "21010036"
+        ]
+      },
+      "file": "MC-QFT4PS.json"
+    },
+    {
+      "code": "MC-KGHNE7",
+      "title": "清达莫全局7z+两轮3z循环轴",
+      "updatedAt": "2026-10-03T01:10:19.762+00:00",
+      "summary": {
+        "teamDps": 571288.5670833333,
+        "axisKind": "global",
+        "entryType": "表级14词条",
+        "teamTotal": 68554628.05,
+        "difficulty": "进阶适中",
+        "monsterRes": 20,
+        "teamConfig": "6+5",
+        "memberNames": [
+          "清宵",
+          "达妮娅",
+          "莫宁"
+        ],
+        "performance": "较挑环境",
+        "axisDuration": 120,
+        "characterIds": [
+          "1413",
+          "1211",
+          "1209"
+        ],
+        "monsterLevel": 100,
+        "memberConfigs": [
+          "6+5",
+          "6+5",
+          "6+5"
+        ],
+        "configVariants": [
+          {
+            "key": "6+5|6+5|6+5",
+            "label": "6+5 · 6+5 · 6+5",
+            "teamDps": 571288.5670833333,
+            "teamTotal": 68554628.05,
+            "teamConfig": "6+5",
+            "axisDuration": 120,
+            "memberConfigs": [
+              "6+5",
+              "6+5",
+              "6+5"
+            ]
+          }
+        ],
+        "snapshotsFresh": true,
+        "_serverComputed": true,
+        "memberWeaponIds": [
+          "21020106",
+          "21050076",
+          "21010066"
+        ]
+      },
+      "file": "MC-KGHNE7.json"
+    },
+    {
+      "code": "MC-NT36XN",
+      "title": "满配爱达千上限三光翼",
+      "updatedAt": "2026-08-28T14:35:44.275+00:00",
+      "summary": {
+        "teamDps": 559657.3945599999,
+        "axisKind": "loop",
+        "entryType": "表级14词条",
+        "teamTotal": 13991434.863999998,
+        "difficulty": "椰果轴",
+        "monsterRes": 20,
+        "teamConfig": "6+5",
+        "memberNames": [
+          "爱弥斯",
+          "达妮娅",
+          "千咲"
+        ],
+        "performance": "较挑环境",
+        "axisDuration": 25,
+        "characterIds": [
+          "1210",
+          "1211",
+          "1508"
+        ],
+        "monsterLevel": 100,
+        "memberConfigs": [
+          "6+5",
+          "6+5",
+          "6+5"
+        ],
+        "configVariants": [
+          {
+            "key": "6+5|6+5|6+5",
+            "label": "6+5 · 6+5 · 6+5",
+            "teamDps": 559657.3945599999,
+            "teamTotal": 13991434.863999998,
+            "teamConfig": "6+5",
+            "axisDuration": 25,
+            "memberConfigs": [
+              "6+5",
+              "6+5",
+              "6+5"
+            ]
+          }
+        ],
+        "snapshotsFresh": true,
+        "_serverComputed": true,
+        "memberWeaponIds": [
+          "21020076",
+          "21050076",
+          "21010056"
+        ]
+      },
+      "file": "MC-NT36XN.json"
+    },
+    {
+      "code": "MC-SCJ322",
+      "title": "卡夏千全局（效应为估算）",
+      "updatedAt": "2026-10-21T12:06:38.481+00:00",
+      "summary": {
+        "teamDps": 459309.80525,
+        "axisKind": "global",
+        "entryType": "表级14词条",
+        "teamTotal": 55117176.629999995,
+        "difficulty": "进阶适中",
+        "monsterRes": 20,
+        "teamConfig": "6+5",
+        "memberNames": [
+          "卡提希娅",
+          "夏空",
+          "千咲"
+        ],
+        "performance": "较挑环境",
+        "axisDuration": 120,
+        "characterIds": [
+          "1409",
+          "1407",
+          "1508"
+        ],
+        "monsterLevel": 100,
+        "memberConfigs": [
+          "6+5",
+          "6+5",
+          "6+5"
+        ],
+        "configVariants": [
+          {
+            "key": "6+5|6+5|6+5",
+            "label": "6+5 · 6+5 · 6+5",
+            "teamDps": 459309.80525,
+            "teamTotal": 55117176.629999995,
+            "teamConfig": "6+5",
+            "axisDuration": 120,
+            "memberConfigs": [
+              "6+5",
+              "6+5",
+              "6+5"
+            ]
+          }
+        ],
+        "snapshotsFresh": true,
+        "_serverComputed": true,
+        "memberWeaponIds": [
+          "21020056",
+          "21030026",
+          "21010056"
+        ]
+      },
+      "file": "MC-SCJ322.json"
+    },
+    {
+      "code": "MC-BSZSVE",
+      "title": "景月莫顶配全局",
+      "updatedAt": "2026-10-06T13:40:33.636+00:00",
+      "summary": {
+        "teamDps": 496895.39628333336,
+        "axisKind": "global",
+        "entryType": "表级14词条",
+        "teamTotal": 59627447.554000005,
+        "difficulty": "最简单",
+        "monsterRes": 20,
+        "teamConfig": "6+5",
+        "memberNames": [
+          "景燃",
+          "尤诺",
+          "莫宁"
+        ],
+        "performance": "较为通解",
+        "axisDuration": 120,
+        "characterIds": [
+          "1212",
+          "1410",
+          "1209"
+        ],
+        "monsterLevel": 100,
+        "memberConfigs": [
+          "6+5",
+          "6+5",
+          "6+5"
+        ],
+        "configVariants": [
+          {
+            "key": "6+5|6+5|6+5",
+            "label": "6+5 · 6+5 · 6+5",
+            "teamDps": 496895.39628333336,
+            "teamTotal": 59627447.554000005,
+            "teamConfig": "6+5",
+            "axisDuration": 120,
+            "memberConfigs": [
+              "6+5",
+              "6+5",
+              "6+5"
+            ]
+          }
+        ],
+        "snapshotsFresh": true,
+        "_serverComputed": false,
+        "memberWeaponIds": [
+          "21010076",
+          "21040046",
+          "21010066"
+        ]
+      },
+      "file": "MC-BSZSVE.json"
+    },
+    {
+      "code": "MC-CM6J6K",
+      "title": "弗仇莫",
+      "updatedAt": "2026-10-23T08:24:40.879+00:00",
+      "summary": {
+        "teamDps": 90162.50719607844,
+        "axisKind": "global",
+        "entryType": "其他表级词条",
+        "teamTotal": 9196575.734000001,
+        "difficulty": "进阶适中",
+        "monsterRes": 20,
+        "teamConfig": "2+1",
+        "memberNames": [
+          "弗洛洛",
+          "仇远",
+          "莫宁"
+        ],
+        "performance": "适中看操作",
+        "axisDuration": 102,
+        "characterIds": [
+          "1608",
+          "1411",
+          "1209"
+        ],
+        "monsterLevel": 100,
+        "memberConfigs": [
+          "2+1",
+          "0+1",
+          "1+5"
+        ],
+        "configVariants": [
+          {
+            "key": "2+1|0+1|1+5",
+            "label": "2+1 · 0+1 · 1+5",
+            "teamDps": 90162.50719607844,
+            "teamTotal": 9196575.734000001,
+            "teamConfig": "2+1",
+            "axisDuration": 102,
+            "memberConfigs": [
+              "2+1",
+              "0+1",
+              "1+5"
+            ]
+          }
+        ],
+        "snapshotsFresh": true,
+        "_serverComputed": true,
+        "memberWeaponIds": [
+          "21050066",
+          "21020066",
+          "21010024"
+        ]
+      },
+      "file": "MC-CM6J6K.json"
+    },
+    {
+      "code": "MC-T6E4P9",
+      "title": "西仇守10爆破1链刃全局",
+      "updatedAt": "2026-10-18T17:53:49.503+00:00",
+      "summary": {
+        "teamDps": 452297.7209333333,
+        "axisKind": "global",
+        "entryType": "表级14词条",
+        "teamTotal": 54275726.511999995,
+        "difficulty": "吃手法",
+        "monsterRes": 20,
+        "teamConfig": "6+5",
+        "memberNames": [
+          "西格莉卡",
+          "仇远",
+          "守岸人"
+        ],
+        "performance": "适中看操作",
+        "axisDuration": 120,
+        "characterIds": [
+          "1412",
+          "1411",
+          "1505"
+        ],
+        "monsterLevel": 100,
+        "memberConfigs": [
+          "6+5",
+          "6+5",
+          "6+5"
+        ],
+        "configVariants": [
+          {
+            "key": "6+5|6+5|6+5",
+            "label": "6+5 · 6+5 · 6+5",
+            "teamDps": 452297.7209333333,
+            "teamTotal": 54275726.511999995,
+            "teamConfig": "6+5",
+            "axisDuration": 120,
+            "memberConfigs": [
+              "6+5",
+              "6+5",
+              "6+5"
+            ]
+          }
+        ],
+        "snapshotsFresh": true,
+        "_serverComputed": true,
+        "memberWeaponIds": [
+          "21040066",
+          "21020066",
+          "21050036"
+        ]
+      },
+      "file": "MC-T6E4P9.json"
+    }
+  ]
+}

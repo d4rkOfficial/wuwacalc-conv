@@ -1,4 +1,7 @@
 .wrangler
 .scratch
+tmp/
 test*
 *test.ts
+!src/**/*_test.ts
+!engines/**/*_test.ts

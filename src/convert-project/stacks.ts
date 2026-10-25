@@ -67,7 +67,13 @@ export const cumulativeAt = (
 ): number => {
     if (layer < Math.trunc(Number(effect.minStacks) || 0)) return 0
     if (effect.valueMode === "fixed") return Number(effect.value) || 0
+    // `maxStacks` 是效果上限：轴上可能出现更大的层数（例如心识 25 层），
+    // 但「万物和鸣」这类效果最多 15 层，25 层时不能算成 25×3%。
+    const maxStacks = Number(effect.maxStacks)
+    const capped = Number.isFinite(maxStacks) && maxStacks > 0
+        ? Math.min(layer, maxStacks)
+        : layer
     let total = 0
-    for (let n = 1; n <= layer; n++) total += perStackAt(effect.segments, n)
+    for (let n = 1; n <= capped; n++) total += perStackAt(effect.segments, n)
     return total
 }

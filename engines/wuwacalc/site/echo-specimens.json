@@ -1,0 +1,2528 @@
+{
+  "version": 1,
+  "updated": "2026-09-29",
+  "source": "nanoka.cc 3.7.3",
+  "note": "main-echo whitelist",
+  "specimens": [
+    {
+      "id": "6000045",
+      "name": "哀声鸷",
+      "setIds": [
+        "5"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为哀声鸷发动二连爪击，分别造成{0}、{1}衍射伤害。\n幻形后，自身衍射伤害加成提升{2}，共鸣解放伤害加成提升{3}，持续{4}秒。\n技能冷却：{5}秒",
+      "skillResolved": "使用声骸技能，幻形为哀声鸷发动二连爪击，分别造成157.44%、236.16%衍射伤害。\n幻形后，自身衍射伤害加成提升12.00%，共鸣解放伤害加成提升12.00%，持续15秒。\n技能冷却：20秒",
+      "skillSimple": "幻形为哀声鸷，连续攻击敌人造成衍射伤害，提高自身的衍射和共鸣解放伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 393.6,
+          "element": "衍射",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 157.44,
+              "count": 1
+            },
+            {
+              "rate": 236.16,
+              "count": 1
+            }
+          ],
+          "energyRegen": 6.15
+        },
+        {
+          "kind": "panelAttr",
+          "element": "衍射",
+          "value": 12,
+          "label": "自身衍射伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣解放",
+          "value": 12,
+          "label": "，共鸣解放伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterGoods/T_IconMonsterGoods_997_UI.T_IconMonsterGoods_997_UI"
+    },
+    {
+      "id": "6000043",
+      "name": "飞廉之猩",
+      "setIds": [
+        "4"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为飞廉之猩进行踢击。如果踢击命中则会接续一记追击，踢击造成{0}气动伤害，追击造成{1}气动伤害。\n追击命中后，自身气动伤害加成提升{2}，重击伤害加成提升{3}，持续{4}秒。\n技能冷却：{5}秒",
+      "skillResolved": "使用声骸技能，幻形为飞廉之猩进行踢击。如果踢击命中则会接续一记追击，踢击造成231.84%气动伤害，追击造成283.36%气动伤害。\n追击命中后，自身气动伤害加成提升12.00%，重击伤害加成提升12.00%，持续15秒。\n技能冷却：20秒",
+      "skillSimple": "幻形为飞廉之猩，连续攻击敌人造成气动伤害，提高自身的气动和重击伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 515.2,
+          "element": "气动",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 231.84,
+              "count": 1
+            },
+            {
+              "rate": 283.36,
+              "count": 1
+            }
+          ],
+          "energyRegen": 8.04
+        },
+        {
+          "kind": "panelAttr",
+          "element": "气动",
+          "value": 12,
+          "label": "自身气动伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "重击",
+          "value": 12,
+          "label": "，重击伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterGoods/T_IconMonsterGoods_996_UI.T_IconMonsterGoods_996_UI"
+    },
+    {
+      "id": "6000200",
+      "name": "共鸣回响·达妮娅",
+      "setIds": [
+        "28"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤【骗术师】，对敌人造成{0}的热熔伤害。\n在此后{1}秒内，若自身施放延奏技能，使下一个变奏技能登场的角色热熔伤害加成提升{2}，持续{3}秒。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，召唤【骗术师】，对敌人造成273.60%的热熔伤害。\n在此后15秒内，若自身施放延奏技能，使下一个变奏技能登场的角色热熔伤害加成提升12.00%，持续15秒。\n技能冷却：20秒",
+      "skillSimple": "召唤【骗术师】，对敌人造成热熔伤害，并使下一个变奏技能登场的角色热熔伤害提升。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.6,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 3.8
+        },
+        {
+          "kind": "teamBuff",
+          "category": "elementBonus",
+          "name": "下一个变奏登场角色伤害提升",
+          "value": 12,
+          "element": "热熔",
+          "label": "下一个变奏技能登场的角色热熔伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34028_1_UI.T_IconMonsterHead_34028_1_UI"
+    },
+    {
+      "id": "6000116",
+      "name": "共鸣回响·芬莱克",
+      "setIds": [
+        "19",
+        "21"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤【教律龙爪】，对周围敌人造成{0}的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升{1}，重击伤害加成提升{2}。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，召唤【教律龙爪】，对周围敌人造成273.60%的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升12.00%，重击伤害加成提升12.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤【教律龙爪】，对周围敌人造成气动伤害。\n在首位装配时，提高自身气动和重击伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.6,
+          "element": "气动",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 3.8
+        },
+        {
+          "kind": "panelAttr",
+          "element": "气动",
+          "value": 12,
+          "label": "自身气动伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "重击",
+          "value": 12,
+          "label": "，重击伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34015_2_UI.T_IconMonsterHead_34015_2_UI"
+    },
+    {
+      "id": "6000106",
+      "name": "共鸣回响·芙露德莉斯",
+      "setIds": [
+        "16",
+        "17"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤【破空幻刃】，攻击目标，造成八段{0}和一段{1}的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升{2}，当装配角色为漂泊者·气动或卡提希娅时，自身气动伤害加成额外提升{3}。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，召唤【破空幻刃】，攻击目标，造成八段27.36%和一段136.80%的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升10.00%，当装配角色为漂泊者·气动或卡提希娅时，自身气动伤害加成额外提升10.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤【破空幻刃】，对敌人造成气动伤害。在首位装配时提高自身的气动伤害，漂泊者·气动和卡提希娅在首位装配时气动伤害加成额外提高。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 355.68,
+          "element": "气动",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 27.36,
+              "count": 8
+            },
+            {
+              "rate": 136.8,
+              "count": 1
+            }
+          ],
+          "energyRegen": 2.28
+        },
+        {
+          "kind": "panelAttr",
+          "element": "气动",
+          "value": 10,
+          "label": "自身气动伤害加成提升10.00%"
+        },
+        {
+          "kind": "panelAttr",
+          "element": "气动",
+          "value": 10,
+          "label": "装配角色为漂泊者·气动或卡提希娅时额外提升10.00%",
+          "onlyCharacterIds": [
+            "1409",
+            "1408",
+            "1406"
+          ]
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34012_1_UI.T_IconMonsterHead_34012_1_UI"
+    },
+    {
+      "id": "6000201",
+      "name": "共鸣回响·梦魇亚当·重锤",
+      "setIds": [
+        "32"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，对范围内敌人造成总共十六段{2}的物理伤害。\n在首位装配该声骸技能时，若装配角色为露西或丽贝卡，则自身暴击提升{4}，且声骸技能也将根据其装配角色替换为对应的特殊效果。\n若装配角色为露西，则声骸技能替换为：\n·短按声骸技能，对周围敌人造成{0}的衍射伤害。\n·长按声骸技能，对周围敌人造成{0}的衍射伤害，并进入特殊的移动状态，持续期间提高露西的移动速度并减缓周围敌人的时间流速。\n若装配角色为丽贝卡，则声骸技能替换为：\n·使用声骸技能，发射导弹，对敌人造成十六段{1}的导电伤害。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，对范围内敌人造成总共十六段10.26%的物理伤害。\n在首位装配该声骸技能时，若装配角色为露西或丽贝卡，则自身暴击提升15%，且声骸技能也将根据其装配角色替换为对应的特殊效果。\n若装配角色为露西，则声骸技能替换为：\n·短按声骸技能，对周围敌人造成273.60%的衍射伤害。\n·长按声骸技能，对周围敌人造成273.60%的衍射伤害，并进入特殊的移动状态，持续期间提高露西的移动速度并减缓周围敌人的时间流速。\n若装配角色为丽贝卡，则声骸技能替换为：\n·使用声骸技能，发射导弹，对敌人造成十六段17.10%的导电伤害。\n技能冷却：20秒",
+      "skillSimple": "使用声骸技能，对敌人造成物理伤害。\n露西或丽贝卡装配该声骸技能时，提高自身暴击，且声骸技能将具有不同的特殊效果。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 164.16,
+          "element": "",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 10.26,
+              "count": 16
+            }
+          ],
+          "energyRegen": 0.14,
+          "note": "基础（非露西/丽贝卡）"
+        },
+        {
+          "kind": "panel",
+          "stat": "critRate",
+          "value": 15,
+          "onlyCharacterIds": [
+            "1511",
+            "1308"
+          ],
+          "label": "露西/丽贝卡装配时暴击+15%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34029_1_UI.T_IconMonsterHead_34029_1_UI"
+    },
+    {
+      "id": "6000167",
+      "name": "共鸣回响·鸣式·利维亚坦",
+      "setIds": [
+        "22",
+        "23"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤【坍缩视界】，对周围敌人造成两段{0}的湮灭伤害，并获得坍缩核心，持续{1}秒。\n坍缩核心存在期间，队伍中登场角色造成伤害时将额外附加一段{2}的湮灭伤害，该效果可触发{3}次，每{4}秒至多触发一次，若敌人处于受「虚湮效应」影响状态时，该效果造成的伤害提升{5}。\n在首位装配该声骸技能时，自身湮灭伤害加成提升{6}，共鸣解放伤害加成提升{7}。\n技能冷却：{8}秒",
+      "skillResolved": "使用声骸技能，召唤【坍缩视界】，对周围敌人造成两段131.04%的湮灭伤害，并获得坍缩核心，持续15秒。\n坍缩核心存在期间，队伍中登场角色造成伤害时将额外附加一段24.57%的湮灭伤害，该效果可触发8次，每0.5秒至多触发一次，若敌人处于受「虚湮效应」影响状态时，该效果造成的伤害提升100%。\n在首位装配该声骸技能时，自身湮灭伤害加成提升12.00%，共鸣解放伤害加成提升12.00%。\n技能冷却：25秒",
+      "skillSimple": "召唤【坍缩视界】，对周围敌人造成湮灭伤害，并使队伍中的角色攻击附加湮灭伤害。\n在首位装配时，提高自身湮灭和共鸣解放伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 458.64,
+          "element": "湮灭",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 131.04,
+              "count": 2
+            },
+            {
+              "rate": 24.57,
+              "count": 8
+            }
+          ],
+          "energyRegen": 0.91
+        },
+        {
+          "kind": "panelAttr",
+          "element": "湮灭",
+          "value": 12,
+          "label": "自身湮灭伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣解放",
+          "value": 12,
+          "label": "，共鸣解放伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34020_1_UI.T_IconMonsterHead_34020_1_UI"
+    },
+    {
+      "id": "6000199",
+      "name": "共鸣回响·鸣式·虚造神型",
+      "setIds": [
+        "30"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤阿列夫一造物，对敌人造成五段{0}和一段{1}的冷凝伤害。\n在首位装配该声骸技能时，自身冷凝伤害加成提升{2}，共鸣解放伤害加成提升{3}。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，召唤阿列夫一造物，对敌人造成五段21.88%和一段164.16%的冷凝伤害。\n在首位装配该声骸技能时，自身冷凝伤害加成提升12.00%，共鸣解放伤害加成提升12.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤阿列夫一造物，造成冷凝伤害。\n在首位装配该声骸技能时，提高自身冷凝和共鸣解放伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.56,
+          "element": "冷凝",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 21.88,
+              "count": 5
+            },
+            {
+              "rate": 164.16,
+              "count": 1
+            }
+          ],
+          "energyRegen": 1.48
+        },
+        {
+          "kind": "panelAttr",
+          "element": "冷凝",
+          "value": 12,
+          "label": "自身冷凝伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣解放",
+          "value": 12,
+          "label": "，共鸣解放伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34027_UI.T_IconMonsterHead_34027_UI"
+    },
+    {
+      "id": "6000189",
+      "name": "海维夏",
+      "setIds": [
+        "24",
+        "26"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤海维夏，在空中发射激光对敌人造成十段{0}的衍射伤害。\n在此后{1}秒内，若自身施放延奏技能，使下一个变奏技能登场的角色全属性伤害加成提升{2}，持续{3}秒。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，召唤海维夏，在空中发射激光对敌人造成十段27.36%的衍射伤害。\n在此后15秒内，若自身施放延奏技能，使下一个变奏技能登场的角色全属性伤害加成提升10.00%，持续15秒。\n技能冷却：20秒",
+      "skillSimple": "召唤海维夏，对敌人造成衍射伤害，并使下一个变奏技能登场的角色全属性伤害提升。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.6,
+          "element": "衍射",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 27.36,
+              "count": 10
+            }
+          ],
+          "energyRegen": 0.03
+        },
+        {
+          "kind": "teamBuff",
+          "category": "generalBonus",
+          "name": "下一个变奏登场角色全属性伤害提升",
+          "value": 10,
+          "label": "下一个变奏技能登场的角色全属性伤害加成提升10.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34021_UI.T_IconMonsterHead_34021_UI"
+    },
+    {
+      "id": "6000160",
+      "name": "海之女",
+      "setIds": [
+        "20"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤【潮涌之漩】，对敌人造成至多十段{0}的气动伤害和一段{1}的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升{2}，共鸣解放伤害加成提升{3}。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，召唤【潮涌之漩】，对敌人造成至多十段13.68%的气动伤害和一段164.16%的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升12.00%，共鸣解放伤害加成提升12.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤【潮涌之漩】，对敌人造成气动伤害。\n在首位装配时，提高自身气动和共鸣解放伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 300.96,
+          "element": "气动",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 13.68,
+              "count": 10
+            },
+            {
+              "rate": 164.16,
+              "count": 1
+            }
+          ],
+          "energyRegen": 2.47
+        },
+        {
+          "kind": "panelAttr",
+          "element": "气动",
+          "value": 12,
+          "label": "自身气动伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣解放",
+          "value": 12,
+          "label": "，共鸣解放伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34018_UI.T_IconMonsterHead_34018_UI"
+    },
+    {
+      "id": "6000085",
+      "name": "赫卡忒",
+      "setIds": [
+        "13"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，在周身召唤3个持续旋舞的「冥月侍女」。「冥月侍女」的旋刃将对敌人造成{0}的湮灭伤害。旋刃成功触发逆势回击时，重置「冥月侍女」存在的时间。\n在首位装配该声骸技能时，自身协同攻击造成的伤害提升{1}。\n技能冷却：{2}秒",
+      "skillResolved": "使用声骸技能，在周身召唤3个持续旋舞的「冥月侍女」。「冥月侍女」的旋刃将对敌人造成45.59%的湮灭伤害。旋刃成功触发逆势回击时，重置「冥月侍女」存在的时间。\n在首位装配该声骸技能时，自身协同攻击造成的伤害提升40.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤旋舞的「冥月侍女」，对周围敌人造成湮灭伤害。「冥月侍女」的旋刃成功触发逆势回击时重置其存在时间。在首位装配时提高自身的协同攻击伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 45.59,
+          "element": "湮灭",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 0.63
+        },
+        {
+          "kind": "panelBonus",
+          "category": "typeBonus",
+          "name": "协同攻击造成的伤害提升",
+          "value": 40,
+          "label": "自身协同攻击造成的伤害提升40.00%",
+          "damageType": "协同攻击",
+          "sourceKey": "generalBonus"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34010_1_UI.T_IconMonsterHead_34010_1_UI"
+    },
+    {
+      "id": "6000044",
+      "name": "辉萤军势",
+      "setIds": [
+        "1"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为辉萤军势进行攻击，可连续使用最多3次。\n向前方下砸并引发大范围的冰冻冲击，前两段下砸分别造成{0}和{1}冷凝伤害，最后一段造成{2}冷凝伤害，被冲击命中的敌人会被冰冻。\n 每次冲击使自身冷凝伤害加成提升{3}，共鸣技能伤害加成提升{4}，最多3层，持续{5}秒。\n 技能冷却：{6}秒",
+      "skillResolved": "使用声骸技能，幻形为辉萤军势进行攻击，可连续使用最多3次。\n向前方下砸并引发大范围的冰冻冲击，前两段下砸分别造成200.16%和200.16%冷凝伤害，最后一段造成266.88%冷凝伤害，被冲击命中的敌人会被冰冻。\n 每次冲击使自身冷凝伤害加成提升4.00%，共鸣技能伤害加成提升4.00%，最多3层，持续15秒。\n 技能冷却：20秒",
+      "skillSimple": "幻形为辉萤军势，连续攻击敌人造成冷凝伤害，提高自身的冷凝和共鸣技能伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 667.2,
+          "element": "冷凝",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 200.16,
+              "count": 2
+            },
+            {
+              "rate": 266.88,
+              "count": 1
+            }
+          ],
+          "energyRegen": 10.41
+        },
+        {
+          "kind": "panelAttr",
+          "element": "冷凝",
+          "value": 4,
+          "label": "自身冷凝伤害加成提升4.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣技能",
+          "value": 4,
+          "label": "，共鸣技能伤害加成提升4.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterGoods/T_IconMonsterGoods_994_UI.T_IconMonsterGoods_994_UI"
+    },
+    {
+      "id": "6000059",
+      "name": "角",
+      "setIds": [
+        "5"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤「角」腾跃而起，对目标造成{0}的衍射伤害并降下光雷，光雷对周围目标造成最多五段，每段{1}的衍射伤害。随后「角」向下盘旋攻击周围敌人，连续两次造成{2}的衍射伤害。\n施放声骸技能时，获得「光阴之祝」，持续{3}秒。\n「光阴之祝」持续期间：\n·自身的共鸣技能伤害加成提升{4}；\n·自身的共鸣技能命中目标后，目标每秒受到1次{5}衍射伤害，此次伤害为角色的共鸣技能伤害，持续{6}秒。\n技能冷却：{7}秒",
+      "skillResolved": "使用声骸技能，召唤「角」腾跃而起，对目标造成48.64%的衍射伤害并降下光雷，光雷对周围目标造成最多五段，每段19.46%的衍射伤害。随后「角」向下盘旋攻击周围敌人，连续两次造成48.64%的衍射伤害。\n施放声骸技能时，获得「光阴之祝」，持续15秒。\n「光阴之祝」持续期间：\n·自身的共鸣技能伤害加成提升16.00%；\n·自身的共鸣技能命中目标后，目标每秒受到1次16.00%衍射伤害，此次伤害为角色的共鸣技能伤害，持续15秒。\n技能冷却：20秒",
+      "skillSimple": "短暂地召唤「角」攻击敌人，造成衍射伤害。施放声骸技能后，角色的共鸣技能可令敌人受到持续的衍射伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 243.17,
+          "element": "衍射",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 48.64,
+              "count": 1
+            },
+            {
+              "rate": 19.45,
+              "count": 5
+            },
+            {
+              "rate": 48.64,
+              "count": 2
+            }
+          ],
+          "energyRegen": 1.82
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣技能",
+          "value": 16,
+          "label": "自身的共鸣技能伤害加成提升16.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_327_UI.T_IconMonsterHead_327_UI"
+    },
+    {
+      "id": "6000112",
+      "name": "角鳄",
+      "setIds": [
+        "17",
+        "18",
+        "22"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为角鳄，跃起后下砸造成{0}的气动伤害；一段时间内再次短按声骸技能，可冲向敌人造成{1}的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升{2}，共鸣解放伤害加成提升{3}。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，幻形为角鳄，跃起后下砸造成268.20%的气动伤害；一段时间内再次短按声骸技能，可冲向敌人造成268.20%的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升12.00%，共鸣解放伤害加成提升12.00%。\n技能冷却：15秒",
+      "skillSimple": "幻形为角鳄，跃起后下砸造成气动伤害；一段时间内再次短按声骸技能，可冲向敌人造成气动伤害。\n在首位装配时，提高自身气动和共鸣解放伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 536.4,
+          "element": "气动",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 268.2,
+              "count": 2
+            }
+          ],
+          "energyRegen": 7.44
+        },
+        {
+          "kind": "panelAttr",
+          "element": "气动",
+          "value": 12,
+          "label": "自身气动伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣解放",
+          "value": 12,
+          "label": "，共鸣解放伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_31062_UI.T_IconMonsterHead_31062_UI"
+    },
+    {
+      "id": "6000048",
+      "name": "聚械机偶",
+      "setIds": [
+        "9"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，对周围的敌人造成一次{0}的导电伤害，并召唤聚械废料攻击敌人。废料命中目标时会造成{1}的导电伤害，并在一段时间后爆炸，造成{2}的导电伤害。\n 施放声骸技能后，自身攻击提升{3}，持续{4}秒。废料造成的伤害为角色的延奏技能伤害。 \n 技能冷却：{5}秒",
+      "skillResolved": "使用声骸技能，对周围的敌人造成一次48.64%的导电伤害，并召唤聚械废料攻击敌人。废料命中目标时会造成320.00%的导电伤害，并在一段时间后爆炸，造成160.00%的导电伤害。\n 施放声骸技能后，自身攻击提升12.00%，持续15秒。废料造成的伤害为角色的延奏技能伤害。 \n 技能冷却：20秒",
+      "skillSimple": "对周围造成导电伤害并生成延迟爆炸的废料，提高自身的攻击。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 528.64,
+          "element": "导电",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 48.64,
+              "count": 1
+            },
+            {
+              "rate": 320,
+              "count": 1
+            },
+            {
+              "rate": 160,
+              "count": 1
+            }
+          ],
+          "energyRegen": 2.28
+        },
+        {
+          "kind": "panelBonus",
+          "category": "generalAttack",
+          "name": "攻击提升",
+          "value": 12,
+          "label": "自身攻击提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_993_UI.T_IconMonsterHead_993_UI"
+    },
+    {
+      "id": "390080007",
+      "name": "燎照之骑",
+      "setIds": [
+        "2"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "短按声骸技能，幻形为燎照之骑发动斩击，可连续使用最多3次。分别造成{0}、{1}、{2}的热熔伤害。\n最后一段命中敌人后，自身热熔伤害加成提升{3}，普攻伤害加成提升{4}，持续{5}秒。\n长按声骸技能，持续幻形为燎照之骑并进入骑行状态，结束时对前方的目标造成一次{2}的热熔伤害。\n技能冷却：{6}秒",
+      "skillResolved": "短按声骸技能，幻形为燎照之骑发动斩击，可连续使用最多3次。分别造成242.40%、282.80%、282.80%的热熔伤害。\n最后一段命中敌人后，自身热熔伤害加成提升12.00%，普攻伤害加成提升12.00%，持续15秒。\n长按声骸技能，持续幻形为燎照之骑并进入骑行状态，结束时对前方的目标造成一次282.80%的热熔伤害。\n技能冷却：20秒",
+      "skillSimple": "幻形为燎照之骑，连续攻击敌人造成热熔伤害，提高自身的热熔和普攻伤害。\n长按声骸技能可以持续幻形为骑行状态的燎照之骑。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 242.4,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 3.78,
+          "note": "短按·第一段",
+          "skillKey": "liaozhao_short_1"
+        },
+        {
+          "kind": "skillMult",
+          "value": 282.8,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 4.41,
+          "note": "短按·第二段",
+          "skillKey": "liaozhao_short_2"
+        },
+        {
+          "kind": "skillMult",
+          "value": 282.8,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 4.41,
+          "note": "短按·第三段",
+          "skillKey": "liaozhao_short_3"
+        },
+        {
+          "kind": "skillMult",
+          "value": 282.8,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 4.41,
+          "note": "长按",
+          "skillKey": "liaozhao_long"
+        },
+        {
+          "kind": "panelAttr",
+          "element": "热熔",
+          "value": 12,
+          "label": "自身热熔伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "普攻",
+          "value": 12,
+          "label": "，普攻伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterGoods/T_IconMonsterGoods_321_UI.T_IconMonsterGoods_321_UI"
+    },
+    {
+      "id": "6000190",
+      "name": "炉芯机骸",
+      "setIds": [
+        "25",
+        "28"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为炉芯机骸，跃向空中施放重斩对敌人造成{0}的热熔伤害。\n在首位装配该声骸技能时，自身共鸣效率提升{1}。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，幻形为炉芯机骸，跃向空中施放重斩对敌人造成351.00%的热熔伤害。\n在首位装配该声骸技能时，自身共鸣效率提升10.00%。\n技能冷却：20秒",
+      "skillSimple": "幻形为炉芯机骸，对敌人造成热熔伤害。\n在首位装配时，提高自身共鸣效率。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 351,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 4.87
+        },
+        {
+          "kind": "panel",
+          "stat": "energyRegenPct",
+          "value": 10,
+          "label": "自身共鸣效率提升10.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34022_UI.T_IconMonsterHead_34022_UI"
+    },
+    {
+      "id": "6000082",
+      "name": "罗蕾莱",
+      "setIds": [
+        "12"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为罗蕾莱，对周围敌人造成{0}的湮灭属性伤害。\n在首位装配该声骸技能时，自身湮灭伤害加成提升{1}，普攻伤害加成提升{2}。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，幻形为罗蕾莱，对周围敌人造成405.00%的湮灭属性伤害。\n在首位装配该声骸技能时，自身湮灭伤害加成提升12.00%，普攻伤害加成提升12.00%。\n技能冷却：25秒",
+      "skillSimple": "幻形为罗蕾莱，对周围敌人造成湮灭伤害。在首位装配时提高自身的湮灭和普攻伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 405,
+          "element": "湮灭",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 5.62
+        },
+        {
+          "kind": "panelAttr",
+          "element": "湮灭",
+          "value": 12,
+          "label": "自身湮灭伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "普攻",
+          "value": 12,
+          "label": "，普攻伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_33011_UI.T_IconMonsterHead_33011_UI"
+    },
+    {
+      "id": "6000092",
+      "name": "梦魇·哀声鸷",
+      "setIds": [
+        "11"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤梦魇·哀声鸷，对周围敌人造成{0}的衍射伤害。若敌人处于受「光噪效应」影响状态时，哀声鸷造成的伤害提升{1}。\n在首位装配该声骸技能时，自身衍射伤害加成提升{2}。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，召唤梦魇·哀声鸷，对周围敌人造成273.60%的衍射伤害。若敌人处于受「光噪效应」影响状态时，哀声鸷造成的伤害提升100.00%。\n在首位装配该声骸技能时，自身衍射伤害加成提升12.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤梦魇·哀声鸷，对周围敌人造成衍射伤害，对受「光噪效应」影响的敌人造成更多伤害。 在首位装配时提高自身的衍射伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.6,
+          "element": "衍射",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 3.8
+        },
+        {
+          "kind": "panelAttr",
+          "element": "衍射",
+          "value": 12,
+          "label": "自身衍射伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_YZ_33020_UI.T_IconMonsterHead_YZ_33020_UI"
+    },
+    {
+      "id": "6000086",
+      "name": "梦魇·飞廉之猩",
+      "setIds": [
+        "4"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤梦魇·飞廉之猩攻击敌人，造成{0}的气动伤害；留存的「风旋榕木」将持续攻击周围敌人，造成最多5段，每段{1}的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升{2}，重击伤害加成提升{3}。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，召唤梦魇·飞廉之猩攻击敌人，造成164.16%的气动伤害；留存的「风旋榕木」将持续攻击周围敌人，造成最多5段，每段21.89%的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升12.00%，重击伤害加成提升12.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤梦魇·飞廉之猩，攻击敌人造成气动伤害。留存的「风旋榕木」也将对周围敌人持续造成气动伤害。在首位装配时提高自身的气动和重击伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.56,
+          "element": "气动",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 164.16,
+              "count": 1
+            },
+            {
+              "rate": 21.88,
+              "count": 5
+            }
+          ],
+          "energyRegen": 2.58
+        },
+        {
+          "kind": "panelAttr",
+          "element": "气动",
+          "value": 12,
+          "label": "自身气动伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "重击",
+          "value": 12,
+          "label": "，重击伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_YZ_33014_UI.T_IconMonsterHead_YZ_33014_UI"
+    },
+    {
+      "id": "6000115",
+      "name": "梦魇·赫卡忒",
+      "setIds": [
+        "19"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为梦魇·赫卡忒，向上跃起后下砸造成三段每段{0}的湮灭伤害。\n在首位装配该声骸技能时，自身湮灭伤害加成提升{1}，声骸技能伤害加成提升{2}。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，幻形为梦魇·赫卡忒，向上跃起后下砸造成三段每段152.39%的湮灭伤害。\n在首位装配该声骸技能时，自身湮灭伤害加成提升12.00%，声骸技能伤害加成提升20.00%。\n技能冷却：25秒",
+      "skillSimple": "幻形为梦魇·赫卡忒，向上跃起后下砸造成三段湮灭伤害。\n在首位装配时，提高自身湮灭和声骸技能伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 457.14,
+          "element": "湮灭",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 152.38,
+              "count": 3
+            }
+          ],
+          "energyRegen": 1.05
+        },
+        {
+          "kind": "panelAttr",
+          "element": "湮灭",
+          "value": 12,
+          "label": "自身湮灭伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "声骸",
+          "value": 20,
+          "label": "，声骸技能伤害加成提升20.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34016_UI.T_IconMonsterHead_34016_UI"
+    },
+    {
+      "id": "6000105",
+      "name": "梦魇·辉萤军势",
+      "setIds": [
+        "10",
+        "13"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤梦魇·辉萤军势，对周围敌人造成{0}的冷凝伤害。\n在首位装配该声骸技能时，自身冷凝伤害加成提升{1}，协同攻击造成的伤害提升{2}。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，召唤梦魇·辉萤军势，对周围敌人造成273.60%的冷凝伤害。\n在首位装配该声骸技能时，自身冷凝伤害加成提升12.00%，协同攻击造成的伤害提升30.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤梦魇·辉萤军势，对周围敌人造成冷凝伤害。 在首位装配时提高自身的冷凝伤害和协同攻击造成的伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.6,
+          "element": "冷凝",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 3.8
+        },
+        {
+          "kind": "panelAttr",
+          "element": "冷凝",
+          "value": 12,
+          "label": "自身冷凝伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34013_UI.T_IconMonsterHead_34013_UI"
+    },
+    {
+      "id": "6000113",
+      "name": "梦魇·凯尔匹",
+      "setIds": [
+        "16",
+        "17"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为梦魇·凯尔匹，对周围敌人造成{0}的冷凝伤害。\n在首位装配该声骸技能时，自身冷凝伤害加成提升{2}，气动伤害加成提升{3}；使用延奏技能离场时可召唤梦魇·凯尔匹，对敌人造成{1}的气动伤害。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，幻形为梦魇·凯尔匹，对周围敌人造成405.00%的冷凝伤害。\n在首位装配该声骸技能时，自身冷凝伤害加成提升12.00%，气动伤害加成提升12.00%；使用延奏技能离场时可召唤梦魇·凯尔匹，对敌人造成405.00%的气动伤害。\n技能冷却：25秒",
+      "skillSimple": "幻形为梦魇·凯尔匹，对周围敌人造成冷凝伤害。\n在首位装配时，提高自身冷凝和气动伤害；使用延奏技能离场时可召唤梦魇·凯尔匹，对敌人造成气动伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 405,
+          "element": "冷凝",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 2.81
+        },
+        {
+          "kind": "skillMult",
+          "value": 405,
+          "element": "气动",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 2.81,
+          "note": "延奏离场召唤",
+          "skillKey": "outro"
+        },
+        {
+          "kind": "panelAttr",
+          "element": "冷凝",
+          "value": 12,
+          "label": "自身冷凝伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelAttr",
+          "element": "气动",
+          "value": 12,
+          "label": "，气动伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_33021_UI.T_IconMonsterHead_33021_UI"
+    },
+    {
+      "id": "6000091",
+      "name": "梦魇·燎照之骑",
+      "setIds": [
+        "2"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为梦魇·燎照之骑，跃起对前方敌人造成{0}的热熔伤害。\n在首位装配该声骸技能时，自身热熔伤害加成提升{1}，共鸣技能伤害加成提升{2}。\n长按声骸技能，持续幻形为燎照之骑并进入骑行状态，结束时对前方的目标造成一次{3}的热熔伤害。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，幻形为梦魇·燎照之骑，跃起对前方敌人造成405.00%的热熔伤害。\n在首位装配该声骸技能时，自身热熔伤害加成提升12.00%，共鸣技能伤害加成提升12.00%。\n长按声骸技能，持续幻形为燎照之骑并进入骑行状态，结束时对前方的目标造成一次283.50%的热熔伤害。\n技能冷却：25秒",
+      "skillSimple": "幻形为梦魇·燎照之骑，对前方敌人造成热熔伤害，在首位装配时提高自身的热熔和共鸣技能伤害。\n长按声骸技能可以持续幻形为骑行状态的梦魇·燎照之骑。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 405,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 5.62,
+          "note": "短按",
+          "skillKey": "mengyan_liaozhao_short"
+        },
+        {
+          "kind": "skillMult",
+          "value": 283.5,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 3.93,
+          "note": "长按",
+          "skillKey": "mengyan_liaozhao_long"
+        },
+        {
+          "kind": "panelAttr",
+          "element": "热熔",
+          "value": 12,
+          "label": "自身热熔伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣技能",
+          "value": 12,
+          "label": "，共鸣技能伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_YZ_33019_UI.T_IconMonsterHead_YZ_33019_UI"
+    },
+    {
+      "id": "6000089",
+      "name": "梦魇·朔雷之鳞",
+      "setIds": [
+        "3",
+        "13"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为梦魇·朔雷之鳞，对周围敌人造成{0}的导电伤害。\n在首位装配该声骸技能时，自身导电伤害加成提升{1}，共鸣技能伤害加成提升{2}。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，幻形为梦魇·朔雷之鳞，对周围敌人造成405.00%的导电伤害。\n在首位装配该声骸技能时，自身导电伤害加成提升12.00%，共鸣技能伤害加成提升12.00%。\n技能冷却：25秒",
+      "skillSimple": "幻形为梦魇·朔雷之鳞，对周围敌人造成导电伤害，在首位装配时提高自身的导电和共鸣技能伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 405,
+          "element": "导电",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 5.62
+        },
+        {
+          "kind": "panelAttr",
+          "element": "导电",
+          "value": 12,
+          "label": "自身导电伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣技能",
+          "value": 12,
+          "label": "，共鸣技能伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_YZ_33017_UI.T_IconMonsterHead_YZ_33017_UI"
+    },
+    {
+      "id": "6000087",
+      "name": "梦魇·无常凶鹭",
+      "setIds": [
+        "12"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为梦魇·无常凶鹭，对周围敌人造成最多10段，每段{0}的湮灭伤害。\n在首位装配该声骸技能时，自身湮灭伤害加成提升{1}，重击伤害加成提升{2}。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，幻形为梦魇·无常凶鹭，对周围敌人造成最多10段，每段40.50%的湮灭伤害。\n在首位装配该声骸技能时，自身湮灭伤害加成提升12.00%，重击伤害加成提升12.00%。\n技能冷却：25秒",
+      "skillSimple": "幻形为梦魇·无常凶鹭，对周围敌人造成多段湮灭伤害，在首位装配时提高自身的湮灭和重击伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 405,
+          "element": "湮灭",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 40.5,
+              "count": 10
+            }
+          ],
+          "energyRegen": 0.56
+        },
+        {
+          "kind": "panelAttr",
+          "element": "湮灭",
+          "value": 12,
+          "label": "自身湮灭伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "重击",
+          "value": 12,
+          "label": "，重击伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_YZ_33015_UI.T_IconMonsterHead_YZ_33015_UI"
+    },
+    {
+      "id": "6000090",
+      "name": "梦魇·无冠者",
+      "setIds": [
+        "6"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为梦魇·无冠者，对前方敌人造成{0}的湮灭伤害。\n在首位装配该声骸技能时，自身湮灭伤害加成提升{1}，普攻伤害加成提升{2}。\n初始拥有{3}次可使用次数，每{4}秒可使用次数增加1次，可使用次数上限{5}次。梦魇·无冠者命中目标后，该声骸技能造成的伤害提升{6}，持续{7}秒，不可叠加。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，幻形为梦魇·无冠者，对前方敌人造成264.60%的湮灭伤害。\n在首位装配该声骸技能时，自身湮灭伤害加成提升12.00%，普攻伤害加成提升12.00%。\n初始拥有3次可使用次数，每12秒可使用次数增加1次，可使用次数上限3次。梦魇·无冠者命中目标后，该声骸技能造成的伤害提升20.00%，持续2秒，不可叠加。\n技能冷却：12秒",
+      "skillSimple": "幻形为梦魇·无冠者，对前方敌人造成湮灭伤害，在首位装配时提高自身的湮灭和普攻伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 264.6,
+          "element": "湮灭",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 3.67
+        },
+        {
+          "kind": "panelAttr",
+          "element": "湮灭",
+          "value": 12,
+          "label": "自身湮灭伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "普攻",
+          "value": 12,
+          "label": "，普攻伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_YZ_33018_UI.T_IconMonsterHead_YZ_33018_UI"
+    },
+    {
+      "id": "6000088",
+      "name": "梦魇·云闪之鳞",
+      "setIds": [
+        "3"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为梦魇·云闪之鳞，对前方敌人造成{0}的导电伤害。\n在首位装配该声骸技能时，自身导电伤害加成提升{1}，共鸣解放伤害加成提升{2}。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，幻形为梦魇·云闪之鳞，对前方敌人造成405.00%的导电伤害。\n在首位装配该声骸技能时，自身导电伤害加成提升12.00%，共鸣解放伤害加成提升12.00%。\n技能冷却：25秒",
+      "skillSimple": "幻形为梦魇·云闪之鳞，对前方敌人造成导电伤害，在首位装配时提高自身的导电和共鸣解放伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 405,
+          "element": "导电",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 5.62
+        },
+        {
+          "kind": "panelAttr",
+          "element": "导电",
+          "value": 12,
+          "label": "自身导电伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣解放",
+          "value": 12,
+          "label": "，共鸣解放伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_YZ_33016_UI.T_IconMonsterHead_YZ_33016_UI"
+    },
+    {
+      "id": "6000198",
+      "name": "迷胧幻蛾",
+      "setIds": [
+        "31"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "短按声骸技能，幻形为迷胧幻蛾，对周围敌人造成{0}的衍射伤害。\n长按声骸技能，持续攻击敌人造成至多十二段{1}的衍射伤害。\n使用该声骸技能后{2}秒内，若自身施放延奏技能，使下一个变奏技能登场的角色攻击提升{3}，持续{4}秒。\n技能冷却：{5}秒",
+      "skillResolved": "短按声骸技能，幻形为迷胧幻蛾，对周围敌人造成405.00%的衍射伤害。\n长按声骸技能，持续攻击敌人造成至多十二段49.33%的衍射伤害。\n使用该声骸技能后15秒内，若自身施放延奏技能，使下一个变奏技能登场的角色攻击提升12.00%，持续15秒。\n技能冷却：25秒",
+      "skillSimple": "短按声骸技能，幻形为迷胧幻蛾，造成衍射伤害。\n长按声骸技能，持续攻击敌人造成衍射伤害。\n使用该声骸技能后，下一个变奏技能登场的角色攻击提升。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 405,
+          "element": "衍射",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 5.62,
+          "note": "短按",
+          "skillKey": "milong_short"
+        },
+        {
+          "kind": "skillMult",
+          "value": 591.96,
+          "element": "衍射",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 49.33,
+              "count": 12
+            }
+          ],
+          "energyRegen": 0.68,
+          "note": "长按",
+          "skillKey": "milong_long"
+        },
+        {
+          "kind": "teamBuff",
+          "category": "generalAttack",
+          "name": "下一个变奏登场角色攻击提升",
+          "value": 12,
+          "label": "下一个变奏技能登场的角色攻击提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_32066_UI.T_IconMonsterHead_32066_UI"
+    },
+    {
+      "id": "390080005",
+      "name": "鸣钟之龟",
+      "setIds": [
+        "7",
+        "8"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，发动鸣钟之龟的加护，对附近敌人造成基于自身防御力{0}的冷凝伤害，并获得鸣钟之盾，持续{1}秒。\n鸣钟之盾能为队伍中登场角色提供{2}的减伤和{3}的伤害提升，受到{4}次攻击后消失。\n技能冷却：{5}秒",
+      "skillResolved": "使用声骸技能，发动鸣钟之龟的加护，对附近敌人造成基于自身防御力145.92%的冷凝伤害，并获得鸣钟之盾，持续15秒。\n鸣钟之盾能为队伍中登场角色提供50.00%的减伤和10.00%的伤害提升，受到3次攻击后消失。\n技能冷却：20秒",
+      "skillSimple": "召唤鸣钟之龟的护盾，对附近敌人造成基于角色防御的冷凝伤害，使角色受到的伤害减少，造成的伤害增加。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 145.92,
+          "element": "冷凝",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 4.55,
+          "scaleStat": "def"
+        },
+        {
+          "kind": "teamBuff",
+          "category": "generalBonus",
+          "name": "队伍中角色造成的伤害提升",
+          "value": 10,
+          "label": "队伍中登场角色提供50.00%的减伤和10.00%的伤害提升"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterGoods/T_IconMonsterGoods_992_UI.T_IconMonsterGoods_992_UI"
+    },
+    {
+      "id": "6000218",
+      "name": "千傀重楼",
+      "setIds": [
+        "33"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，对周围敌人造成{1}的湮灭伤害，并召唤四把【千忆剑声】，持续{5}秒。\n【千忆剑声】存在期间，自身为目标附加「虚湮效应」时，将消耗一把【千忆剑声】对目标造成一次{0}的湮灭伤害，每{6}秒可触发一次。\n在首位装配该声骸技能时，自身湮灭伤害加成提升{2}，重击伤害加成提升{3}。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，对周围敌人造成109.44%的湮灭伤害，并召唤四把【千忆剑声】，持续15秒。\n【千忆剑声】存在期间，自身为目标附加「虚湮效应」时，将消耗一把【千忆剑声】对目标造成一次41.04%的湮灭伤害，每1秒可触发一次。\n在首位装配该声骸技能时，自身湮灭伤害加成提升12.00%，重击伤害加成提升12.00%。\n技能冷却：20秒",
+      "skillSimple": "对周围敌人造成湮灭伤害并召唤【千忆剑声】，自身附加「虚湮效应」时将消耗【千忆剑声】对目标额外造成湮灭伤害。\n在首位装配时，提高自身湮灭和重击伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.6,
+          "element": "湮灭",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 109.44,
+              "count": 1
+            },
+            {
+              "rate": 41.04,
+              "count": 4
+            }
+          ],
+          "energyRegen": 2.09
+        },
+        {
+          "kind": "panelAttr",
+          "element": "湮灭",
+          "value": 12,
+          "label": "自身湮灭伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "重击",
+          "value": 12,
+          "label": "，重击伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34031_UI.T_IconMonsterHead_34031_UI"
+    },
+    {
+      "id": "6000104",
+      "name": "荣光节使",
+      "setIds": [
+        "11",
+        "16",
+        "17"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤荣光节使，向目标跳砸，造成{0}的衍射伤害，并生成额外的4道【凛冽裁决】，每道造成{1}的衍射伤害。\n在首位装配该声骸技能时，自身衍射伤害加成提升{2}，重击伤害加成提升{3}。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，召唤荣光节使，向目标跳砸，造成118.80%的衍射伤害，并生成额外的4道【凛冽裁决】，每道造成59.40%的衍射伤害。\n在首位装配该声骸技能时，自身衍射伤害加成提升12.00%，重击伤害加成提升12.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤荣光节使，对敌人造成衍射伤害。在首位装配时提高自身的衍射伤害和重击伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 356.4,
+          "element": "衍射",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 118.8,
+              "count": 1
+            },
+            {
+              "rate": 59.4,
+              "count": 4
+            }
+          ],
+          "energyRegen": 2.47
+        },
+        {
+          "kind": "panelAttr",
+          "element": "衍射",
+          "value": 12,
+          "label": "自身衍射伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "重击",
+          "value": 12,
+          "label": "，重击伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_32033_UI.T_IconMonsterHead_32033_UI"
+    },
+    {
+      "id": "6000114",
+      "name": "荣耀狮像",
+      "setIds": [
+        "18"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤【荣光之戟】，对周围敌人造成{0}的热熔伤害，一定时间后再造成{1}的热熔伤害。\n在首位装配该声骸技能时，自身热熔伤害加成提升{2}，共鸣解放伤害加成提升{3}。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，召唤【荣光之戟】，对周围敌人造成82.08%的热熔伤害，一定时间后再造成191.52%的热熔伤害。\n在首位装配该声骸技能时，自身热熔伤害加成提升12.00%，共鸣解放伤害加成提升12.00%。\n技能冷却：20秒",
+      "skillSimple": "使用声骸技能，召唤【荣光之戟】，对周围敌人造成热熔伤害。\n在首位装配时，提高自身热熔和共鸣解放伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.6,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 82.08,
+              "count": 1
+            },
+            {
+              "rate": 191.52,
+              "count": 1
+            }
+          ],
+          "energyRegen": 3.8
+        },
+        {
+          "kind": "panelAttr",
+          "element": "热熔",
+          "value": 12,
+          "label": "自身热熔伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣解放",
+          "value": 12,
+          "label": "，共鸣解放伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_33022_UI.T_IconMonsterHead_33022_UI"
+    },
+    {
+      "id": "6000120",
+      "name": "蚀脊龙",
+      "setIds": [
+        "18",
+        "22"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤蚀脊龙，对敌人造成{0}的热熔伤害。\n在首位装配该声骸技能时，自身热熔伤害加成提升{1}，声骸技能伤害加成提升{2}。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，召唤蚀脊龙，对敌人造成273.60%的热熔伤害。\n在首位装配该声骸技能时，自身热熔伤害加成提升12.00%，声骸技能伤害加成提升20.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤蚀脊龙，造成热熔伤害。\n在首位装配时，提高自身热熔和声骸技能伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.6,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 3.8
+        },
+        {
+          "kind": "panelAttr",
+          "element": "热熔",
+          "value": 12,
+          "label": "自身热熔伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "声骸",
+          "value": 20,
+          "label": "，声骸技能伤害加成提升20.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_32044_UI.T_IconMonsterHead_32044_UI"
+    },
+    {
+      "id": "6000179",
+      "name": "双极·星升辉铳",
+      "setIds": [
+        "26",
+        "28"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为双极·星升辉铳，发动两段斩击，每段攻击造成{0}的衍射伤害。\n在首位装配该声骸技能时，自身衍射伤害加成提升{6}，普攻伤害加成提升{7}。\n技能冷却：{11}秒\n自身同时装配双极·渊陨重锋时：\n·使用声骸技能后，声骸技能在双极·星升辉铳、双极·渊陨重锋中交替更变，但视为同名声骸技能，且装配首位声骸获得的伤害加成不变。\n·双极·渊陨重锋的伤害类型将变为衍射伤害。\n·施放普攻时获得{1}层【双极律动】，施放共鸣技能时获得{2}层【双极律动】，可叠加{3}层，持续{4}秒，每层可以使该声骸技能造成的伤害提升{5}，该声骸技能效果结束后清除全部层数。\n·可使用次数上限变为{10}次，初始拥有{8}次可使用次数，每{9}秒可使用次数增加1次。",
+      "skillResolved": "使用声骸技能，幻形为双极·星升辉铳，发动两段斩击，每段攻击造成80.51%的衍射伤害。\n在首位装配该声骸技能时，自身衍射伤害加成提升12.00%，普攻伤害加成提升12.00%。\n技能冷却：8秒\n自身同时装配双极·渊陨重锋时：\n·使用声骸技能后，声骸技能在双极·星升辉铳、双极·渊陨重锋中交替更变，但视为同名声骸技能，且装配首位声骸获得的伤害加成不变。\n·双极·渊陨重锋的伤害类型将变为衍射伤害。\n·施放普攻时获得1层【双极律动】，施放共鸣技能时获得3层【双极律动】，可叠加6层，持续8秒，每层可以使该声骸技能造成的伤害提升10%，该声骸技能效果结束后清除全部层数。\n·可使用次数上限变为2次，初始拥有2次可使用次数，每8秒可使用次数增加1次。",
+      "skillSimple": "幻形为双极·星升辉铳，斩击敌人造成衍射伤害。\n在首位装配该声骸技能时，提高自身衍射和普攻伤害。\n同时装配双极·渊陨重锋时，声骸技能将具有额外的特殊效果。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 161.02,
+          "element": "衍射",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 80.51,
+              "count": 2
+            }
+          ],
+          "energyRegen": 0.55
+        },
+        {
+          "kind": "panelAttr",
+          "element": "衍射",
+          "value": 12,
+          "label": "自身衍射伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "普攻",
+          "value": 12,
+          "label": "，普攻伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_32049_UI.T_IconMonsterHead_32049_UI"
+    },
+    {
+      "id": "6000180",
+      "name": "双极·渊陨重锋",
+      "setIds": [
+        "26",
+        "27",
+        "29"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为双极·渊陨重锋，快速射击敌人，持续5秒，每段攻击造成{0}的导电伤害。\n在首位装配该声骸技能时，自身导电伤害加成提升{6}，普攻伤害加成提升{7}。\n技能冷却：{11}秒\n自身同时装配双极·星升辉铳时：\n·使用声骸技能后，声骸技能在双极·星升辉铳、双极·渊陨重锋中交替更变，但视为同名声骸技能。\n·双极·渊陨重锋的伤害类型将变为衍射伤害，且首位装配该声骸技能时获得的导电伤害加成将变为衍射伤害加成。\n·施放普攻时获得{1}层【双极律动】，施放共鸣技能时获得{2}层【双极律动】，可叠加{3}层，持续{4}秒，每层可以使该声骸技能造成的伤害提升{5}，该声骸技能效果结束后清除全部层数。\n·可使用次数上限变为{10}次，初始拥有{8}次可使用次数，每{9}秒可使用次数增加1次。",
+      "skillResolved": "使用声骸技能，幻形为双极·渊陨重锋，快速射击敌人，持续5秒，每段攻击造成2.01%的导电伤害。\n在首位装配该声骸技能时，自身导电伤害加成提升12.00%，普攻伤害加成提升12.00%。\n技能冷却：8秒\n自身同时装配双极·星升辉铳时：\n·使用声骸技能后，声骸技能在双极·星升辉铳、双极·渊陨重锋中交替更变，但视为同名声骸技能。\n·双极·渊陨重锋的伤害类型将变为衍射伤害，且首位装配该声骸技能时获得的导电伤害加成将变为衍射伤害加成。\n·施放普攻时获得1层【双极律动】，施放共鸣技能时获得3层【双极律动】，可叠加6层，持续8秒，每层可以使该声骸技能造成的伤害提升10%，该声骸技能效果结束后清除全部层数。\n·可使用次数上限变为2次，初始拥有2次可使用次数，每8秒可使用次数增加1次。",
+      "skillSimple": "幻形为双极·渊陨重锋，射击敌人造成导电伤害。\n在首位装配该声骸技能时，提高自身导电和普攻伤害。\n同时装配双极·星升辉铳时，声骸技能将具有额外的特殊效果。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 2.01,
+          "element": "导电",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 0,
+          "note": "持续每段×N按轴手动"
+        },
+        {
+          "kind": "panelAttr",
+          "element": "导电",
+          "value": 12,
+          "label": "自身导电伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "普攻",
+          "value": 12,
+          "label": "，普攻伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_32050_UI.T_IconMonsterHead_32050_UI"
+    },
+    {
+      "id": "6000039",
+      "name": "朔雷之鳞",
+      "setIds": [
+        "3"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为朔雷之鳞，可连续使用最多2次，甩尾召唤出来的雷击每段造成{0}的导电伤害，爪击造成{1}的导电伤害。\n爪击命中后，自身导电伤害加成提升{2}，重击伤害加成提升{3}，持续{4}秒。\n技能冷却：{5}秒",
+      "skillResolved": "使用声骸技能，幻形为朔雷之鳞，可连续使用最多2次，甩尾召唤出来的雷击每段造成102.48%的导电伤害，爪击造成175.68%的导电伤害。\n爪击命中后，自身导电伤害加成提升12.00%，重击伤害加成提升12.00%，持续15秒。\n技能冷却：20秒",
+      "skillSimple": "幻形为朔雷之鳞，连续攻击敌人造成导电伤害，提高自身的导电和重击伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 278.16,
+          "element": "导电",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 102.48,
+              "count": 1
+            },
+            {
+              "rate": 175.68,
+              "count": 1
+            }
+          ],
+          "energyRegen": 4.34
+        },
+        {
+          "kind": "panelAttr",
+          "element": "导电",
+          "value": 12,
+          "label": "自身导电伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "重击",
+          "value": 12,
+          "label": "，重击伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterGoods/T_IconMonsterGoods_221_UI.T_IconMonsterGoods_221_UI"
+    },
+    {
+      "id": "6000084",
+      "name": "叹息古龙",
+      "setIds": [
+        "14"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为叹息古龙，召唤「悲恸领域」，持续5秒，对「悲恸领域」内的敌人周期性造成{0}的热熔伤害。\n在首位装配该声骸技能时，自身获得{1}热熔伤害加成提升，{2}普攻伤害加成提升。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，幻形为叹息古龙，召唤「悲恸领域」，持续5秒，对「悲恸领域」内的敌人周期性造成36.81%的热熔伤害。\n在首位装配该声骸技能时，自身获得12.00%热熔伤害加成提升，12.00%普攻伤害加成提升。\n技能冷却：25秒",
+      "skillSimple": "幻形为叹息古龙召唤「悲恸领域」，对一定范围内的敌人持续造成热熔伤害。在首位装配时提高自身的热熔和普攻伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 36.81,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 0.51
+        },
+        {
+          "kind": "panelType",
+          "damageType": "普攻",
+          "value": 12,
+          "label": "，12.00%普攻伤害加成提升"
+        },
+        {
+          "kind": "panelAttr",
+          "element": "热熔",
+          "value": 12,
+          "label": "自身获得12.00%热熔伤害加成"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_33013_UI.T_IconMonsterHead_33013_UI"
+    },
+    {
+      "id": "6000217",
+      "name": "万囮牢·朽躯",
+      "setIds": [
+        "34",
+        "35"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤万囮牢·朽躯，首次对敌人造成{0}生命上限的热熔伤害，期间多次碾压路径上的敌人，至多{5}次，每次造成{1}生命上限的热熔伤害。\n在首位装配该声骸技能时，自身热熔伤害加成提升{2}，重击伤害加成提升{3}。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，召唤万囮牢·朽躯，首次对敌人造成10.20%生命上限的热熔伤害，期间多次碾压路径上的敌人，至多19次，每次造成0.37%生命上限的热熔伤害。\n在首位装配该声骸技能时，自身热熔伤害加成提升12.00%，重击伤害加成提升12.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤万囮牢·朽躯，对敌人造成热熔伤害。\n在首位装配时，提高自身热熔和重击伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 17.23,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 10.2,
+              "count": 1
+            },
+            {
+              "rate": 0.37,
+              "count": 19
+            }
+          ],
+          "energyRegen": 3.8,
+          "scaleStat": "hp"
+        },
+        {
+          "kind": "panelAttr",
+          "element": "热熔",
+          "value": 12,
+          "label": "自身热熔伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "重击",
+          "value": 12,
+          "label": "，重击伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34030_UI.T_IconMonsterHead_34030_UI"
+    },
+    {
+      "id": "6000121",
+      "name": "伪作的神王",
+      "setIds": [
+        "20"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为伪作的神王，发动旋转突进对敌人造成四段{0}的导电伤害。\n在首位装配该声骸技能时，自身导电伤害加成提升{1}，重击伤害加成提升{2}；使用变奏技能登场时可召唤伪作的神王，对敌人造成{3}的导电伤害。\n初始拥有{4}次可使用次数，每{5}秒可使用次数增加1次，可使用次数上限{6}次。\n技能冷却：{7}秒",
+      "skillResolved": "使用声骸技能，幻形为伪作的神王，发动旋转突进对敌人造成四段55.35%的导电伤害。\n在首位装配该声骸技能时，自身导电伤害加成提升12.00%，重击伤害加成提升12.00%；使用变奏技能登场时可召唤伪作的神王，对敌人造成405.00%的导电伤害。\n初始拥有2次可使用次数，每8秒可使用次数增加1次，可使用次数上限2次。\n技能冷却：8秒",
+      "skillSimple": "幻形为伪作的神王，对周围敌人造成导电伤害。\n在首位装配时，提高自身导电和重击伤害；使用变奏技能登场时可召唤伪作的神王，对敌人造成导电伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 221.4,
+          "element": "导电",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 55.35,
+              "count": 4
+            }
+          ],
+          "energyRegen": 0.76
+        },
+        {
+          "kind": "skillMult",
+          "value": 405,
+          "element": "导电",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 0,
+          "note": "变奏登场召唤",
+          "skillKey": "outro"
+        },
+        {
+          "kind": "panelAttr",
+          "element": "导电",
+          "value": 12,
+          "label": "自身导电伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "重击",
+          "value": 12,
+          "label": "，重击伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34017_UI.T_IconMonsterHead_34017_UI"
+    },
+    {
+      "id": "6000052",
+      "name": "无常凶鹭",
+      "setIds": [
+        "8"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为无常凶鹭，起飞后下砸，造成{0}的湮灭伤害；\n长按声骸技能，持续幻形，起飞后向下倾泻湮灭火炎，每段攻击造成{1}的湮灭伤害。\n幻形后首次命中敌人，回复自身10点共鸣能量；在此后15秒内，若自身施放延奏技能，则可使下一个变奏登场的角色伤害提升12%，持续15秒。\n技能冷却：{2}秒",
+      "skillResolved": "使用声骸技能，幻形为无常凶鹭，起飞后下砸，造成310.56%的湮灭伤害；\n长按声骸技能，持续幻形，起飞后向下倾泻湮灭火炎，每段攻击造成55.73%的湮灭伤害。\n幻形后首次命中敌人，回复自身10点共鸣能量；在此后15秒内，若自身施放延奏技能，则可使下一个变奏登场的角色伤害提升12%，持续15秒。\n技能冷却：20秒",
+      "skillSimple": "幻形为无常凶鹭，起飞后下砸，造成湮灭伤害；长按声骸技能，飞起倾泻火炎造成湮灭伤害。\n攻击命中后回复自身共鸣能量并为下一个变奏登场的角色附加伤害提升效果。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 310.56,
+          "element": "湮灭",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 4.85,
+          "note": "短按",
+          "skillKey": "wuchang_short"
+        },
+        {
+          "kind": "skillMult",
+          "value": 55.72,
+          "element": "湮灭",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 0.87,
+          "note": "长按（每段×N按轴手动）",
+          "skillKey": "wuchang_long"
+        },
+        {
+          "kind": "teamBuff",
+          "category": "generalBonus",
+          "name": "下一个变奏登场角色伤害提升",
+          "value": 12,
+          "label": "下一个变奏登场的角色伤害提升12%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_995_UI.T_IconMonsterHead_995_UI"
+    },
+    {
+      "id": "6000042",
+      "name": "无冠者",
+      "setIds": [
+        "6"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为无冠者，可连续使用最多4次，前2次均造成一段{0}的湮灭伤害，第3次造成两段{1}的湮灭伤害，第4次造成三段{2}的湮灭伤害\n幻形后，自身湮灭伤害加成提升{3}，共鸣技能伤害加成提升{4}，持续{5}秒。\n技能冷却：{6}秒",
+      "skillResolved": "使用声骸技能，幻形为无冠者，可连续使用最多4次，前2次均造成一段134.08%的湮灭伤害，第3次造成两段100.56%的湮灭伤害，第4次造成三段67.04%的湮灭伤害\n幻形后，自身湮灭伤害加成提升12.00%，共鸣技能伤害加成提升12.00%，持续15秒。\n技能冷却：20秒",
+      "skillSimple": "幻形为无冠者，连续攻击敌人造成湮灭伤害，提高自身的湮灭和共鸣技能伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 670.4,
+          "element": "湮灭",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 134.08,
+              "count": 2
+            },
+            {
+              "rate": 100.56,
+              "count": 2
+            },
+            {
+              "rate": 67.04,
+              "count": 3
+            }
+          ],
+          "energyRegen": 4.7
+        },
+        {
+          "kind": "panelAttr",
+          "element": "湮灭",
+          "value": 12,
+          "label": "自身湮灭伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣技能",
+          "value": 12,
+          "label": "，共鸣技能伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterGoods/T_IconMonsterGoods_9991_UI.T_IconMonsterGoods_9991_UI"
+    },
+    {
+      "id": "6000060",
+      "name": "无归的谬误",
+      "setIds": [
+        "7"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤无归的谬误一部分的权能，对周围的敌人造成1次基于自身生命上限{0}的衍射伤害，使自身共鸣效率提升10%，全队角色攻击提升10%，持续20秒。\n长按声骸技能，可在震击结束后，消耗耐力持续进行攻击，每次造成基于生命上限{1}的衍射伤害；结束长按时，触发最后一击，造成基于生命上限{2}的衍射伤害。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，召唤无归的谬误一部分的权能，对周围的敌人造成1次基于自身生命上限15.86%的衍射伤害，使自身共鸣效率提升10%，全队角色攻击提升10%，持续20秒。\n长按声骸技能，可在震击结束后，消耗耐力持续进行攻击，每次造成基于生命上限1.58%的衍射伤害；结束长按时，触发最后一击，造成基于生命上限19.82%的衍射伤害。\n技能冷却：20秒",
+      "skillSimple": "召唤无归的谬误的部分权能，攻击周围的敌人，可提升自身的共鸣效率，提升全队角色的攻击力。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 15.85,
+          "element": "衍射",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 3.04,
+          "note": "短按",
+          "skillKey": "wugui_short",
+          "scaleStat": "hp"
+        },
+        {
+          "kind": "skillMult",
+          "value": 1.58,
+          "element": "衍射",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 0.3,
+          "note": "长按·持续（每次×N按轴手动）",
+          "skillKey": "wugui_long_hit",
+          "scaleStat": "hp"
+        },
+        {
+          "kind": "skillMult",
+          "value": 19.82,
+          "element": "衍射",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 3.8,
+          "note": "长按·最后一击",
+          "skillKey": "wugui_long_final",
+          "scaleStat": "hp"
+        },
+        {
+          "kind": "panel",
+          "stat": "energyRegenPct",
+          "value": 10,
+          "label": "自身共鸣效率提升10%"
+        },
+        {
+          "kind": "teamBuff",
+          "category": "generalAttack",
+          "name": "全队角色攻击提升",
+          "value": 10,
+          "label": "全队角色攻击提升10%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_350_UI.T_IconMonsterHead_350_UI"
+    },
+    {
+      "id": "6000192",
+      "name": "无铭探索者",
+      "setIds": [
+        "29",
+        "31"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤无铭探索者，攻击贯穿路径上的敌人造成{0}的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升{1}，声骸技能伤害加成提升{2}。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，召唤无铭探索者，攻击贯穿路径上的敌人造成273.60%的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升12.00%，声骸技能伤害加成提升20.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤无铭探索者，对敌人造成气动伤害。\n在首位装配该声骸技能时，提高自身气动和声骸技能伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.6,
+          "element": "气动",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 3.8
+        },
+        {
+          "kind": "panelAttr",
+          "element": "气动",
+          "value": 12,
+          "label": "自身气动伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "声骸",
+          "value": 20,
+          "label": "，声骸技能伤害加成提升20.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34026_UI.T_IconMonsterHead_34026_UI"
+    },
+    {
+      "id": "6000053",
+      "name": "无妄者",
+      "setIds": [
+        "6"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为无妄者，连续攻击前方目标6次，前5次每次造成{0}的湮灭伤害，最后一段造成{1}的湮灭伤害。\n漂泊者·湮灭在施放共鸣解放·临渊死寂后{2}秒内，施放该声骸技能造成的伤害提升{3}。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，幻形为无妄者，连续攻击前方目标6次，前5次每次造成54.08%的湮灭伤害，最后一段造成270.40%的湮灭伤害。\n漂泊者·湮灭在施放共鸣解放·临渊死寂后5秒内，施放该声骸技能造成的伤害提升50.00%。\n技能冷却：20秒",
+      "skillSimple": "幻形为无妄者，连续攻击敌人造成湮灭伤害。施放共鸣解放·临渊死寂后的漂泊者·湮灭使用该声骸技能造成的伤害提高。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 540.8,
+          "element": "湮灭",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 54.08,
+              "count": 5
+            },
+            {
+              "rate": 270.4,
+              "count": 1
+            }
+          ],
+          "energyRegen": 5.06
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_998_UI.T_IconMonsterHead_998_UI"
+    },
+    {
+      "id": "6000191",
+      "name": "辛吉勒姆",
+      "setIds": [
+        "27"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤辛吉勒姆，对敌人造成一段{0}和一段{1}的热熔伤害。\n在首位装配该声骸技能时，若装配角色为爱弥斯，则自身共鸣解放伤害加成提升{2}。\n技能冷却：{3}秒",
+      "skillResolved": "使用声骸技能，召唤辛吉勒姆，对敌人造成一段68.40%和一段205.20%的热熔伤害。\n在首位装配该声骸技能时，若装配角色为爱弥斯，则自身共鸣解放伤害加成提升25.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤辛吉勒姆，对敌人造成热熔伤害。\n爱弥斯在首位装配该声骸技能时，提高自身共鸣解放伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.6,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 68.4,
+              "count": 1
+            },
+            {
+              "rate": 205.2,
+              "count": 1
+            }
+          ],
+          "energyRegen": 2.36
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣解放",
+          "value": 25,
+          "label": "自身共鸣解放伤害加成提升25.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34025_0_UI.T_IconMonsterHead_34025_0_UI"
+    },
+    {
+      "id": "6000083",
+      "name": "异构武装",
+      "setIds": [
+        "10"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为异构武装，攻击前方目标，造成{0}的冷凝伤害。装配角色施放共鸣解放时，可持续提升「强袭功率」。\n「强袭功率」升满时，重置声骸技能的冷却时间，可使用声骸技能幻形为异构武装，起飞后向目标俯冲，造成{1}的冷凝伤害，并冻结目标。\n在首位装配该声骸技能时，自身获得{2}冷凝伤害加成提升，{3}共鸣技能伤害加成提升。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，幻形为异构武装，攻击前方目标，造成405.00%的冷凝伤害。装配角色施放共鸣解放时，可持续提升「强袭功率」。\n「强袭功率」升满时，重置声骸技能的冷却时间，可使用声骸技能幻形为异构武装，起飞后向目标俯冲，造成405.00%的冷凝伤害，并冻结目标。\n在首位装配该声骸技能时，自身获得12.00%冷凝伤害加成提升，12.00%共鸣技能伤害加成提升。\n技能冷却：25秒",
+      "skillSimple": "幻形为异构武装，连续攻击前方敌人造成冷凝伤害。装配角色施放共鸣解放可持续提升「强袭功率」。「强袭功率」升满时可幻形为异构武装对敌人俯冲造成冷凝伤害。在首位装配时提高自身的冷凝和共鸣技能伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 405,
+          "element": "冷凝",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 5.62
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣技能",
+          "value": 12,
+          "label": "，12.00%共鸣技能伤害加成提升"
+        },
+        {
+          "kind": "panelAttr",
+          "element": "冷凝",
+          "value": 12,
+          "label": "自身获得12.00%冷凝伤害加成"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_33012_UI.T_IconMonsterHead_33012_UI"
+    },
+    {
+      "id": "390080003",
+      "name": "云闪之鳞",
+      "setIds": [
+        "3"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为云闪之鳞，穿梭攻击，可连续使用最多6次，前5次每次造成{0}导电伤害，终结一击造成{1}导电伤害，落雷造成{2}导电伤害。\n终结一击命中后，自身导电伤害加成提升{3}，共鸣解放伤害加成提升{4}，持续{5}秒。\n技能冷却：{6}秒",
+      "skillResolved": "使用声骸技能，幻形为云闪之鳞，穿梭攻击，可连续使用最多6次，前5次每次造成132.61%导电伤害，终结一击造成189.44%导电伤害，落雷造成31.57%导电伤害。\n终结一击命中后，自身导电伤害加成提升12.00%，共鸣解放伤害加成提升12.00%，持续15秒。\n技能冷却：20秒",
+      "skillSimple": "幻形为云闪之鳞，连续攻击敌人造成导电伤害，提高自身的导电和共鸣解放伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 884,
+          "element": "导电",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "multComponents": [
+            {
+              "rate": 132.6,
+              "count": 5
+            },
+            {
+              "rate": 189.44,
+              "count": 1
+            },
+            {
+              "rate": 31.56,
+              "count": 1
+            }
+          ],
+          "energyRegen": 5.52
+        },
+        {
+          "kind": "panelAttr",
+          "element": "导电",
+          "value": 12,
+          "label": "自身导电伤害加成提升12.00%"
+        },
+        {
+          "kind": "panelType",
+          "damageType": "共鸣解放",
+          "value": 12,
+          "label": "，共鸣解放伤害加成提升12.00%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterGoods/T_IconMonsterGoods_222_UI.T_IconMonsterGoods_222_UI"
+    },
+    {
+      "id": "6000221",
+      "name": "天傀劫煞",
+      "setIds": [
+        "34"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，幻形为天傀劫煞，对敌人造成{0}的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升{1}；为目标附加【集谐·偏移】时，自身气动伤害加成额外提升{2}，持续{3}秒。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，幻形为天傀劫煞，对敌人造成405.00%的气动伤害。\n在首位装配该声骸技能时，自身气动伤害加成提升10.00%；为目标附加【集谐·偏移】时，自身气动伤害加成额外提升10.00%，持续15秒。\n技能冷却：25秒",
+      "skillSimple": "幻形为天傀劫煞，造成气动伤害。\n在首位装配时，提高自身气动伤害；为目标附加【集谐·偏移】时，额外提高自身气动伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 405,
+          "element": "气动",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 5.62
+        },
+        {
+          "kind": "panelAttr",
+          "element": "气动",
+          "value": 10,
+          "label": "首位装配气动伤害加成"
+        },
+        {
+          "kind": "panelBonus",
+          "category": "elementBonus",
+          "name": "天傀劫煞·集谐偏移增伤",
+          "element": "气动",
+          "value": 10,
+          "label": "附加【集谐·偏移】时气动伤害加成额外提升10.00%（条件 Buff，需在个人 Buff 中勾选）"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34032_UI.T_IconMonsterHead_34032_UI"
+    },
+    {
+      "id": "6000216",
+      "name": "封庭械囿",
+      "setIds": [
+        "33",
+        "34",
+        "35"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤封庭械囿，猛击敌人造成{0}的冷凝伤害。\n在首位装配该声骸技能时，自身治疗效果加成提升{2}。\n技能冷却：{1}秒",
+      "skillResolved": "使用声骸技能，召唤封庭械囿，猛击敌人造成237.60%的冷凝伤害。\n在首位装配该声骸技能时，自身治疗效果加成提升10.00%。\n技能冷却：20秒",
+      "skillSimple": "召唤封庭械囿，对敌人造成冷凝伤害。\n在首位装配时，提高自身治疗效果加成。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 237.6,
+          "element": "冷凝",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 3.3
+        },
+        {
+          "kind": "panel",
+          "stat": "displayOnly",
+          "label": "治疗效果加成",
+          "value": 10
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_32068_UI.T_IconMonsterHead_32068_UI"
+    },
+    {
+      "id": "6000195",
+      "name": "格洛犸图",
+      "setIds": [
+        "27",
+        "30"
+      ],
+      "cost": 3,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤格洛犸图，践踏敌人造成{0}的冷凝伤害。\n在此后{1}秒内，若自身施放延奏技能，使下一个变奏技能登场的角色冷凝伤害加成提升{2}，持续{3}秒。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，召唤格洛犸图，践踏敌人造成273.60%的冷凝伤害。\n在此后15秒内，若自身施放延奏技能，使下一个变奏技能登场的角色冷凝伤害加成提升12.00%，持续15秒。\n技能冷却：20秒",
+      "skillSimple": "召唤格洛犸图，践踏敌人造成冷凝伤害，并使下一个变奏技能登场的角色冷凝伤害加成提升。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.6,
+          "element": "冷凝",
+          "damageType": "声骸",
+          "label": "满级{0}",
+          "energyRegen": 3.8
+        },
+        {
+          "kind": "teamBuff",
+          "category": "elementBonus",
+          "name": "下一个变奏登场角色伤害提升",
+          "value": 12,
+          "element": "冷凝",
+          "label": "下一个变奏技能登场的角色冷凝伤害加成提升12.00%"
+        }
+      ]
+    },
+    {
+      "id": "6000224",
+      "name": "绝息魄",
+      "setIds": [
+        "36",
+        "37"
+      ],
+      "cost": 3,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤绝息魄，对敌人造成三段{0}的导电伤害。\n在此后{1}秒内，若自身施放延奏技能，使下一个变奏技能登场的角色导电伤害加成提升{2}，持续{3}秒。\n技能冷却：{4}秒",
+      "skillResolved": "使用声骸技能，召唤绝息魄，对敌人造成三段91.18%的导电伤害。此后15秒内施放延奏，使下一个变奏登场的角色导电伤害加成提升12%，持续15秒。技能冷却：20秒",
+      "skillSimple": "召唤绝息魄造成导电伤害；施放延奏后给下一位变奏登场者导电增伤。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.54,
+          "element": "导电",
+          "damageType": "声骸",
+          "label": "绝息魄三连（91.18%×3）",
+          "energyRegen": 3.78,
+          "multComponents": [
+            {
+              "rate": 91.18,
+              "count": 3
+            }
+          ]
+        },
+        {
+          "kind": "teamBuff",
+          "category": "elementBonus",
+          "name": "下一个变奏登场角色伤害提升",
+          "value": 12,
+          "element": "导电",
+          "label": "下一个变奏技能登场的角色导电伤害加成提升12%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_32071_UI.T_IconMonsterHead_32071_UI"
+    },
+    {
+      "id": "6000225",
+      "name": "共鸣回响·天演溯心",
+      "setIds": [
+        "36",
+        "37"
+      ],
+      "cost": 4,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，对敌人造成四段{0}和一段{1}的导电伤害。\n若装配角色为心，则声骸技能将变为对更大范围内的敌人造成至多五段{2}和一段{3}的导电伤害。\n在首位装配该声骸技能时，自身导电伤害加成提升{4}；自身为目标附加【电磁效应】后，或自身获得同奏、响应同奏时，自身导电伤害加成额外提升{5}，持续{6}秒。\n技能冷却：{7}秒",
+      "skillResolved": "使用声骸技能，对敌人造成四段27.36%和一段164.16%的导电伤害。若装配角色为心，则声骸技能变为对更大范围内的敌人造成至多五段13.68%和一段232.56%的导电伤害。首位装配时导电伤害加成提升10.00%；自身附加电磁效应、获得同奏或响应同奏时额外提升10.00%，持续30秒。技能冷却：20秒。",
+      "skillSimple": "造成导电伤害；心装配时改为专属形态。首位装配导电+10%，触发电磁效应或同奏时再+10%。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.6,
+          "element": "导电",
+          "damageType": "声骸",
+          "label": "通用四段+终结（27.36%×4+164.16%）",
+          "energyRegen": 3.8,
+          "multComponents": [
+            {
+              "rate": 27.36,
+              "count": 4
+            },
+            {
+              "rate": 164.16,
+              "count": 1
+            }
+          ]
+        },
+        {
+          "kind": "panelAttr",
+          "element": "导电",
+          "value": 10,
+          "label": "首位装配时导电伤害加成提升10%"
+        },
+        {
+          "kind": "panelBonus",
+          "category": "elementBonus",
+          "name": "电磁效应/同奏条件导电增伤",
+          "element": "导电",
+          "value": 10,
+          "label": "附加电磁效应/获得同奏/响应同奏时导电额外+10%（条件 Buff）"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34033_2_UI.T_IconMonsterHead_34033_2_UI"
+    },
+    {
+      "id": "6000220",
+      "name": "巡霄枪卫",
+      "setIds": [
+        "37",
+        "38"
+      ],
+      "cost": 3,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤巡霄枪卫，攻击敌人造成六段{0}的气动伤害。\n技能冷却：{1}秒",
+      "skillResolved": "使用声骸技能，召唤巡霄枪卫，攻击敌人造成六段32.09%的气动伤害。技能冷却：15秒。",
+      "skillSimple": "召唤巡霄枪卫，对敌人造成六段气动伤害。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 192.54,
+          "element": "气动",
+          "damageType": "声骸",
+          "label": "六段（32.09%×6）",
+          "energyRegen": 0.44,
+          "multComponents": [
+            {
+              "rate": 32.09,
+              "count": 6
+            }
+          ]
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_32069_UI.T_IconMonsterHead_32069_UI"
+    },
+    {
+      "id": "6000223",
+      "name": "解形煞",
+      "setIds": [
+        "36",
+        "38"
+      ],
+      "cost": 3,
+      "costs": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "skillDesc": "使用声骸技能，召唤解形煞，对敌人造成{0}的热熔伤害。\n在首位装配该声骸技能时，自身共鸣效率提升{1}。\n技能冷却：{2}秒",
+      "skillResolved": "使用声骸技能，召唤解形煞，对敌人造成273.60%的热熔伤害。在首位装配该声骸技能时，自身共鸣效率提升10.00%。技能冷却：20秒。",
+      "skillSimple": "召唤解形煞造成热熔伤害；首位装配时提高自身共鸣效率10%。",
+      "mainEffects": [
+        {
+          "kind": "skillMult",
+          "value": 273.6,
+          "element": "热熔",
+          "damageType": "声骸",
+          "label": "满级273.60%",
+          "energyRegen": 3.8
+        },
+        {
+          "kind": "panel",
+          "stat": "energyRegenPct",
+          "value": 10,
+          "label": "首位装配时自身共鸣效率提升10%"
+        }
+      ],
+      "icon": "/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_32070_UI.T_IconMonsterHead_32070_UI"
+    }
+  ]
+}

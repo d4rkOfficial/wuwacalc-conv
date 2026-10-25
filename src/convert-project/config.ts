@@ -22,6 +22,7 @@
  */
 
 import { toInt } from "../utils.ts"
+import { ELEMENTS } from "./data/game.ts"
 import { convertMainStat, convertSubstat } from "./stat-tables.ts"
 import {
     type CoconutCharEchoConfig,
@@ -37,17 +38,6 @@ import {
     type WuwaCalcProjectPayload,
     type WuwaCalcTeamSnapshot,
 } from "./types.ts"
-
-/** 工坊的元素枚举（`ELEMENTS`），抗性按元素逐项给出 */
-const ELEMENTS = [
-    "物理",
-    "冷凝",
-    "热熔",
-    "导电",
-    "气动",
-    "衍射",
-    "湮灭",
-] as const
 
 /**
  * 敌怪：**100 级 Boss**（不是工具箱默认的「精英怪」）。

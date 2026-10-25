@@ -12,6 +12,7 @@
  */
 
 import { optionalString } from "../utils.ts"
+import { ELEMENT_BONUS_ELEMENTS } from "./data/game.ts"
 import type { CoconutEchoStat } from "./types.ts"
 
 // ── 主词条 ────────────────────────────────────────────────────────────────────
@@ -27,16 +28,6 @@ const MAIN_STAT_LABELS: Record<string, string> = {
     // 上游叫「治疗效果加成」，椰果叫「治疗加成」
     main_healing_bonus: "治疗加成",
 }
-
-/** 椰果元素增伤主词条（cost 3）：物理没有增伤主词条 */
-const ELEMENT_BONUS_ELEMENTS = [
-    "冷凝",
-    "热熔",
-    "导电",
-    "气动",
-    "衍射",
-    "湮灭",
-] as const
 
 /** 椰果主词条池：cost → 词条名 → 满级数值（`MAIN_STAT_POOL`，单位一律 `%`） */
 const MAIN_STAT_POOL: Record<number, Record<string, number>> = {

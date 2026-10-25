@@ -4,11 +4,14 @@
         "dev": "deno --allow-env --allow-run npm:wrangler dev",
         "start": "deno --allow-env --allow-run npm:wrangler dev",
         "cf-typegen": "deno --allow-env --allow-run npm:wrangler types",
-        "test": "deno test",
-        "check": "deno check src/"
+        "test": "deno test -A",
+        "check": "deno check src/",
+        "test:parity": "deno test -A src/convert-project/parity_test.ts"
     },
+    "exclude": ["tmp", ".wrangler"],
     "imports": {
-        "wrangler": "npm:wrangler@^4.149.0"
+        "wrangler": "npm:wrangler@^4.149.0",
+        "$lib/": "./engines/coconut/lib/"
     },
     "compilerOptions": {
         "lib": ["esnext"],

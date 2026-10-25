@@ -173,6 +173,35 @@ export const globalBuffActiveOf = (
             if (!map.has(id)) map.set(id, !!value)
         }
     }
+    // W 的 `getPhaseActive` 会先把成员所有 buff 在全局表里补成 false，再用
+    // 阶段/技能开关覆盖。转换器不能把「表里没有」当成「默认生效」——
+    // 5 链「行罚倍率提升」这类没出现在 globalBuffActive 里的 buff 会被
+    // 错误地绑到所有同名招式上（实测多算 100%）。这里同样补 false。
+    const ids = new Set<string>()
+    for (const member of (payload?.members ?? []).slice(0, TEAM_SIZE)) {
+        for (
+            const buff of ((member as WuwaCalcMember).buffs ?? []) as {
+                id?: string
+            }[]
+        ) {
+            const id = optionalString(buff?.id)
+            if (id) ids.add(id)
+        }
+    }
+    for (
+        const buff of ((shared as { buffs?: { id?: string }[] } | undefined)
+            ?.buffs ?? [])
+    ) {
+        const id = optionalString(buff?.id)
+        if (id) ids.add(id)
+    }
+    for (const id of ids) {
+        const mirror = id.startsWith("tm_") ? id.slice(3) : `tm_${id}`
+        if (!map.has(id) && !map.has(mirror)) {
+            map.set(id, false)
+            map.set(mirror, false)
+        }
+    }
     return map
 }
 

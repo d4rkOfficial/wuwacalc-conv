@@ -106,6 +106,9 @@ export interface WuwaCalcMember {
     excludedTeamBuffIds?: string[] | null
     /** 同上的手动子集（用户手动取消的那些），保留以防老方案只存了这一份 */
     manuallyExcludedTeamBuffIds?: string[] | null
+    /** 战斗模态（`burst` 等），影响特殊技能规则 */
+    combatMode?: string | null
+    convergenceMode?: boolean
 }
 
 // ── 输入：排轴 / 拉表 ─────────────────────────────────────────────────────────
@@ -118,9 +121,13 @@ export interface WuwaCalcAxisSkill {
     baseMult?: number
     multCount?: number
     damageType?: string
+    /** 同时视为某种效应（上游 `alsoAsEffect`，如卡提希娅部分普攻同时算风蚀） */
+    alsoAsEffect?: string
     energyRegen?: number
     fixedDamage?: boolean
     scaleStat?: string
+    /** `custom` 时技能上的 buffActive / buffStacks 才是权威 */
+    buffMode?: string
     /** 该技能时点各 buff 是否生效（**逐技能**存，不是全局一份） */
     buffActive?: Record<string, boolean> | null
     /** 该技能时点各 buff 的叠层数 */
@@ -163,6 +170,10 @@ export interface WuwaCalcAxisPhase {
     name?: string
     skills?: WuwaCalcAxisSkill[] | null
     locked?: boolean
+    /** `custom` 时阶段开关才是权威 */
+    buffMode?: string
+    /** 阶段级 Buff 勾选（角色/队伍全局之上覆盖） */
+    buffActive?: Record<string, boolean> | null
     /** 阶段级默认层数（优先级低于技能目录条目上的层数） */
     buffStacks?: Record<string, number> | null
 }
@@ -175,6 +186,8 @@ export interface WuwaCalcRotationEntry {
     multCount?: number
     scaleStat?: string
     damageType?: string
+    /** 同时视为某种效应（上游 `alsoAsEffect`） */
+    alsoAsEffect?: string
     energyRegen?: number
     fixedDamage?: boolean
     stackLayers?: Record<string, unknown>
@@ -205,6 +218,12 @@ export interface WuwaCalcSpecialSkillItem {
     damageType?: string
     /** 效应类型，如 `聚爆` / `霜渐` / `虚湮` */
     effectType?: string
+    /** 效应元素（部分条目直接给） */
+    element?: string
+    /** 特殊技能自己的 Buff 开关/层数（`custom` 时权威） */
+    buffMode?: string
+    buffActive?: Record<string, boolean> | null
+    buffStacks?: Record<string, number> | null
     characterId?: string
     /** 段数 → 椰果 `nonDirectEntries[].hits` */
     effectCount?: number
@@ -359,6 +378,8 @@ export interface CoconutSkillHit {
      * 鸣算屋的技能名（技能库全名）多半对不上，所以这里把上游的权威类型带进条目。
      */
     damageType?: string
+    /** 同时视为某种效应（上游 `alsoAsEffect`），拉表阶段会追加 `效应伤害` */
+    alsoAsEffect?: string
 }
 
 /** 非直伤条目：处决 / 响应带 `responders`，效应带 `layers` 与 `hits` */
@@ -368,6 +389,15 @@ export interface CoconutNonDirectEntry {
     layers: number
     hits?: number
     responders?: string[]
+    /** 效应伤害的归属角色：决定它吃谁的 Buff（显示仍按效应） */
+    character?: string
+    /** 效应/处决的每段倍率（上游 `baseMult`，百分比数值，如 13.9726） */
+    baseMult?: number
+    /** 效应伤害元素（上游 `effectType` 推断；具名效应也能落到正确抗性） */
+    element?: string
+    /** 效应双暴覆盖（如爱弥斯 6 链聚爆：80% / 275%） */
+    critRate?: number
+    critDmg?: number
 }
 
 export interface CoconutDamageBlock {
@@ -455,8 +485,17 @@ export interface CoconutDamageEntry {
     }[]
     ratioUnit?: "%" | "fixed"
     burstLayers?: number
+    /** 效应层数（用于反查通用效应倍率） */
+    ratioValue?: number
+    /** 效应每段倍率覆盖（上游 baseMult / 100；用额外倍率 Buff 覆盖） */
+    effectBaseMult?: number
+    /** 效应双暴覆盖（%；用覆盖型 Buff 实现） */
+    effectCritRate?: number
+    effectCritDmg?: number
     /** 上游 `damageType`（`普攻` / `重击` / …）；拿来落 `damageEntryDamageTypes` */
     damageType?: string
+    /** 同时视为某种效应（上游 `alsoAsEffect`），拉表阶段会追加 `效应伤害` */
+    alsoAsEffect?: string
 }
 
 /** 对应工具箱 `CalcState` */

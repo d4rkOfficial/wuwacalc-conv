@@ -17,6 +17,7 @@
 import { DEFAULT_API_BASE } from "../http.ts"
 import type { Bindings } from "../http.ts"
 import { optionalString, toInt } from "../utils.ts"
+import { ELEMENT_BY_ID } from "./data/game.ts"
 
 /** 表数据缓存时长：上游随游戏版本更新，6 小时足够新鲜，也避免每次请求都拉一遍 */
 export const TABLE_TTL_MS = 6 * 60 * 60 * 1000
@@ -46,6 +47,37 @@ export interface EchoInfo {
     cost: number
 }
 
+/**
+ * 技能库条目（上游 `character-skills.json`）。
+ *
+ * 转换**不能只看 `damageType`**：鸣算屋的 `damageType` 是「算哪种伤害」，
+ * 而椰果的 `skillType` 是「谁打出的这一招」。例如洛瑟菈的 `强化A4-断舍离`
+ * 上游 `damageType='声骸'`，技能库 `skillType='共鸣解放'`；按 damageType 落
+ * `声骸技能` 会被工具箱加上装备声骸前缀，并且技能名被改写成 `伤害1`，
+ * 连带按技能名限定的 Buff 全绑不上。
+ */
+export interface SkillInfo {
+    name: string
+    skillType: string
+    damageType: string
+    baseMult: number
+}
+
+/** 声骸图鉴的首位效果（上游 `echo-specimens.json` 的 `mainEffects`） */
+export interface EchoSpecimenInfo {
+    id: string
+    name: string
+    mainEffects: {
+        kind?: string
+        category?: string
+        name?: string
+        value?: number
+        element?: string
+        damageType?: string
+        sourceKey?: string
+    }[]
+}
+
 /** 转换期需要的名称表集合 */
 export interface ProjectTables {
     /** 武器 id → 名称 */
@@ -54,6 +86,12 @@ export interface ProjectTables {
     echoSets: Map<string, EchoSetInfo>
     /** 声骸 id → 名称 + cost */
     echoes: Map<string, EchoInfo>
+    /** `角色 id + 技能库全名` → 技能库条目 */
+    skills: Map<string, SkillInfo>
+    /** 角色 id → 角色自身元素（不是主位声骸的元素） */
+    characterElements: Map<string, string>
+    /** 声骸 id → 首位效果（`echo-specimens.json`） */
+    echoSpecimens: Map<string, EchoSpecimenInfo>
 }
 
 /** 空表：拉取失败或单测里不关心名称时使用 */
@@ -61,6 +99,9 @@ export const EMPTY_TABLES: ProjectTables = {
     weapons: new Map(),
     echoSets: new Map(),
     echoes: new Map(),
+    skills: new Map(),
+    characterElements: new Map(),
+    echoSpecimens: new Map(),
 }
 
 /**
@@ -142,6 +183,80 @@ const toEchoSetMap = (
     return map
 }
 
+const toSkillsMap = (
+    characters:
+        | {
+            id?: string
+            name?: string
+            skills?: {
+                name?: string
+                skillType?: string
+                damageType?: string
+                baseMult?: number
+            }[]
+        }[]
+        | undefined,
+): Map<string, SkillInfo> => {
+    const map = new Map<string, SkillInfo>()
+    for (const character of characters ?? []) {
+        const characterId = optionalString(character?.id)
+        if (!characterId) continue
+        for (const skill of character?.skills ?? []) {
+            const name = optionalString(skill?.name)
+            if (!name) continue
+            map.set(`${characterId}|${name}`, {
+                name,
+                skillType: optionalString(skill?.skillType) ?? "",
+                damageType: optionalString(skill?.damageType) ?? "",
+                baseMult: Number(skill?.baseMult) || 0,
+            })
+        }
+    }
+    return map
+}
+
+const toEchoSpecimens = (
+    specimens:
+        | {
+            id?: string
+            name?: string
+            mainEffects?: {
+                kind?: string
+                category?: string
+                name?: string
+                value?: number
+                element?: string
+                damageType?: string
+                sourceKey?: string
+            }[]
+        }[]
+        | undefined,
+): Map<string, EchoSpecimenInfo> => {
+    const map = new Map<string, EchoSpecimenInfo>()
+    for (const specimen of specimens ?? []) {
+        const id = optionalString(specimen?.id)
+        if (!id) continue
+        map.set(id, {
+            id,
+            name: optionalString(specimen?.name) ?? "",
+            mainEffects: specimen?.mainEffects ?? [],
+        })
+    }
+    return map
+}
+
+const toCharacterElements = (
+    characters: { id?: string; element?: number }[] | undefined,
+): Map<string, string> => {
+    const map = new Map<string, string>()
+    for (const character of characters ?? []) {
+        const id = optionalString(character?.id)
+        const element = ELEMENT_BY_ID[Number(character?.element)]
+        if (id && element) map.set(id, element)
+    }
+    return map
+}
+
 const toEchoMap = (
     rows: { id?: string; name?: string; cost?: number }[] | undefined,
 ): Map<string, EchoInfo> => {
@@ -165,29 +280,64 @@ export const loadProjectTables = async (
     if (inflight) return await inflight
 
     inflight = (async (): Promise<ProjectTables> => {
-        const [weapons, echoSets, echoes] = await Promise.all([
-            fetchTable<{ weapons?: { id?: string; name?: string }[] }>(
-                env,
-                "weapons.json",
-            ),
-            fetchTable<
-                {
-                    sets?: {
-                        id?: string
-                        name?: string
-                        bonuses?: Record<string, unknown>
-                    }[]
-                }
-            >(env, "echo-sets.json"),
-            fetchTable<
-                { echoes?: { id?: string; name?: string; cost?: number }[] }
-            >(env, "echo-catalog.json"),
-        ])
+        const [weapons, echoSets, echoes, echoSpecimens, skills] = await Promise
+            .all([
+                fetchTable<{ weapons?: { id?: string; name?: string }[] }>(
+                    env,
+                    "weapons.json",
+                ),
+                fetchTable<
+                    {
+                        sets?: {
+                            id?: string
+                            name?: string
+                            bonuses?: Record<string, unknown>
+                        }[]
+                    }
+                >(env, "echo-sets.json"),
+                fetchTable<
+                    { echoes?: { id?: string; name?: string; cost?: number }[] }
+                >(env, "echo-catalog.json"),
+                fetchTable<
+                    {
+                        specimens?: {
+                            id?: string
+                            name?: string
+                            mainEffects?: {
+                                kind?: string
+                                category?: string
+                                name?: string
+                                value?: number
+                                element?: string
+                                damageType?: string
+                                sourceKey?: string
+                            }[]
+                        }[]
+                    }
+                >(env, "echo-specimens.json"),
+                fetchTable<
+                    {
+                        characters?: {
+                            id?: string
+                            name?: string
+                            skills?: {
+                                name?: string
+                                skillType?: string
+                                damageType?: string
+                                baseMult?: number
+                            }[]
+                        }[]
+                    }
+                >(env, "character-skills.json"),
+            ])
 
         const tables: ProjectTables = {
             weapons: toNameMap(weapons?.weapons),
             echoSets: toEchoSetMap(echoSets?.sets),
             echoes: toEchoMap(echoes?.echoes),
+            skills: toSkillsMap(skills?.characters),
+            characterElements: toCharacterElements(skills?.characters),
+            echoSpecimens: toEchoSpecimens(echoSpecimens?.specimens),
         }
         // 三张表全没拉到 → 不写缓存，下一次请求重试
         if (

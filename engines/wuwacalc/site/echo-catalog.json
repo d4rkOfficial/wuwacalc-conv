@@ -1,0 +1,2220 @@
+{
+  "version": 1,
+  "updated": "2026-09-29",
+  "source": "库街区 calabashData + nanoka.cc",
+  "total": 185,
+  "costs": {
+    "1": 86,
+    "3": 55,
+    "4": 44
+  },
+  "echoes": [
+    {
+      "id": "390077021",
+      "name": "坚岩斗士",
+      "cost": 3,
+      "setIds": [
+        "7",
+        "8"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031252086.png",
+      "maxStar": 4,
+      "zh": "坚岩斗士"
+    },
+    {
+      "id": "390070068",
+      "name": "呼咻咻",
+      "cost": 1,
+      "setIds": [
+        "4",
+        "7",
+        "8"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031570963.png",
+      "maxStar": 4,
+      "zh": "呼咻咻"
+    },
+    {
+      "id": "390070105",
+      "name": "寒霜陆龟",
+      "cost": 1,
+      "setIds": [
+        "1",
+        "5"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031140317.png",
+      "maxStar": 4,
+      "zh": "寒霜陆龟"
+    },
+    {
+      "id": "6000046",
+      "name": "车刃镰",
+      "cost": 3,
+      "setIds": [
+        "4",
+        "8"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716030964752.png",
+      "maxStar": 4,
+      "zh": "车刃镰"
+    },
+    {
+      "id": "390077022",
+      "name": "奏谕乐师",
+      "cost": 3,
+      "setIds": [
+        "3",
+        "9"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031553238.png",
+      "maxStar": 4,
+      "zh": "奏谕乐师"
+    },
+    {
+      "id": "390070052",
+      "name": "裂变幼岩",
+      "cost": 1,
+      "setIds": [
+        "3",
+        "7",
+        "8"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031197499.png",
+      "maxStar": 4,
+      "zh": "裂变幼岩"
+    },
+    {
+      "id": "390070100",
+      "name": "火鬃狼",
+      "cost": 1,
+      "setIds": [
+        "2",
+        "7"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031107636.png",
+      "maxStar": 4,
+      "zh": "火鬃狼"
+    },
+    {
+      "id": "390077028",
+      "name": "绿熔蜥",
+      "cost": 3,
+      "setIds": [
+        "2",
+        "8"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031022897.png",
+      "maxStar": 4,
+      "zh": "绿熔蜥"
+    },
+    {
+      "id": "6000042",
+      "name": "无冠者",
+      "cost": 4,
+      "setIds": [
+        "6"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031387956.png",
+      "maxStar": 4,
+      "zh": "无冠者"
+    },
+    {
+      "id": "390077023",
+      "name": "振铎乐师",
+      "cost": 3,
+      "setIds": [
+        "1",
+        "6"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031258204.png",
+      "maxStar": 4,
+      "zh": "振铎乐师"
+    },
+    {
+      "id": "390077005",
+      "name": "青羽鹭",
+      "cost": 3,
+      "setIds": [
+        "4",
+        "5"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031319273.png",
+      "maxStar": 4,
+      "zh": "青羽鹭"
+    },
+    {
+      "id": "390070075",
+      "name": "碎獠猪",
+      "cost": 1,
+      "setIds": [
+        "1",
+        "4",
+        "8"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031420517.png",
+      "maxStar": 4,
+      "zh": "碎獠猪"
+    },
+    {
+      "id": "390070053",
+      "name": "惊蛰猎手",
+      "cost": 1,
+      "setIds": [
+        "2",
+        "3"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716030984882.png",
+      "maxStar": 4,
+      "zh": "惊蛰猎手"
+    },
+    {
+      "id": "6000039",
+      "name": "朔雷之鳞",
+      "cost": 4,
+      "setIds": [
+        "3"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031325516.png",
+      "maxStar": 4,
+      "zh": "朔雷之鳞"
+    },
+    {
+      "id": "390077017",
+      "name": "湮灭棱镜",
+      "cost": 1,
+      "setIds": [
+        "3",
+        "5",
+        "6"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031187899.png",
+      "maxStar": 4,
+      "zh": "湮灭棱镜"
+    },
+    {
+      "id": "6000044",
+      "name": "辉萤军势",
+      "cost": 4,
+      "setIds": [
+        "1"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716030871596.png",
+      "maxStar": 4,
+      "zh": "辉萤军势"
+    },
+    {
+      "id": "390077012",
+      "name": "热熔棱镜",
+      "cost": 1,
+      "setIds": [
+        "1",
+        "2",
+        "9"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031097315.png",
+      "maxStar": 4,
+      "zh": "热熔棱镜"
+    },
+    {
+      "id": "390077025",
+      "name": "冥渊守卫",
+      "cost": 3,
+      "setIds": [
+        "7",
+        "9"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031299728.png",
+      "maxStar": 4,
+      "zh": "冥渊守卫"
+    },
+    {
+      "id": "6000043",
+      "name": "飞廉之猩",
+      "cost": 4,
+      "setIds": [
+        "4"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716030978516.png",
+      "maxStar": 4,
+      "zh": "飞廉之猩"
+    },
+    {
+      "id": "6000050",
+      "name": "通行灯偶",
+      "cost": 1,
+      "setIds": [
+        "2",
+        "3",
+        "4"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031467856.png",
+      "maxStar": 4,
+      "zh": "通行灯偶"
+    },
+    {
+      "id": "6000049",
+      "name": "巡哨机傀",
+      "cost": 3,
+      "setIds": [
+        "1",
+        "5"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031113039.png",
+      "maxStar": 4,
+      "zh": "巡哨机傀"
+    },
+    {
+      "id": "6000047",
+      "name": "啾啾河豚",
+      "cost": 1,
+      "setIds": [
+        "4",
+        "6"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031083470.png",
+      "maxStar": 4,
+      "zh": "啾啾河豚"
+    },
+    {
+      "id": "390070064",
+      "name": "鸣泣战士",
+      "cost": 1,
+      "setIds": [
+        "2",
+        "3",
+        "4"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031220479.png",
+      "maxStar": 4,
+      "zh": "鸣泣战士"
+    },
+    {
+      "id": "390070065",
+      "name": "审判战士",
+      "cost": 1,
+      "setIds": [
+        "5",
+        "6"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031277969.png",
+      "maxStar": 4,
+      "zh": "审判战士"
+    },
+    {
+      "id": "390070070",
+      "name": "破霜猎手",
+      "cost": 1,
+      "setIds": [
+        "1",
+        "5"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031332563.png",
+      "maxStar": 4,
+      "zh": "破霜猎手"
+    },
+    {
+      "id": "390080007",
+      "name": "燎照之骑",
+      "cost": 4,
+      "setIds": [
+        "2"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031254258.png",
+      "maxStar": 4,
+      "zh": "燎照之骑"
+    },
+    {
+      "id": "390070066",
+      "name": "咔嚓嚓",
+      "cost": 1,
+      "setIds": [
+        "2",
+        "7",
+        "9"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716030833398.png",
+      "maxStar": 4,
+      "zh": "咔嚓嚓"
+    },
+    {
+      "id": "390077033",
+      "name": "暗鬃狼",
+      "cost": 3,
+      "setIds": [
+        "2",
+        "6"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031155308.png",
+      "maxStar": 4,
+      "zh": "暗鬃狼"
+    },
+    {
+      "id": "390077029",
+      "name": "刺玫菇",
+      "cost": 3,
+      "setIds": [
+        "1",
+        "6"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031066539.png",
+      "maxStar": 4,
+      "zh": "刺玫菇"
+    },
+    {
+      "id": "390070079",
+      "name": "刺玫菇（稚形）",
+      "cost": 1,
+      "setIds": [
+        "4",
+        "6"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031563789.png",
+      "maxStar": 4,
+      "zh": "刺玫菇（稚形）"
+    },
+    {
+      "id": "6000048",
+      "name": "聚械机偶",
+      "cost": 4,
+      "setIds": [
+        "9"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716030905371.png",
+      "maxStar": 4,
+      "zh": "聚械机偶"
+    },
+    {
+      "id": "6000045",
+      "name": "哀声鸷",
+      "cost": 4,
+      "setIds": [
+        "5"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031069457.png",
+      "maxStar": 4,
+      "zh": "哀声鸷"
+    },
+    {
+      "id": "390077024",
+      "name": "磐石守卫",
+      "cost": 3,
+      "setIds": [
+        "5",
+        "7"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716030841263.png",
+      "maxStar": 4,
+      "zh": "磐石守卫"
+    },
+    {
+      "id": "390070071",
+      "name": "巡徊猎手",
+      "cost": 1,
+      "setIds": [
+        "3",
+        "4"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031100054.png",
+      "maxStar": 4,
+      "zh": "巡徊猎手"
+    },
+    {
+      "id": "390077038",
+      "name": "箭簇熊",
+      "cost": 3,
+      "setIds": [
+        "8",
+        "9"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031054393.png",
+      "maxStar": 4,
+      "zh": "箭簇熊"
+    },
+    {
+      "id": "390080003",
+      "name": "云闪之鳞",
+      "cost": 4,
+      "setIds": [
+        "3"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031148133.png",
+      "maxStar": 4,
+      "zh": "云闪之鳞"
+    },
+    {
+      "id": "390077016",
+      "name": "衍射棱镜",
+      "cost": 1,
+      "setIds": [
+        "2",
+        "3",
+        "5"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031031142.png",
+      "maxStar": 4,
+      "zh": "衍射棱镜"
+    },
+    {
+      "id": "6000052",
+      "name": "无常凶鹭",
+      "cost": 4,
+      "setIds": [
+        "8"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031585620.png",
+      "maxStar": 4,
+      "zh": "无常凶鹭"
+    },
+    {
+      "id": "390080005",
+      "name": "鸣钟之龟",
+      "cost": 4,
+      "setIds": [
+        "7",
+        "8"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031298428.png",
+      "maxStar": 4,
+      "zh": "鸣钟之龟"
+    },
+    {
+      "id": "390070078",
+      "name": "绿熔蜥（稚形）",
+      "cost": 1,
+      "setIds": [
+        "2",
+        "3",
+        "9"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031470942.png",
+      "maxStar": 4,
+      "zh": "绿熔蜥（稚形）"
+    },
+    {
+      "id": "390070077",
+      "name": "遁地鼠",
+      "cost": 1,
+      "setIds": [
+        "1",
+        "6"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031044125.png",
+      "maxStar": 4,
+      "zh": "遁地鼠"
+    },
+    {
+      "id": "390077004",
+      "name": "紫羽鹭",
+      "cost": 3,
+      "setIds": [
+        "2",
+        "3"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031255040.png",
+      "maxStar": 4,
+      "zh": "紫羽鹭"
+    },
+    {
+      "id": "6000040",
+      "name": "戏猿",
+      "cost": 3,
+      "setIds": [
+        "4",
+        "7"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031211681.png",
+      "maxStar": 4,
+      "zh": "戏猿"
+    },
+    {
+      "id": "6000038",
+      "name": "幼猿",
+      "cost": 1,
+      "setIds": [
+        "4",
+        "9"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031515688.png",
+      "maxStar": 4,
+      "zh": "幼猿"
+    },
+    {
+      "id": "390070067",
+      "name": "阿嗞嗞",
+      "cost": 1,
+      "setIds": [
+        "5",
+        "8",
+        "9"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031091634.png",
+      "maxStar": 4,
+      "zh": "阿嗞嗞"
+    },
+    {
+      "id": "390070069",
+      "name": "呜咔咔",
+      "cost": 1,
+      "setIds": [
+        "6",
+        "7",
+        "9"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716030821526.png",
+      "maxStar": 4,
+      "zh": "呜咔咔"
+    },
+    {
+      "id": "390077013",
+      "name": "冷凝棱镜",
+      "cost": 1,
+      "setIds": [
+        "1",
+        "6",
+        "8"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031298656.png",
+      "maxStar": 4,
+      "zh": "冷凝棱镜"
+    },
+    {
+      "id": "390070076",
+      "name": "咕咕河豚",
+      "cost": 1,
+      "setIds": [
+        "1",
+        "5"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031045800.png",
+      "maxStar": 4,
+      "zh": "咕咕河豚"
+    },
+    {
+      "id": "390070051",
+      "name": "先锋幼岩",
+      "cost": 1,
+      "setIds": [
+        "3",
+        "7",
+        "9"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031317562.png",
+      "maxStar": 4,
+      "zh": "先锋幼岩"
+    },
+    {
+      "id": "6000041",
+      "name": "晶螯蝎",
+      "cost": 1,
+      "setIds": [
+        "8",
+        "9"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031107501.png",
+      "maxStar": 4,
+      "zh": "晶螯蝎"
+    },
+    {
+      "id": "390070074",
+      "name": "游弋蝶",
+      "cost": 1,
+      "setIds": [
+        "5",
+        "7",
+        "8"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716031420750.png",
+      "maxStar": 4,
+      "zh": "游弋蝶"
+    },
+    {
+      "id": "6000053",
+      "name": "无妄者",
+      "cost": 4,
+      "setIds": [
+        "6"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1716030917799.png",
+      "maxStar": 4,
+      "zh": "无妄者"
+    },
+    {
+      "id": "6000051",
+      "name": "叮咚咚",
+      "cost": 1,
+      "setIds": [
+        "1",
+        "5"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1719546555041.png",
+      "maxStar": 4,
+      "zh": "叮咚咚"
+    },
+    {
+      "id": "6000058",
+      "name": "踏光兽",
+      "cost": 3,
+      "setIds": [
+        "5"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1719545846638.png",
+      "maxStar": 4,
+      "zh": "踏光兽"
+    },
+    {
+      "id": "6000054",
+      "name": "融火虫",
+      "cost": 1,
+      "setIds": [
+        "2",
+        "9"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1719546000465.png",
+      "maxStar": 4,
+      "zh": "融火虫"
+    },
+    {
+      "id": "6000057",
+      "name": "游鳞机枢",
+      "cost": 3,
+      "setIds": [
+        "1",
+        "3"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1719546525484.png",
+      "maxStar": 4,
+      "zh": "游鳞机枢"
+    },
+    {
+      "id": "6000055",
+      "name": "侏侏鸵",
+      "cost": 1,
+      "setIds": [
+        "4",
+        "7"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1719545700776.png",
+      "maxStar": 4,
+      "zh": "侏侏鸵"
+    },
+    {
+      "id": "6000059",
+      "name": "角",
+      "cost": 4,
+      "setIds": [
+        "5"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1719546378940.png",
+      "maxStar": 4,
+      "zh": "角"
+    },
+    {
+      "id": "6000056",
+      "name": "雪鬃狼",
+      "cost": 3,
+      "setIds": [
+        "1",
+        "8"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1719545913409.png",
+      "maxStar": 4,
+      "zh": "雪鬃狼"
+    },
+    {
+      "id": "6000060",
+      "name": "无归的谬误",
+      "cost": 4,
+      "setIds": [
+        "7"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1727419339842.png",
+      "maxStar": 4,
+      "zh": "无归的谬误"
+    },
+    {
+      "id": "6000083",
+      "name": "异构武装",
+      "cost": 4,
+      "setIds": [
+        "10"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780762766.png",
+      "maxStar": 4,
+      "zh": "异构武装"
+    },
+    {
+      "id": "6000070",
+      "name": "寂寞小姐",
+      "cost": 1,
+      "setIds": [
+        "10",
+        "14"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780471700.png",
+      "maxStar": 4,
+      "zh": "寂寞小姐"
+    },
+    {
+      "id": "6000079",
+      "name": "浮灵偶",
+      "cost": 3,
+      "setIds": [
+        "13",
+        "14",
+        "19"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780013528.png",
+      "maxStar": 4,
+      "zh": "浮灵偶"
+    },
+    {
+      "id": "6000066",
+      "name": "浮灵偶·莱特",
+      "cost": 1,
+      "setIds": [
+        "10",
+        "14"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780234939.png",
+      "maxStar": 4,
+      "zh": "浮灵偶·莱特"
+    },
+    {
+      "id": "6000065",
+      "name": "浮灵偶·蕾弗",
+      "cost": 1,
+      "setIds": [
+        "10",
+        "14"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780548211.png",
+      "maxStar": 4,
+      "zh": "浮灵偶·蕾弗"
+    },
+    {
+      "id": "6000085",
+      "name": "赫卡忒",
+      "cost": 4,
+      "setIds": [
+        "13"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780505071.png",
+      "maxStar": 4,
+      "zh": "赫卡忒"
+    },
+    {
+      "id": "6000063",
+      "name": "霜鬃狼",
+      "cost": 1,
+      "setIds": [
+        "11",
+        "12"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780195094.png",
+      "maxStar": 4,
+      "zh": "霜鬃狼"
+    },
+    {
+      "id": "6000080",
+      "name": "琉璃刀伶",
+      "cost": 3,
+      "setIds": [
+        "11",
+        "13"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780629029.png",
+      "maxStar": 4,
+      "zh": "琉璃刀伶"
+    },
+    {
+      "id": "6000073",
+      "name": "巡游骑士",
+      "cost": 3,
+      "setIds": [
+        "10",
+        "12"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780149443.png",
+      "maxStar": 4,
+      "zh": "巡游骑士"
+    },
+    {
+      "id": "6000061",
+      "name": "风鬃狼",
+      "cost": 1,
+      "setIds": [
+        "10",
+        "13"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780888213.png",
+      "maxStar": 4,
+      "zh": "风鬃狼"
+    },
+    {
+      "id": "6000072",
+      "name": "欺诈奇藏",
+      "cost": 1,
+      "setIds": [
+        "10",
+        "12",
+        "13"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780656654.png",
+      "maxStar": 4,
+      "zh": "欺诈奇藏"
+    },
+    {
+      "id": "6000071",
+      "name": "工头布偶",
+      "cost": 1,
+      "setIds": [
+        "11",
+        "14"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780627512.png",
+      "maxStar": 4,
+      "zh": "工头布偶"
+    },
+    {
+      "id": "6000081",
+      "name": "巨布偶",
+      "cost": 3,
+      "setIds": [
+        "10",
+        "12"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780827522.png",
+      "maxStar": 4,
+      "zh": "巨布偶"
+    },
+    {
+      "id": "6000069",
+      "name": "魔术先生",
+      "cost": 1,
+      "setIds": [
+        "10",
+        "13"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780782386.png",
+      "maxStar": 4,
+      "zh": "魔术先生"
+    },
+    {
+      "id": "6000064",
+      "name": "浮灵偶·海德",
+      "cost": 1,
+      "setIds": [
+        "11",
+        "14"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780686619.png",
+      "maxStar": 4,
+      "zh": "浮灵偶·海德"
+    },
+    {
+      "id": "6000074",
+      "name": "幻昼骑士",
+      "cost": 3,
+      "setIds": [
+        "11",
+        "14"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780790069.png",
+      "maxStar": 4,
+      "zh": "幻昼骑士"
+    },
+    {
+      "id": "6000067",
+      "name": "幽翎火",
+      "cost": 1,
+      "setIds": [
+        "11",
+        "12",
+        "19"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780594982.png",
+      "maxStar": 4,
+      "zh": "幽翎火"
+    },
+    {
+      "id": "6000077",
+      "name": "持刃贵族",
+      "cost": 3,
+      "setIds": [
+        "12",
+        "14",
+        "23"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780085018.png",
+      "maxStar": 4,
+      "zh": "持刃贵族"
+    },
+    {
+      "id": "6000078",
+      "name": "凝水贵族",
+      "cost": 3,
+      "setIds": [
+        "10",
+        "11"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780642615.png",
+      "maxStar": 4,
+      "zh": "凝水贵族"
+    },
+    {
+      "id": "6000075",
+      "name": "暗夜骑士",
+      "cost": 3,
+      "setIds": [
+        "12",
+        "13"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780496625.png",
+      "maxStar": 4,
+      "zh": "暗夜骑士"
+    },
+    {
+      "id": "6000068",
+      "name": "云海妖精",
+      "cost": 1,
+      "setIds": [
+        "12",
+        "13",
+        "22"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1759041869991.png",
+      "maxStar": 4,
+      "zh": "云海妖精"
+    },
+    {
+      "id": "6000076",
+      "name": "毒冠贵族",
+      "cost": 3,
+      "setIds": [
+        "10",
+        "13"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780378529.png",
+      "maxStar": 4,
+      "zh": "毒冠贵族"
+    },
+    {
+      "id": "6000062",
+      "name": "雷鬃狼",
+      "cost": 1,
+      "setIds": [
+        "12",
+        "13"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780244342.png",
+      "maxStar": 4,
+      "zh": "雷鬃狼"
+    },
+    {
+      "id": "6000084",
+      "name": "叹息古龙",
+      "cost": 4,
+      "setIds": [
+        "14"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780235458.png",
+      "maxStar": 4,
+      "zh": "叹息古龙"
+    },
+    {
+      "id": "6000082",
+      "name": "罗蕾莱",
+      "cost": 4,
+      "setIds": [
+        "12"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780648472.png",
+      "maxStar": 4,
+      "zh": "罗蕾莱"
+    },
+    {
+      "id": "6000089",
+      "name": "梦魇·朔雷之鳞",
+      "cost": 4,
+      "setIds": [
+        "13",
+        "3"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780170913.png",
+      "maxStar": 4,
+      "zh": "梦魇·朔雷之鳞"
+    },
+    {
+      "id": "6000091",
+      "name": "梦魇·燎照之骑",
+      "cost": 4,
+      "setIds": [
+        "2"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780509450.png",
+      "maxStar": 4,
+      "zh": "梦魇·燎照之骑"
+    },
+    {
+      "id": "6000092",
+      "name": "梦魇·哀声鸷",
+      "cost": 4,
+      "setIds": [
+        "11"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780616933.png",
+      "maxStar": 4,
+      "zh": "梦魇·哀声鸷"
+    },
+    {
+      "id": "6000087",
+      "name": "梦魇·无常凶鹭",
+      "cost": 4,
+      "setIds": [
+        "12"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780412740.png",
+      "maxStar": 4,
+      "zh": "梦魇·无常凶鹭"
+    },
+    {
+      "id": "6000090",
+      "name": "梦魇·无冠者",
+      "cost": 4,
+      "setIds": [
+        "6"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780702700.png",
+      "maxStar": 4,
+      "zh": "梦魇·无冠者"
+    },
+    {
+      "id": "6000086",
+      "name": "梦魇·飞廉之猩",
+      "cost": 4,
+      "setIds": [
+        "4"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780364443.png",
+      "maxStar": 4,
+      "zh": "梦魇·飞廉之猩"
+    },
+    {
+      "id": "6000088",
+      "name": "梦魇·云闪之鳞",
+      "cost": 4,
+      "setIds": [
+        "3"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1735780061389.png",
+      "maxStar": 4,
+      "zh": "梦魇·云闪之鳞"
+    },
+    {
+      "id": "6000093",
+      "name": "愚金幼岩",
+      "cost": 1,
+      "setIds": [
+        "10",
+        "11",
+        "21"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1755850411957.png",
+      "maxStar": 4,
+      "zh": "愚金幼岩"
+    },
+    {
+      "id": "6000096",
+      "name": "重塑雕像的拳砾",
+      "cost": 3,
+      "setIds": [
+        "11",
+        "16",
+        "21"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1755850538195.png",
+      "maxStar": 4,
+      "zh": "重塑雕像的拳砾"
+    },
+    {
+      "id": "6000095",
+      "name": "气动棱镜",
+      "cost": 1,
+      "setIds": [
+        "11",
+        "14"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1738928136317.png",
+      "maxStar": 4,
+      "zh": "气动棱镜"
+    },
+    {
+      "id": "6000097",
+      "name": "飓力熊",
+      "cost": 3,
+      "setIds": [
+        "14",
+        "16",
+        "20"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1755850593906.png",
+      "maxStar": 4,
+      "zh": "飓力熊"
+    },
+    {
+      "id": "6000094",
+      "name": "釉变幼岩",
+      "cost": 1,
+      "setIds": [
+        "13",
+        "14",
+        "20"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1755850732990.png",
+      "maxStar": 4,
+      "zh": "釉变幼岩"
+    },
+    {
+      "id": "6000106",
+      "name": "共鸣回响·芙露德莉斯",
+      "cost": 4,
+      "setIds": [
+        "16",
+        "17"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1742894131701.png",
+      "maxStar": 4,
+      "zh": "共鸣回响·芙露德莉斯"
+    },
+    {
+      "id": "6000098",
+      "name": "卫冕节使",
+      "cost": 1,
+      "setIds": [
+        "12",
+        "16",
+        "18"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1742893917692.png",
+      "maxStar": 4,
+      "zh": "卫冕节使"
+    },
+    {
+      "id": "6000099",
+      "name": "赦罪节使",
+      "cost": 1,
+      "setIds": [
+        "11",
+        "16",
+        "18"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1742894651993.png",
+      "maxStar": 4,
+      "zh": "赦罪节使"
+    },
+    {
+      "id": "6000104",
+      "name": "荣光节使",
+      "cost": 3,
+      "setIds": [
+        "11",
+        "16",
+        "17"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1742894679707.png",
+      "maxStar": 4,
+      "zh": "荣光节使"
+    },
+    {
+      "id": "6000101",
+      "name": "小翼龙·气动",
+      "cost": 1,
+      "setIds": [
+        "14",
+        "16",
+        "18"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1742894292304.png",
+      "maxStar": 4,
+      "zh": "小翼龙·气动"
+    },
+    {
+      "id": "6000100",
+      "name": "慈悲节使",
+      "cost": 1,
+      "setIds": [
+        "16",
+        "17"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1742894156768.png",
+      "maxStar": 4,
+      "zh": "慈悲节使"
+    },
+    {
+      "id": "6000102",
+      "name": "小翼龙·导电",
+      "cost": 1,
+      "setIds": [
+        "12",
+        "16",
+        "18"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1742894497124.png",
+      "maxStar": 4,
+      "zh": "小翼龙·导电"
+    },
+    {
+      "id": "6000105",
+      "name": "梦魇·辉萤军势",
+      "cost": 4,
+      "setIds": [
+        "10",
+        "13"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1742893925193.png",
+      "maxStar": 4,
+      "zh": "梦魇·辉萤军势"
+    },
+    {
+      "id": "6000103",
+      "name": "小翼龙·冷凝",
+      "cost": 1,
+      "setIds": [
+        "16",
+        "17"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1742893873968.png",
+      "maxStar": 4,
+      "zh": "小翼龙·冷凝"
+    },
+    {
+      "id": "6000112",
+      "name": "角鳄",
+      "cost": 3,
+      "setIds": [
+        "17",
+        "18",
+        "22"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1759042027124.png",
+      "maxStar": 4,
+      "zh": "角鳄"
+    },
+    {
+      "id": "6000113",
+      "name": "梦魇·凯尔匹",
+      "cost": 4,
+      "setIds": [
+        "16",
+        "17"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1749626286118.png",
+      "maxStar": 4,
+      "zh": "梦魇·凯尔匹"
+    },
+    {
+      "id": "6000114",
+      "name": "荣耀狮像",
+      "cost": 4,
+      "setIds": [
+        "18"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1749625786576.png",
+      "maxStar": 4,
+      "zh": "荣耀狮像"
+    },
+    {
+      "id": "6000107",
+      "name": "小翼龙·热熔",
+      "cost": 1,
+      "setIds": [
+        "17",
+        "18"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1749625810209.png",
+      "maxStar": 4,
+      "zh": "小翼龙·热熔"
+    },
+    {
+      "id": "6000109",
+      "name": "小翼龙·湮灭",
+      "cost": 1,
+      "setIds": [
+        "17",
+        "18",
+        "23"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1749626274875.png",
+      "maxStar": 4,
+      "zh": "小翼龙·湮灭"
+    },
+    {
+      "id": "6000108",
+      "name": "小翼龙·衍射",
+      "cost": 1,
+      "setIds": [
+        "17",
+        "18"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1749625635545.png",
+      "maxStar": 4,
+      "zh": "小翼龙·衍射"
+    },
+    {
+      "id": "6000110",
+      "name": "苦信者的作俑",
+      "cost": 1,
+      "setIds": [
+        "16",
+        "17",
+        "18"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1749625772246.png",
+      "maxStar": 4,
+      "zh": "苦信者的作俑"
+    },
+    {
+      "id": "6000111",
+      "name": "传道者的遗形",
+      "cost": 3,
+      "setIds": [
+        "17",
+        "18"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1749625589925.png",
+      "maxStar": 4,
+      "zh": "传道者的遗形"
+    },
+    {
+      "id": "6000118",
+      "name": "梦魇·破霜猎手",
+      "cost": 1,
+      "setIds": [
+        "19"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1753085167019.png",
+      "maxStar": 4,
+      "zh": "梦魇·破霜猎手"
+    },
+    {
+      "id": "6000119",
+      "name": "梦魇·振铎乐师",
+      "cost": 3,
+      "setIds": [
+        "19"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1753085193750.png",
+      "maxStar": 4,
+      "zh": "梦魇·振铎乐师"
+    },
+    {
+      "id": "6000117",
+      "name": "梦魇·审判战士",
+      "cost": 1,
+      "setIds": [
+        "19"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1753085371253.png",
+      "maxStar": 4,
+      "zh": "梦魇·审判战士"
+    },
+    {
+      "id": "6000116",
+      "name": "共鸣回响·芬莱克",
+      "cost": 4,
+      "setIds": [
+        "19",
+        "21"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1755850435251.png",
+      "maxStar": 4,
+      "zh": "共鸣回响·芬莱克"
+    },
+    {
+      "id": "6000115",
+      "name": "梦魇·赫卡忒",
+      "cost": 4,
+      "setIds": [
+        "19"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1753085587267.png",
+      "maxStar": 4,
+      "zh": "梦魇·赫卡忒"
+    },
+    {
+      "id": "6000121",
+      "name": "伪作的神王",
+      "cost": 4,
+      "setIds": [
+        "20"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1755850596008.png",
+      "maxStar": 4,
+      "zh": "伪作的神王"
+    },
+    {
+      "id": "6000164",
+      "name": "梦魇·巡徊猎手",
+      "cost": 1,
+      "setIds": [
+        "20"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1755850284339.png",
+      "maxStar": 4,
+      "zh": "梦魇·巡徊猎手"
+    },
+    {
+      "id": "6000163",
+      "name": "梦魇·惊蛰猎手",
+      "cost": 1,
+      "setIds": [
+        "20"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1755850215668.png",
+      "maxStar": 4,
+      "zh": "梦魇·惊蛰猎手"
+    },
+    {
+      "id": "6000161",
+      "name": "梦魇·紫羽鹭",
+      "cost": 3,
+      "setIds": [
+        "20"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1755850268864.png",
+      "maxStar": 4,
+      "zh": "梦魇·紫羽鹭"
+    },
+    {
+      "id": "6000120",
+      "name": "蚀脊龙",
+      "cost": 3,
+      "setIds": [
+        "18",
+        "22"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1759042065784.png",
+      "maxStar": 4,
+      "zh": "蚀脊龙"
+    },
+    {
+      "id": "6000165",
+      "name": "梦魇·咕咕河豚",
+      "cost": 1,
+      "setIds": [
+        "21"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1755850736490.png",
+      "maxStar": 4,
+      "zh": "梦魇·咕咕河豚"
+    },
+    {
+      "id": "6000162",
+      "name": "梦魇·青羽鹭",
+      "cost": 3,
+      "setIds": [
+        "21"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1755851000884.png",
+      "maxStar": 4,
+      "zh": "梦魇·青羽鹭"
+    },
+    {
+      "id": "6000166",
+      "name": "梦魇·啾啾河豚",
+      "cost": 1,
+      "setIds": [
+        "21"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1755850663506.png",
+      "maxStar": 4,
+      "zh": "梦魇·啾啾河豚"
+    },
+    {
+      "id": "6000160",
+      "name": "海之女",
+      "cost": 4,
+      "setIds": [
+        "20"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1755850934998.png",
+      "maxStar": 4,
+      "zh": "海之女"
+    },
+    {
+      "id": "6000167",
+      "name": "共鸣回响·鸣式·利维亚坦",
+      "cost": 4,
+      "setIds": [
+        "22",
+        "23"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1759042142217.png",
+      "maxStar": 4,
+      "zh": "共鸣回响·鸣式·利维亚坦"
+    },
+    {
+      "id": "6000170",
+      "name": "梦魇·刺玫菇（稚形）",
+      "cost": 1,
+      "setIds": [
+        "22"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1759042272979.png",
+      "maxStar": 4,
+      "zh": "梦魇·刺玫菇（稚形）"
+    },
+    {
+      "id": "6000168",
+      "name": "梦魇·绿熔蜥",
+      "cost": 3,
+      "setIds": [
+        "22"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1759042008385.png",
+      "maxStar": 4,
+      "zh": "梦魇·绿熔蜥"
+    },
+    {
+      "id": "6000169",
+      "name": "梦魇·绿熔蜥（稚形）",
+      "cost": 1,
+      "setIds": [
+        "22"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1759042510616.png",
+      "maxStar": 4,
+      "zh": "梦魇·绿熔蜥（稚形）"
+    },
+    {
+      "id": "6000173",
+      "name": "梦魇·刺玫菇",
+      "cost": 3,
+      "setIds": [
+        "23"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1763457609678.png",
+      "maxStar": 4,
+      "zh": "梦魇·刺玫菇"
+    },
+    {
+      "id": "6000172",
+      "name": "梦魇·侏侏鸵",
+      "cost": 1,
+      "setIds": [
+        "23"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1763457585196.png",
+      "maxStar": 4,
+      "zh": "梦魇·侏侏鸵"
+    },
+    {
+      "id": "6000171",
+      "name": "梦魇·呜咔咔",
+      "cost": 1,
+      "setIds": [
+        "23"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1763457961637.png",
+      "maxStar": 4,
+      "zh": "梦魇·呜咔咔"
+    },
+    {
+      "id": "6000189",
+      "name": "海维夏",
+      "cost": 4,
+      "setIds": [
+        "24",
+        "26"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766624738781.png",
+      "maxStar": 4,
+      "zh": "海维夏"
+    },
+    {
+      "id": "6000188",
+      "name": "风鳞蜃甲",
+      "cost": 3,
+      "setIds": [
+        "26",
+        "30"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766625184546.png",
+      "maxStar": 4,
+      "zh": "风鳞蜃甲"
+    },
+    {
+      "id": "6000174",
+      "name": "颤栗战士",
+      "cost": 1,
+      "setIds": [
+        "25",
+        "28",
+        "30"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766625545288.png",
+      "maxStar": 4,
+      "zh": "颤栗战士"
+    },
+    {
+      "id": "6000187",
+      "name": "霜鳞蜃甲",
+      "cost": 3,
+      "setIds": [
+        "25",
+        "30"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766624848292.png",
+      "maxStar": 4,
+      "zh": "霜鳞蜃甲"
+    },
+    {
+      "id": "6000181",
+      "name": "莳植机麋",
+      "cost": 3,
+      "setIds": [
+        "26",
+        "31"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766625021958.png",
+      "maxStar": 4,
+      "zh": "莳植机麋"
+    },
+    {
+      "id": "6000177",
+      "name": "岩蛛S4型",
+      "cost": 1,
+      "setIds": [
+        "24",
+        "25",
+        "27"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766625002440.png",
+      "maxStar": 4,
+      "zh": "岩蛛S4型"
+    },
+    {
+      "id": "6000183",
+      "name": "重工铁蹄",
+      "cost": 3,
+      "setIds": [
+        "24",
+        "30",
+        "31"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766624666860.png",
+      "maxStar": 4,
+      "zh": "重工铁蹄"
+    },
+    {
+      "id": "6000186",
+      "name": "隐迹铁影",
+      "cost": 3,
+      "setIds": [
+        "24",
+        "25",
+        "29"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766625314586.png",
+      "maxStar": 4,
+      "zh": "隐迹铁影"
+    },
+    {
+      "id": "6000185",
+      "name": "锯袭铁影",
+      "cost": 3,
+      "setIds": [
+        "24",
+        "25",
+        "29"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766625021597.png",
+      "maxStar": 4,
+      "zh": "锯袭铁影"
+    },
+    {
+      "id": "6000184",
+      "name": "探隧重机",
+      "cost": 3,
+      "setIds": [
+        "25",
+        "28",
+        "29"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766624809285.png",
+      "maxStar": 4,
+      "zh": "探隧重机"
+    },
+    {
+      "id": "6000182",
+      "name": "矿岩机麋",
+      "cost": 3,
+      "setIds": [
+        "24",
+        "31"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766624667528.png",
+      "maxStar": 4,
+      "zh": "矿岩机麋"
+    },
+    {
+      "id": "6000178",
+      "name": "噼啪啪",
+      "cost": 1,
+      "setIds": [
+        "24",
+        "26",
+        "28",
+        "29"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766624667046.png",
+      "maxStar": 4,
+      "zh": "噼啪啪"
+    },
+    {
+      "id": "6000175",
+      "name": "莳植熊蜂",
+      "cost": 1,
+      "setIds": [
+        "24",
+        "26",
+        "29",
+        "31"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766624753073.png",
+      "maxStar": 4,
+      "zh": "莳植熊蜂"
+    },
+    {
+      "id": "6000180",
+      "name": "双极·渊陨重锋",
+      "cost": 3,
+      "setIds": [
+        "26",
+        "27",
+        "29"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766624896990.png",
+      "maxStar": 4,
+      "zh": "双极·渊陨重锋"
+    },
+    {
+      "id": "6000190",
+      "name": "炉芯机骸",
+      "cost": 4,
+      "setIds": [
+        "25",
+        "28"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766624938658.png",
+      "maxStar": 4,
+      "zh": "炉芯机骸"
+    },
+    {
+      "id": "6000176",
+      "name": "矿岩熊蜂",
+      "cost": 1,
+      "setIds": [
+        "25",
+        "26",
+        "29",
+        "31"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766625389923.png",
+      "maxStar": 4,
+      "zh": "矿岩熊蜂"
+    },
+    {
+      "id": "6000179",
+      "name": "双极·星升辉铳",
+      "cost": 3,
+      "setIds": [
+        "26",
+        "28"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1766625502533.png",
+      "maxStar": 4,
+      "zh": "双极·星升辉铳"
+    },
+    {
+      "id": "6000192",
+      "name": "无铭探索者",
+      "cost": 4,
+      "setIds": [
+        "29",
+        "31"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1769504884473.png",
+      "maxStar": 4,
+      "zh": "无铭探索者"
+    },
+    {
+      "id": "6000191",
+      "name": "辛吉勒姆",
+      "cost": 4,
+      "setIds": [
+        "27"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1769504442374.png",
+      "maxStar": 4,
+      "zh": "辛吉勒姆"
+    },
+    {
+      "id": "6000196",
+      "name": "冰盈舞者",
+      "cost": 1,
+      "setIds": [
+        "27",
+        "30",
+        "31"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1769504050989.png",
+      "maxStar": 4,
+      "zh": "冰盈舞者"
+    },
+    {
+      "id": "6000193",
+      "name": "冠顶械隼",
+      "cost": 3,
+      "setIds": [
+        "27",
+        "28"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1769504133069.png",
+      "maxStar": 4,
+      "zh": "冠顶械隼"
+    },
+    {
+      "id": "6000194",
+      "name": "共鸣回响·冠顶苍隼",
+      "cost": 3,
+      "setIds": [
+        "27",
+        "28"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1769504637162.png",
+      "maxStar": 4,
+      "zh": "共鸣回响·冠顶苍隼"
+    },
+    {
+      "id": "6000197",
+      "name": "影烁者",
+      "cost": 1,
+      "setIds": [
+        "27",
+        "28",
+        "30"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1769504690718.png",
+      "maxStar": 4,
+      "zh": "影烁者"
+    },
+    {
+      "id": "6000195",
+      "name": "格洛犸图",
+      "cost": 3,
+      "setIds": [
+        "27",
+        "30"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1769504148013.png",
+      "maxStar": 4,
+      "zh": "格洛犸图"
+    },
+    {
+      "id": "6000199",
+      "name": "共鸣回响·鸣式·虚造神型",
+      "cost": 4,
+      "setIds": [
+        "30"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1780554793729.png",
+      "maxStar": 4,
+      "zh": "共鸣回响·鸣式·虚造神型"
+    },
+    {
+      "id": "6000200",
+      "name": "共鸣回响·达妮娅",
+      "cost": 4,
+      "setIds": [
+        "28"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1780554224130.png",
+      "maxStar": 4,
+      "zh": "共鸣回响·达妮娅"
+    },
+    {
+      "id": "6000198",
+      "name": "迷胧幻蛾",
+      "cost": 3,
+      "setIds": [
+        "31"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1777459181258.png",
+      "maxStar": 4,
+      "zh": "迷胧幻蛾"
+    },
+    {
+      "id": "6000201",
+      "name": "共鸣回响·梦魇亚当·重锤",
+      "cost": 4,
+      "setIds": [
+        "32"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1780554343684.png",
+      "maxStar": 4,
+      "zh": "共鸣回响·梦魇亚当·重锤"
+    },
+    {
+      "id": "6000213",
+      "name": "霁息兽尊·首",
+      "cost": 1,
+      "setIds": [
+        "33"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783653344102.png",
+      "maxStar": 4,
+      "zh": "霁息兽尊·首"
+    },
+    {
+      "id": "6000212",
+      "name": "霁息兽尊·身",
+      "cost": 1,
+      "setIds": [
+        "33"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783652883549.png",
+      "maxStar": 4,
+      "zh": "霁息兽尊·身"
+    },
+    {
+      "id": "6000207",
+      "name": "心傀·怒",
+      "cost": 1,
+      "setIds": [
+        "34"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783652848140.png",
+      "maxStar": 4,
+      "zh": "心傀·怒"
+    },
+    {
+      "id": "6000208",
+      "name": "心傀·忧",
+      "cost": 1,
+      "setIds": [
+        "34"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783652699113.png",
+      "maxStar": 4,
+      "zh": "心傀·忧"
+    },
+    {
+      "id": "6000216",
+      "name": "封庭械囿",
+      "cost": 3,
+      "setIds": [
+        "33",
+        "34",
+        "35"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783653127444.png",
+      "maxStar": 4,
+      "zh": "封庭械囿"
+    },
+    {
+      "id": "6000211",
+      "name": "心傀·恐",
+      "cost": 1,
+      "setIds": [
+        "35"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783652714042.png",
+      "maxStar": 4,
+      "zh": "心傀·恐"
+    },
+    {
+      "id": "6000210",
+      "name": "心傀·悲",
+      "cost": 1,
+      "setIds": [
+        "35"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783653366196.png",
+      "maxStar": 4,
+      "zh": "心傀·悲"
+    },
+    {
+      "id": "6000215",
+      "name": "霁息兽尊",
+      "cost": 3,
+      "setIds": [
+        "33",
+        "34",
+        "35"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783653045711.png",
+      "maxStar": 4,
+      "zh": "霁息兽尊"
+    },
+    {
+      "id": "6000202",
+      "name": "融躯战士",
+      "cost": 1,
+      "setIds": [
+        "33"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783652971836.png",
+      "maxStar": 4,
+      "zh": "融躯战士"
+    },
+    {
+      "id": "6000214",
+      "name": "不熄猎手",
+      "cost": 1,
+      "setIds": [
+        "33"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783653049179.png",
+      "maxStar": 4,
+      "zh": "不熄猎手"
+    },
+    {
+      "id": "6000204",
+      "name": "石庭候",
+      "cost": 1,
+      "setIds": [
+        "35"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783652655296.png",
+      "maxStar": 4,
+      "zh": "石庭候"
+    },
+    {
+      "id": "6000206",
+      "name": "心傀·喜",
+      "cost": 1,
+      "setIds": [
+        "33"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783653268848.png",
+      "maxStar": 4,
+      "zh": "心傀·喜"
+    },
+    {
+      "id": "6000209",
+      "name": "心傀·思",
+      "cost": 1,
+      "setIds": [
+        "34"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783653364157.png",
+      "maxStar": 4,
+      "zh": "心傀·思"
+    },
+    {
+      "id": "6000203",
+      "name": "瓷庭候",
+      "cost": 1,
+      "setIds": [
+        "35"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783652913344.png",
+      "maxStar": 4,
+      "zh": "瓷庭候"
+    },
+    {
+      "id": "6000205",
+      "name": "金庭候",
+      "cost": 1,
+      "setIds": [
+        "34"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783652784276.png",
+      "maxStar": 4,
+      "zh": "金庭候"
+    },
+    {
+      "id": "6000218",
+      "name": "千傀重楼",
+      "cost": 4,
+      "setIds": [
+        "33"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783653249053.png",
+      "maxStar": 4,
+      "zh": "千傀重楼"
+    },
+    {
+      "id": "6000217",
+      "name": "万囮牢·朽躯",
+      "cost": 4,
+      "setIds": [
+        "34",
+        "35"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1783653245733.png",
+      "maxStar": 4,
+      "zh": "万囮牢·朽躯"
+    },
+    {
+      "id": "6000221",
+      "name": "天傀劫煞",
+      "cost": 4,
+      "setIds": [
+        "34",
+        "35"
+      ],
+      "iconUrl": "https://web-static.kurobbs.com/adminConfig/35/phantom_icon/1787186600665.png",
+      "maxStar": 4,
+      "zh": "天傀劫煞"
+    },
+    {
+      "id": "6000222",
+      "name": "奇绽傀",
+      "cost": 1,
+      "setIds": [
+        "36"
+      ],
+      "iconUrl": "assets/echoes/6000222.png",
+      "maxStar": 4,
+      "zh": "奇绽傀"
+    },
+    {
+      "id": "6000223",
+      "name": "解形煞",
+      "cost": 3,
+      "setIds": [
+        "36",
+        "38"
+      ],
+      "iconUrl": "assets/echoes/6000223.png",
+      "maxStar": 4,
+      "zh": "解形煞"
+    },
+    {
+      "id": "6000224",
+      "name": "绝息魄",
+      "cost": 3,
+      "setIds": [
+        "36",
+        "37"
+      ],
+      "iconUrl": "assets/echoes/6000224.png",
+      "maxStar": 4,
+      "zh": "绝息魄"
+    },
+    {
+      "id": "6000225",
+      "name": "共鸣回响·天演溯心",
+      "cost": 4,
+      "setIds": [
+        "36",
+        "37"
+      ],
+      "iconUrl": "assets/echoes/6000225.png",
+      "maxStar": 4,
+      "zh": "共鸣回响·天演溯心"
+    }
+  ]
+}

@@ -40,12 +40,14 @@ typeBonus  typeDeep  typeDefense  typeVulnerability
 | `generalDeep` | 通用加深（`延奏·莫宁` 25%） | `deepenDmg` | — |
 | `elementDeep` | 属性加深（`绯雪·延奏` 冷凝 20%） | `deepenDmg` | `elements:[element]` |
 | `typeDeep` | 类型加深（`洛瑟拉·延奏` 效应 60%） | `deepenDmg` | `damageTypes:[damageType]` |
-| `generalVulnerability` / `typeVulnerability` / `convergence` | 易伤（`雪锈` 霜渐 25%；集谐 `convergenceVuln` 12%） | `dmgTakenInc` | 类型易伤带 `damageTypes` |
+| `generalVulnerability` / `typeVulnerability` | 易伤（`雪锈` 霜渐 25%） | `dmgTakenInc` | 类型易伤带 `damageTypes` |
+| `convergence` | 集谐·最终伤害（`convergenceVuln` 每层 14.4% × 层数） | `finalDmg` | **独立乘区**，不能并进易伤 |
 | `elementResReduce` | 属性减抗（`洛瑟菈·全队·霜渐` 冷凝 8%） | `resDown` | `elements:[element]` |
 | `generalDefense` / `elementDefense` / `typeDefense` | 无视防御（`荣光` 30% / `穗穗` 湮灭 6% / `再无我·共鸣解放` 10%） | `defPen` | 按各自 element / damageType |
 | `offsetHarmonyEff` | 偏谐值累积效率（`莫宁` 50%） | `offTuneBuildupRate` | — |
 | `multAdd` | **倍率追加**：「每层/每点/每超过X**增加**倍率 N%」（`命火` 劫魄 527.5 / 踏罡 541.25、`锯环残响` 每点 2.59%、`余响` 每层 82.55%） | `extraRatio` | — |
-| `multBoost` / `multBoostExtra` | **倍率提升**：「××伤害倍率**提升** N%」（`坎特蕾拉·一链` 50%、`弗洛洛·1链` 80%、`景燃·2链` 46%、`卡提希娅·3链` 100%） | `specialFinal1` | — |
+| `multBoost` | **倍率提升**：「××伤害倍率**提升** N%」（`坎特蕾拉·一链` 50%、`弗洛洛·1链` 80%、`景燃·2链` 46%、`卡提希娅·3链` 100%） | `specialFinal1` | 同区加算 |
+| `multBoostExtra` | 额外倍率提升：上游按 `(1+Σ multBoost) × (1+Σ multBoostExtra)` 连乘 | `specialFinal2` | 每个来源独立乘算 |
 
 - 三个 `*Defense` **一律落 `defPen`**（实测样例都带 `defenseKind: 'ignore'`，即穿防）。
 - ⚠️ **两个倍率类不是一回事**（原先都落 `extraRatio`，是错的）：
@@ -63,7 +65,7 @@ typeBonus  typeDeep  typeDefense  typeVulnerability
   - 两者都**不挂 `damageType` 条件**：上游 `multBoost` 的 `damageType` 只是**概要**
     （卡提希娅 2 链「普攻、重击、闪避反击、变奏技能倍率提升50%」的 `dt` 写的是「普攻」），
     当成条件会把重击/变奏那几条挡掉；定位一律靠 `skillNames` → 条目名。
-- `convergence` 落易伤区，依据 `core.js` 注释「集谐与陆·赫斯/达妮娅共用现有易伤计算」，且该 buff 只有 `convergenceVuln` 一个数值字段。
+- `convergence` 是**独立乘区**：`core.js` 的 `sumConvergenceFinalPct` 与易伤区（Z2）分开、区间乘算；落工具箱「终伤区」`finalDmg`。数值为 `层数 × 谐度破坏增幅 × convergenceVuln`，转换时按每层值 + `maxStacks` 折算。
 
 ⚠️ **`damageTypes` 条件必须写全名**：工具箱的 `evaluateCondition` 拿它去比对
 `inferDamageTypes()` 的返回值，而后者返回的是 `普攻伤害` / `效应伤害` 这种**带「伤害」后缀的全名**。
@@ -165,7 +167,7 @@ else  // 'stack'
 | --- | --- |
 | 叠层段（`valueMode === 'stack'`） | 轴上**用到过**的层数各一条：`id = ${id}#L${n}`、`name = ${name} ${n}层`，`value` = 第 1..n 层的**累计值**（`Σ perStackOf(s)`，不是单层值） |
 | 固定段（`valueMode === 'fixed'`） | 不拆层，一条；`minStacks` 当**绑定门槛**（`≥N 层`才生效） |
-| 集谐模态 `convergenceVuln` | 单独一条易伤乘区 |
+| 集谐模态 `convergenceVuln` | 单独一条终伤乘区（按层数累计，独立乘算） |
 
 - 层数只取**轴上用到过的**：`maxStacks` 只是上限（祸兮福兮上限 50，但每条轴不一定用满），
   铺 `1..N` 更会凭空多出一堆空 buff。
@@ -200,7 +202,11 @@ else  // 'stack'
 - 拉表侧的绑定判定用同一份口径（`inferEntryDamageTypes()`）：有上游类型就用上游的，
   否则复刻工具箱的规则 1 / 3 / 4，保证「勾选状态」与「工具箱实际算的类型」一致；
 - 非直伤（处决 / 响应 / 效应）不在这张表里：它们的 id 由工具箱自己派生，
-  效应条目靠 `isEffect` 自动得到「效应伤害」。
+  效应条目靠 `isEffect` 自动得到「效应伤害」；
+- **双类型伤害**：上游 `alsoAsEffect`（如卡提希娅部分普攻同时视为风蚀）会追加成
+  第二项 `效应伤害`。椰果条件内部是「或」（`evaluateCondition` 对 `damageTypes` 逐项
+  `some`），所以同一条目可同时挂 `普攻伤害` + `效应伤害`，效应专属加深 / 双暴都能命中。
+
 
 ### 1.7 一条 buff 只带一种乘区（拆分 + 重命名）
 
@@ -402,6 +408,19 @@ resolved = { ...globalBuffStacks（缺省 0）, ...该技能目录条目的层�
 `buffActive` 仍是逐技能的开关（`skill.buffActive[buffId]`，缺失回落到全局），
 和层数各管各的：层数记着但 `buffActive: false` 的技能不会被勾选。
 
+### 2.3.2.1 鸣算屋没有「持续时间」模拟
+
+游戏文案里的「持续 30 秒」不会进入结算。线上引擎的当前状态只有三份：
+
+- `getPhaseActive()`：`phase.buffMode/buffActive` 覆盖 `member.globalBuffActive`；
+- `resolveCycleStepStacksForRound()`：`globalBuffStacks` → `phase.buffStacks` →
+  `round.catalogStacks[catalogId]`；
+- `axisOffsetPx` / `duration`：只用于排序、轮长和 DPS，**不参与任何 Buff 生效判定**。
+
+所以鸣算屋本身也是「一切皆当下」，粒度是**阶段 / 技能**，不是时间轴。转换时只要把每个技能的
+`buffActive` / `buffStacks` 落到对应伤害条目的绑定上即可，**不能也不需要**去模拟时间窗口——
+按时间窗口重算反而会与上游口径不一致。
+
 ### 2.3.3 一个技能一条原始复合倍率（关键）
 
 上游一个技能段的倍率是**分段**构成的（`rotationCatalog[].multComponents`），
@@ -556,6 +575,47 @@ effectiveRatio = ratio + extraRatio / 100 × hits      // compute.ts
 
 - 处决 / 响应 `max: 0` → **`layers` 恒为 0**；效应有层数上限（19 / 12 / 9），`layers` 才有效。
 - 实测样例：露丽莫 `{name:"谐度破坏",category:"处决",layers:0,responders:["露西"]}`、`{name:"骇破响应",category:"响应",layers:0,responders:["露西","丽贝卡"]}`；爱达千 `{name:"聚爆效应",category:"效应",layers:13,hits:5}`。
+
+### 2.4.1 效应专属：覆盖倍率 / 双暴 / 加深
+
+鸣算屋的具名效应（`聚爆·普通光翼`、`达妮娅·6链·强化聚爆` …）在 payload 里带
+`baseMult`，它的倍率**不等于**工具箱通用表（`EFFECT_TABLE[效应名][层数]`）的值；
+部分 6 链还会给效应独立的双暴。这些都必须继续遵守「一切皆 Buff」，不能改引擎公式：
+
+| 上游 | 转换后的 Buff | 说明 |
+| --- | --- | --- |
+| 效应 `baseMult`（已 /100） | `effect_base:<entryId>`，乘区 `extraRatio` | 目标值 B、通用表 T（按层数），Buff 值 = `(B − T) × 100`；引擎的效应公式是 `3674 × (T + extraRatio/100 × hits)`，所以等价于把倍率覆盖成 B |
+| 效应专属 `critRate` / `critDmg` | `effect_crit:<entryId>`，乘区 `critRate` / `critDmg`，**`override: true`** | 系数基类条目只认覆盖型双暴；追加/引用一律无效 |
+| 效应专属加深 | 已经是 `deepenDmg` Buff，条件带 `damageTypes:["效应伤害"]` | 只绑到对应效应条目 |
+
+两个 Buff 都按条目的 `character` 找到站位，`scope` 指到该站位（找不到才退化成 `all`），
+并写进 `damageEntryBuffSetIds`，因此不会污染同角色的直伤条目。
+
+**全伤害加深不会进效应。** 鸣算屋的特殊技能走独立 Buff 库（`isSpecialEffectBuffSource`）：
+`generalDeep` 只有明确标成「效应」才会同步，普通「全伤害加深 25%」留在直伤侧。
+工具箱的效应伤害却和直伤共用 `deepenDmg` 乘区，所以转换器对效应条目会跳过
+「只有 `deepenDmg`、且条件里没有 `效应伤害`」的 Buff。易伤 / 穿防 / 减抗属于特殊技能
+默认同步，照常保留。
+
+面板来源同理：`typeDmgBonusSources` 里的 `damageType`（如西格莉卡固有2 的 `声骸`）
+和 `element` 必须转成乘区条件，名字里没写类型时尤其不能丢，否则会变成无条件的全伤害增伤。
+
+### 2.4.2 减抗与「无视防御」的独立乘区
+
+- **减抗**：上游 `generalResReduce` / `typeResReduce` / `elementResReduce` 都落工具箱的
+  `resDown`；`typeResReduce` 额外带 `damageTypes` 条件，`elementResReduce` 额外带
+  `elements` 条件。漏掉减抗会让整段伤害少一大截（逐星 30% 热熔减抗实测差 5.9%）。
+- **穿防 vs 无视防御**：上游用 `defenseKind` 区分 `pen` 与 `ignore`，公式是
+  `(1 − pen) × (1 − ignore)` 两个**独立**因子。工具箱的 `defPen`（穿防）与
+  `defDown`（减防）在 `computeDefMulti()` 里同样是独立乘算，所以：
+
+  | 上游 | 椰果乘区 |
+  | --- | --- |
+  | `generalDefense` / `elementDefense` / `typeDefense` + `defenseKind: "pen"` | `defPen` |
+  | 同上 + `defenseKind: "ignore"` | `defDown` |
+
+  两者都并进 `defPen` 会被工具箱当成 `1 − pen − ignore`，把 18% 无视防御放大成
+  额外收益（实测逐条高 9.7%，总伤因此偏 +4.6%）。
 
 ### 2.5 多轮（`cycleConfig.rounds`）—— 有多少轮转多少轮
 
