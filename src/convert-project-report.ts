@@ -109,17 +109,40 @@ const numberText = (value: number): string =>
 const engineStatusLabel = (status: string): string =>
     status === "match" ? "一致" : status === "warn" ? "小偏差" : "异常"
 
+const ENGINE_ZONE_LABELS: Record<string, string> = {
+    attack: "攻击",
+    hp: "生命",
+    def: "防御",
+    baseMult: "倍率",
+    dmgBonus: "增伤",
+    deepen: "加深",
+    vulnerability: "易伤",
+    resistance: "抗性",
+    defense: "防御乘区",
+    critRate: "暴击率",
+    critDmg: "暴击伤害",
+    critExpect: "双暴期望",
+    multBoost: "倍率提升",
+    multAdd: "倍率追加",
+}
+
+const engineZoneLabel = (name: string): string =>
+    ENGINE_ZONE_LABELS[name] ?? name
+
 const ENGINE_PERCENT_POINTS = new Set(["critRate", "critDmg", "multAdd"])
+const ENGINE_FLAT_ZONES = new Set(["attack", "hp", "def"])
 
 const engineZoneValue = (name: string, value: number): string => {
-    if (name === "attack") return value.toFixed(2)
+    if (ENGINE_FLAT_ZONES.has(name)) return value.toFixed(2)
     if (ENGINE_PERCENT_POINTS.has(name)) return `${value.toFixed(2)}%`
     return value.toFixed(4)
 }
 
 const engineZoneDelta = (name: string, value: number): string => {
     if (!Number.isFinite(value)) return "∞"
-    if (name === "attack") return `${value >= 0 ? "+" : ""}${value.toFixed(2)}`
+    if (ENGINE_FLAT_ZONES.has(name)) {
+        return `${value >= 0 ? "+" : ""}${value.toFixed(2)}`
+    }
     if (ENGINE_PERCENT_POINTS.has(name)) {
         return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`
     }
@@ -272,7 +295,7 @@ const markdownOf = (report: Omit<ProjectReport, "markdown">): string => {
             ) {
                 const zones = skill.zones
                     .map((zone) =>
-                        `${zone.name} ${
+                        `${engineZoneLabel(zone.name)} ${
                             engineZoneValue(zone.name, zone.wuwa)
                         } → ${engineZoneValue(zone.name, zone.coconut)} (${
                             engineZoneDelta(zone.name, zone.delta)
@@ -527,7 +550,8 @@ export const renderProjectReportHtml = (report: ProjectReport): string => {
                 const zones = skill.zones.length
                     ? "<table><thead><tr><th>乘区</th><th>鸣算屋</th><th>椰果</th><th>偏差</th></tr></thead><tbody>" +
                         skill.zones.map((zone) =>
-                            "<tr><td>" + escapeHtml(zone.name) +
+                            "<tr><td>" +
+                            escapeHtml(engineZoneLabel(zone.name)) +
                             '</td><td class="num">' +
                             engineZoneValue(zone.name, zone.wuwa) +
                             '</td><td class="num">' +
@@ -608,7 +632,7 @@ export const renderProjectReportHtml = (report: ProjectReport): string => {
                 (entry.engine.zones.length
                     ? "<br>差异：" +
                         entry.engine.zones.map((zone) =>
-                            escapeHtml(zone.name) + " " +
+                            escapeHtml(engineZoneLabel(zone.name)) + " " +
                             engineZoneDelta(zone.name, zone.delta)
                         ).join(" · ")
                     : "") +

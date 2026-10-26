@@ -163,9 +163,17 @@ const zonesOf = (
         bd.multAddPct,
         group.entries.reduce((sum, e) => sum + (e.extraRatio || 0), 0),
     )
-    if (skill.scaleStat === "atk" || !skill.scaleStat) {
-        add("attack", bd.attack, base.totalAtk)
-    }
+    // 鸣算屋的 `attack` 字段其实是「当前缩放面板值」：生命/防御缩放的技能
+    // 也塞在这个字段里，只有 `breakdown.scaleStat` 才说明它到底是什么。
+    // 椰果侧严格分成 totalAtk / totalHp / totalDef，不能一律拿 totalAtk 比。
+    const scale = String(bd.scaleStat ?? skill.scaleStat ?? "atk")
+    const scaleName = scale === "hp" ? "hp" : scale === "def" ? "def" : "attack"
+    const scaleValue = scale === "hp"
+        ? base.totalHp
+        : scale === "def"
+        ? base.totalDef
+        : base.totalAtk
+    add(scaleName, bd.attack, scaleValue)
     return out
 }
 

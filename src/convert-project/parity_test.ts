@@ -79,10 +79,10 @@ for (const code of GATE) {
                 }%`,
             )
             for (const zone of entry.zones) {
-                if (zone.name === "attack") {
+                if (["attack", "hp", "def"].includes(zone.name)) {
                     ok(
                         Math.abs(zone.delta) <= ATTACK_ROUNDING_TOLERANCE,
-                        `${code} ${entry.character}/${entry.wuwaName} 攻击白值差 ${zone.delta}（超过取整容差）`,
+                        `${code} ${entry.character}/${entry.wuwaName} 面板白值差 ${zone.delta}（超过取整容差）`,
                     )
                     continue
                 }
@@ -124,6 +124,22 @@ for (const code of DIAGNOSTIC) {
         },
     )
 }
+
+Deno.test("差分：生命/防御缩放不再误标成 attack", async () => {
+    const result = await runParityComparison("MC-4NRWDV")
+    const row = result.entries.find((entry) =>
+        entry.character === "莫宁" && entry.wuwaName === "R"
+    )
+    ok(row, "应能找到莫宁 R")
+    ok(
+        row!.zones.some((zone) => zone.name === "def"),
+        "防御缩放应落到 def 乘区",
+    )
+    ok(
+        !row!.zones.some((zone) => zone.name === "attack"),
+        "防御缩放不应再标成 attack",
+    )
+})
 
 Deno.test("引擎快照 · 鸣算屋线上脚本已提取到仓库", async () => {
     for (

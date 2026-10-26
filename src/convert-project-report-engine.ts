@@ -90,8 +90,11 @@ const statusOf = (rel: number): ComparisonStatus => {
 }
 
 const zoneStatusOf = (zone: ZoneDiff): ComparisonStatus => {
-    // 工具箱把攻击白值四舍五入到整数，允许 2 点误差；其余乘区仍要求逐位一致。
-    if (zone.name === "attack" && Math.abs(zone.delta) <= 2.01) return "match"
+    // 工具箱把面板白值四舍五入到整数，允许 2 点误差；其余乘区仍要求逐位一致。
+    if (
+        ["attack", "hp", "def"].includes(zone.name) &&
+        Math.abs(zone.delta) <= 2.01
+    ) return "match"
     return Math.abs(zone.rel) < 1e-9 ? "match" : statusOf(zone.rel)
 }
 
