@@ -21,6 +21,14 @@ import {
 } from "./convert-project-report-endpoint.ts"
 import { handleHome, handleUsageImage, USAGE_IMAGE_ROUTE } from "./home.ts"
 import { CORS_HEADERS, errorResponse } from "./http.ts"
+import {
+    handleCsfRequest,
+    handleSchemeRequest,
+    handleWuwacalcAsset,
+    isCsfRequest,
+    isSchemeRequest,
+    isWuwacalcAsset,
+} from "./wuwacalc-proxy.ts"
 import type { Bindings } from "./http.ts"
 
 export default {
@@ -33,6 +41,29 @@ export default {
         if (req.method !== "GET") return errorResponse(405, "仅支持 GET 请求")
 
         if (url.pathname === "/") return await handleHome(url, env)
+
+        // 报告页里的本地重算 iframe：同源代理鸣算屋站点与 CSF 数据
+        if (isWuwacalcAsset(url.pathname)) {
+            try {
+                return await handleWuwacalcAsset(url)
+            } catch {
+                return errorResponse(502, "鸣算屋引擎资源加载失败")
+            }
+        }
+        if (isCsfRequest(url.pathname)) {
+            try {
+                return await handleCsfRequest(url)
+            } catch {
+                return errorResponse(502, "鸣算屋数据加载失败")
+            }
+        }
+        if (isSchemeRequest(url.pathname)) {
+            try {
+                return await handleSchemeRequest(url)
+            } catch {
+                return errorResponse(502, "鸣算屋方案数据加载失败")
+            }
+        }
 
         const usage = USAGE_IMAGE_ROUTE.exec(url.pathname)
         if (usage) return handleUsageImage(usage[1] as "dark" | "light")

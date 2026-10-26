@@ -200,7 +200,10 @@ const renderCard = (project: HomeProject): string => {
             : "",
     ].filter(Boolean).join("")
 
-    return `<article class="card pop">
+    const href = `/share/${encodeURIComponent(project.code)}`
+    return `<a class="card pop" href="${href}" aria-label="打开 ${
+        escapeHtml(project.title)
+    } 的转换报告">
   <header class="card-head">
     <span class="card-order">${escapeHtml(project.order)}</span>
     <span class="card-date">${escapeHtml(formatDate(project.createdAt))}</span>
@@ -218,8 +221,9 @@ const renderCard = (project: HomeProject): string => {
     <span class="card-author">${escapeHtml(project.author)}${
         project.config ? ` · ${escapeHtml(project.config)}` : ""
     }</span>
+    <span class="card-open">查看报告 →</span>
   </footer>
-</article>`
+</a>`
 }
 
 /** 页面骨架：所有可变内容都已经过 `escapeHtml` */
@@ -876,11 +880,16 @@ code {
   gap: 12px;
   padding: 24px 24px 20px;
   background: var(--paper-2);
+  color: inherit;
   border: 1px solid var(--rule);
   box-shadow: var(--shadow);
+  text-decoration: none;
   transition: .2s ease;
 }
 .card:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--rule)); transform: translateY(-2px); }
+.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.card-open { color: var(--accent); font-weight: 600; transition: transform .2s ease; }
+.card:hover .card-open { transform: translateX(3px); }
 @media (min-width: 920px) { .card:first-child { grid-column: span 2; } }
 .card-head { display: flex; align-items: baseline; justify-content: space-between; }
 .card-order { font-size: 26px; color: var(--accent); font-variant-numeric: tabular-nums; }

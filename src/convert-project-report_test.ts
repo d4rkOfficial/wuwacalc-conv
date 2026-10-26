@@ -75,11 +75,18 @@ Deno.test("转换报告：双引擎对比能逐技能定位乘区差异", async 
         report.entries.filter((entry) => entry.engine).length > 10,
         "逐条目应挂上技能合计对比",
     )
-    assertStringIncludes(report.markdown, "## 引擎对比（鸣算屋快照 vs 椰果）")
+    assertStringIncludes(
+        report.markdown,
+        "## 引擎对比（鸣算屋快照 vs 椰果工具箱）",
+    )
     assertStringIncludes(report.markdown, "### 逐技能")
     const html = renderProjectReportHtml(report)
-    assertStringIncludes(html, "引擎对比（鸣算屋快照 vs 椰果）")
+    assertStringIncludes(html, "引擎审计")
     assertStringIncludes(html, "逐技能")
+    assertStringIncludes(html, "Buff 提取列表")
+    assertStringIncludes(html, "entry-buff-table")
+    assert(html.includes('href="#buff-1"'), "转换映射应能跳到 Buff 提取列表")
+    assert(html.includes('href="#entry-1"'), "Buff 列表应能跳到伤害条目")
 })
 
 Deno.test("转换报告：逐条目 Buff 与乘区汇总", () => {

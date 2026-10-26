@@ -9,7 +9,7 @@ import {
     renderHomePage,
     toHomeProject,
 } from "./home.ts"
-import { USAGE_IMAGES, USAGE_IMAGE_PATHS } from "./usage-images.ts"
+import { USAGE_IMAGE_PATHS, USAGE_IMAGES } from "./usage-images.ts"
 
 const assertEquals = (actual: unknown, expected: unknown) =>
     deepStrictEqual(actual, expected)
@@ -172,7 +172,11 @@ Deno.test("首页：卡片渲染标题 / 队伍 / 统计，且不带下载按钮
     // 卡片上不再给下载入口（端点说明里提到 `/share/{code}/download` 属于文案，不算链接）
     assert(!html.includes("下载工程"), "卡片里不应再有下载按钮")
     assert(!html.includes('class="card-action"'), "卡片里不应再有操作链接")
-    assert(!/href="\/share\//.test(html), "页面里不应有指向下载端点的链接")
+    assert(
+        /href="\/share\/MC-[^"]+"/.test(html),
+        "卡片应链接到对应报告页",
+    )
+    assert(!/href="\/share\/[^"]+\/download"/.test(html), "卡片不应直链下载")
 })
 
 Deno.test("首页：上游文本一律转义，不给注入留口子", () => {
@@ -261,8 +265,9 @@ Deno.test("首页：右上角是「返回顶部」，三个按钮各带图标", 
     // 三处主站链接挪到了大按钮上
     assert(!nav.includes("wuwacalc.cn"), "顶栏不该再挂主站跳转")
 
-    const actions = /<div class="hero-actions">([\s\S]*?)<\/div>/.exec(html)?.[1] ??
-        ""
+    const actions =
+        /<div class="hero-actions">([\s\S]*?)<\/div>/.exec(html)?.[1] ??
+            ""
     assertEquals(
         (actions.match(/<a /g) ?? []).length,
         3,
@@ -321,14 +326,17 @@ Deno.test("首页：栏目叫「最新方案」，端点做成两张卡片且名
 Deno.test("首页：标语就是那句话", () => {
     const html = renderHomePage({ total: 0, projects: [] })
     assert(
-        html.includes("把鸣算屋的方案列表/下载API与完整工程翻译成椰果工具箱认得的格式"),
+        html.includes(
+            "把鸣算屋的方案列表/下载API与完整工程翻译成椰果工具箱认得的格式",
+        ),
         "标语应当是新文案",
     )
 })
 
 Deno.test("首页：标题区下面是三格收录总数，合计为两侧之和", () => {
     const ledger = (html: string) =>
-        /<section class="ledger pop">([\s\S]*?)<\/section>/.exec(html)?.[1] ?? ""
+        /<section class="ledger pop">([\s\S]*?)<\/section>/.exec(html)?.[1] ??
+            ""
 
     const both = ledger(renderHomePage({
         total: 128,
@@ -390,7 +398,10 @@ Deno.test("首页：主内容区统一用入场弹入，且只在滚进画面时
     })
 
     assert(html.includes("@keyframes pop-in"), "有弹出关键帧")
-    assert(html.includes("@supports (animation-timeline: view())"), "带特性兜底")
+    assert(
+        html.includes("@supports (animation-timeline: view())"),
+        "带特性兜底",
+    )
     assert(
         html.includes("animation-range: entry 0% entry 45%"),
         "进入视口时才弹",
@@ -405,7 +416,7 @@ Deno.test("首页：主内容区统一用入场弹入，且只在滚进画面时
             'class="btn btn-wuwacalc pop-hero"',
             'class="btn btn-usage pop-hero"',
             '<section class="ledger pop">',
-            '<article class="card pop">',
+            '<a class="card pop"',
             '<article class="endpoint-card pop">',
             '<div class="section-head-inner pop">',
             '<div class="usage-text pop">',
@@ -456,14 +467,18 @@ Deno.test("首页：栏目标题滚动贴顶，顶栏在开屏时藏起来", () 
         3,
     )
     assert(
-        /@container scroll-state\(stuck: top\) \{[^}]*\.section-head-inner/.test(
-            html,
-        ),
+        /@container scroll-state\(stuck: top\) \{[^}]*\.section-head-inner/
+            .test(
+                html,
+            ),
         "贴顶时才切换标题外观",
     )
 
     // 顶栏：只用滚动时间线切状态，没有滑动/淡入的动作
-    assert(html.includes("animation-timeline: scroll(root block)"), "用滚动时间线")
+    assert(
+        html.includes("animation-timeline: scroll(root block)"),
+        "用滚动时间线",
+    )
     assert(html.includes("@keyframes nav-flip"), "顶栏只切显隐状态")
     assert(html.includes("steps(1, end)"), "状态是瞬间切换的，不做动画")
     assert(
@@ -480,13 +495,17 @@ Deno.test("首页：栏目标题滚动贴顶，顶栏在开屏时藏起来", () 
 Deno.test("首页：标题下的「使用方法」按钮跳到页面底部的同名栏目", () => {
     const html = renderHomePage({ total: 0, projects: [] })
 
-    const actions = /<div class="hero-actions">([\s\S]*?)<\/div>/.exec(html)?.[1] ??
-        ""
+    const actions =
+        /<div class="hero-actions">([\s\S]*?)<\/div>/.exec(html)?.[1] ??
+            ""
     assert(
         actions.includes('<a class="btn btn-usage pop-hero" href="#usage">'),
         "标题下应当有跳转「使用方法」的按钮",
     )
-    assert(html.includes('<section class="section" id="usage">'), "底部应当有锚点")
+    assert(
+        html.includes('<section class="section" id="usage">'),
+        "底部应当有锚点",
+    )
     assert(html.includes("<h2>使用方法</h2>"), "底部栏目应当叫「使用方法」")
     // 按钮在栏目之前，锚点指向页尾那一段
     assert(
@@ -538,9 +557,10 @@ Deno.test("首页：使用方法图文双列 3:1，文字在图片右侧且没�
         "亮色配色下应当藏起暗色截图",
     )
     assert(
-        /@media \(prefers-color-scheme: dark\) \{\s*\.usage-figure\.is-dark \{ display: block; \}/.test(
-            html,
-        ),
+        /@media \(prefers-color-scheme: dark\) \{\s*\.usage-figure\.is-dark \{ display: block; \}/
+            .test(
+                html,
+            ),
         "暗色配色下应当换成暗色截图",
     )
 })
@@ -608,9 +628,10 @@ Deno.test("首页端点：取第一页并转成 HTML，同时带上两侧收录�
         // 两次外部请求：鸣算屋列表 + 工坊总数
         assertEquals(calls.length, 2)
         const wuwa = calls.find((url) => url.includes("wuwacalc.cn")) ?? ""
-        const workshop =
-            calls.find((url) => url.includes("wuwa-afyg-share.200503.xyz")) ??
-                ""
+        const workshop = calls.find((url) =>
+            url.includes("wuwa-afyg-share.200503.xyz")
+        ) ??
+            ""
         assert(wuwa.includes("/api/public-schemes?"), "应当打到鸣算屋列表接口")
         assert(wuwa.includes("page=1"), "应当只取第一页")
         assert(wuwa.includes("pageSize=11"), "展示页固定取 11 条")
@@ -639,7 +660,10 @@ Deno.test("首页端点：工坊总数拿不到时给占位符，不影响方案
         const html = await res.text()
         assert(html.includes("顶配秧千穗·椰果最高的山"), "方案列表照常渲染")
         assert(html.includes("128"), "鸣算屋总数照常渲染")
-        assert(!html.includes("<strong>上游暂时不可用</strong>"), "不应报成整体失败")
+        assert(
+            !html.includes("<strong>上游暂时不可用</strong>"),
+            "不应报成整体失败",
+        )
         const ledger = /<section class="ledger pop">([\s\S]*?)<\/section>/.exec(
             html,
         )?.[1] ?? ""

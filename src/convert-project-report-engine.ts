@@ -1,8 +1,8 @@
 /**
- * 报告里的「双引擎」对比：鸣算屋快照里保存的结算结果 vs 转换后在服务端重跑的椰果引擎。
+ * 报告里的「双引擎」对比：鸣算屋快照里保存的结算结果 vs 转换后在服务端重跑的椰果工具箱引擎。
  *
  * 这一层只做对齐和展示，不参与转换。对齐键与差分测试保持一致：
- * 目录 id + 出现序号；椰果同一个伤害块的「本体 +（额外）+ 多 Hit」合并成一条。
+ * 目录 id + 出现序号；椰果工具箱同一个伤害块的「本体 +（额外）+ 多 Hit」合并成一条。
  */
 
 import {
@@ -34,7 +34,7 @@ export interface ReportEngineSkill {
     rel: number
     status: ComparisonStatus
     fixed: boolean
-    /** 该技能对应的椰果时间线块；报告条目按它挂对比 */
+    /** 该技能对应的椰果工具箱时间线块；报告条目按它挂对比 */
     blockId: string
     zones: ReportEngineZone[]
 }
@@ -46,6 +46,17 @@ export interface ReportEngineMember {
     delta: number
     rel: number
     status: ComparisonStatus
+}
+
+/** 浏览器本地重算时用来对齐的椰果工具箱逐技能快照（只带对齐键与乘区值） */
+export interface CoconutSkillSnapshot {
+    blockId: string
+    catalogId?: string
+    character: string
+    name: string
+    damage: number
+    fixed: boolean
+    zones: Record<string, number>
 }
 
 export interface ReportEngineComparison {
@@ -168,10 +179,62 @@ const wuwaTotals = (
 const zoneRows = (entry: AlignedEntry): ReportEngineZone[] =>
     entry.zones.map(toZone)
 
+const cleanName = (name: string): string =>
+    name.replace("（额外）", "").replace(/\([^)]*\)$/, "")
+
+const coconutZones = (
+    entries: CoconutMeasureResult["entries"],
+): Record<string, number> => {
+    const base = entries[0]
+    const out: Record<string, number> = {
+        baseMult: entries.reduce((sum, e) => sum + e.ratioNum * e.hits, 0),
+        dmgBonus: 1 + base.dmgBonus,
+        deepen: 1 + base.deepen,
+        vulnerability: 1 + base.vulnerability,
+        resistance: base.resMulti,
+        defense: base.defMulti,
+        critRate: base.critRate * 100,
+        critDmg: base.critDmg * 100,
+        critExpect: 1 + base.critRate * (base.critDmg - 1),
+        multBoost: base.customMult,
+        multAdd: entries.reduce((sum, e) => sum + (e.extraRatio || 0), 0),
+        attack: base.totalAtk,
+        hp: base.totalHp,
+        def: base.totalDef,
+    }
+    return out
+}
+
+/** 把椰果工具箱逐技能压成浏览器端可对齐的快照；不把整份 ResultEntry 塞进 HTML。 */
+export const buildCoconutSkillSnapshots = (
+    coconut: CoconutMeasureResult,
+): CoconutSkillSnapshot[] => {
+    const groups = new Map<string, CoconutMeasureResult["entries"]>()
+    for (const entry of coconut.entries) {
+        if (entry.id.includes("-nd|")) continue
+        const key = entry.sourceTimelineBlockId || entry.id
+        const list = groups.get(key) ?? []
+        list.push(entry)
+        groups.set(key, list)
+    }
+    return [...groups].map(([blockId, entries]) => {
+        const base = entries[0]
+        return {
+            blockId,
+            ...(base.catalogId ? { catalogId: base.catalogId } : {}),
+            character: base.character,
+            name: cleanName(base.displayName),
+            damage: entries.reduce((sum, e) => sum + e.totalDamage, 0),
+            fixed: base.baseUnit === "固定",
+            zones: coconutZones(entries),
+        }
+    })
+}
+
 /**
  * @param payload 转换用的 payload（含鸣算屋保存的 results）
  * @param meta    分享详情 meta（旧快照的 teamTotal 可能只在这里）
- * @param coconut 转换产物跑椰果引擎的结果
+ * @param coconut 转换产物跑椰果工具箱引擎的结果
  */
 export const buildReportEngineComparison = (
     payload: WuwaCalcProjectPayload,
@@ -275,7 +338,7 @@ export const buildReportEngineComparison = (
     const notes: string[] = []
     if (!detailed) {
         notes.push(
-            "该工程的鸣算屋分享快照只保存了角色合计，没有保存逐技能结算（members[].results 缺少 damagePhases / cycles / _breakdown）。因此只能核对总伤和角色合计，无法逐条对比；这是上游保存分享时没有写入逐技能数据，不是转换器漏算。浏览器本地重算鸣算屋引擎的方案暂缓。",
+            "该工程的鸣算屋分享快照只保存了角色合计，没有保存逐技能结算（members[].results 缺少 damagePhases / cycles / _breakdown）。这是上游保存分享时没有写入逐技能数据，不是转换器漏算；页面下方会尝试用浏览器本地鸣算屋引擎重算逐技能。",
         )
     }
     if (missingWuwa.length || missingCoconut.length) {

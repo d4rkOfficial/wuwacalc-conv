@@ -19,7 +19,10 @@ import {
     type ProjectReport,
     renderProjectReportHtml,
 } from "./convert-project-report.ts"
-import { buildReportEngineComparison } from "./convert-project-report-engine.ts"
+import {
+    buildCoconutSkillSnapshots,
+    buildReportEngineComparison,
+} from "./convert-project-report-engine.ts"
 import { gameDataOfProjectTables } from "./convert-project/game-data.ts"
 import { measureCoconut } from "../engines/coconut/measure.ts"
 import { loadProjectTables } from "./convert-project/tables.ts"
@@ -42,12 +45,16 @@ export const handleProjectReport = async (
     const parts = convertWuwaCalcProjectParts(detail.detail, tables)
     const game = gameDataOfProjectTables(tables)
     let engine = undefined
+    let coconut: ReturnType<typeof measureCoconut> | undefined
+    let coconutMs: number | undefined
     if (game) {
         try {
             const file = buildCoconutProjectFile(parts, detail.detail, {
                 projectId: code,
             })
-            const coconut = measureCoconut(file, game)
+            const startedAt = performance.now()
+            coconut = measureCoconut(file, game)
+            coconutMs = performance.now() - startedAt
             engine = buildReportEngineComparison(
                 parts.payload,
                 detail.detail.payload?.meta ?? undefined,
@@ -64,6 +71,18 @@ export const handleProjectReport = async (
         parts,
         engine,
     )
+    report.timings = {
+        ...(coconutMs !== undefined ? { coconutMs } : {}),
+        wuwaMs: null,
+        wuwaMode: engine?.detailed ? "snapshot" : "local",
+    }
+    if (coconut && engine && !engine.detailed) {
+        report.localRecompute = {
+            code,
+            ...(coconutMs !== undefined ? { coconutMs } : {}),
+            coconutSkills: buildCoconutSkillSnapshots(coconut),
+        }
+    }
     return new Response(renderProjectReportHtml(report), {
         status: 200,
         headers: {
