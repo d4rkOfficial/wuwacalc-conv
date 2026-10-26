@@ -82,9 +82,17 @@ export const ZONE_LABELS: Record<string, string> = {
     defPen: "穿防",
     extraRatio: "额外倍率",
     specialFinal1: "特殊终伤(1)",
+    specialFinal2: "特殊终伤(2)",
     offTuneBuildupRate: "偏谐累积",
     tuneBreakBoost: "谐度破坏增幅",
+    tuneStrainLayer: "集谐层数",
+    unisonBoonLayer: "同奏层数",
     recharge: "共鸣效率",
+    atkFlat: "攻击固定值",
+    hpFlat: "生命固定值",
+    defFlat: "防御固定值",
+    defDown: "减防",
+    dmgRedPen: "穿免",
 }
 
 /** 需要按元素 / 伤害类型挂条件的乘区 */

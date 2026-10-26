@@ -176,6 +176,9 @@ else  // 'stack'
 - 层数达不成的条目（0 层）不吃任何一条；**一条都没用到的 buff** 仍然留一条
   `value: 0` 的占位条目在列表里（不然它在工具箱里会凭空消失），但**不勾选**。
 - 该层未达 `minStacks` 的效果贡献 0（上游语义：≥N 层才计入）。
+- 叠层 Buff 里的**纯固定效果也要求 ≥1 层**：上游 `getCompositeEffectValue()` 在
+  `stacks <= 0` 时一律返回 0，哪怕效果是 `valueMode: 'fixed'`。漏掉这道门槛会把
+  明确 0 层的固定效果照样算进去（露帕追猎）。
 - `skill.buffStacks` / `phases[].buffStacks` 都不算数：上游多轮模式下会清空前者，
   层数的权威来源见 §2.3.2。
 
@@ -435,6 +438,16 @@ member.globalBuffActive = round.globalBuffActive || savedGlobalActive
 转换器此前把顶层层数并入每轮，导致第一轮继承最后一轮的层数（T6E4P9 第一段凭空多出
 大量 Buff）。现在多轮只读该轮快照，阶段开关再覆盖到轮级开关之上。
 
+### 2.3.2.3 split 技能按 Hit 落条目
+
+上游一个技能段可能带 `split: true` 与 `hits[]`，每个 Hit 有自己的
+`buffMode / buffActive / buffStacks`（T6E4P9 的 Hit1 全关、Hit2 开了延奏）。
+转换器必须**逐 Hit 落一条伤害条目**，否则会把某一个 Hit 的状态套到整招：
+
+- 所有 Hit 共用同一个 `groupKey` / 参考线；
+- 差分时按参考线合并成一个技能组，与上游聚合结果比较；
+- 追加倍率只挂在第一个 Hit 上，避免技能级效果重复。
+
 ### 2.3.3 一个技能一条原始复合倍率（关键）
 
 上游一个技能段的倍率是**分段**构成的（`rotationCatalog[].multComponents`），
@@ -630,6 +643,35 @@ effectiveRatio = ratio + extraRatio / 100 × hits      // compute.ts
 
   两者都并进 `defPen` 会被工具箱当成 `1 − pen − ignore`，把 18% 无视防御放大成
   额外收益（实测逐条高 9.7%，总伤因此偏 +4.6%）。
+
+### 2.4.3 特殊技能的额外口径
+
+- **同一参考线上的多次处决 / 响应不能合并**：KGHNE7 一轮会有 2 次处决，
+  按「同名同类」合并会少算非直伤；每个 item 必须各自保留成独立条目。
+- **效应不吃「无视防御(ignore)」**：鸣算屋特殊技能只同步穿防(pen)，不同步
+  `defenseKind:'ignore'`；转换器把 ignore 落成 `defDown` 后，效应条目要跳过它，
+  否则 SCJ322 会多算 18% 穿防。
+- 共享 Buff 的 `tm_` 成员副本可能带**动态换算值**（达妮娅固有 10→50），
+  转换时数值以成员副本为准，作用域仍用共享条目的。
+
+### 2.4.4 集谐最终伤害按受益角色缩放
+
+鸣算屋的集谐层数不是简单 `层数 × 12%`：
+
+```text
+convergence = stacks × convergenceVuln × 受益角色谐度破坏增幅
+```
+
+其中「受益角色谐度破坏增幅」= 面板本体属性 + 该角色吃到的 `tuneBreakBoost` Buff，
+不同角色可以不同（4NRWDV 60%、KGHNE7 100%）。
+
+转换器会按角色把 convergence Buff 拆成独立实例：
+
+- 原值 = `stacks × convergenceVuln × 100`；
+- 缩放 = `该角色谐度破坏增幅 / 100`；
+- 只绑到该角色自己的条目。
+
+KGHNE7 的集谐层数也必须按**技能自己的 catalog 层数**，不能把一轮最大值回填给所有技能。
 
 ### 2.5 多轮（`cycleConfig.rounds`）—— 有多少轮转多少轮
 

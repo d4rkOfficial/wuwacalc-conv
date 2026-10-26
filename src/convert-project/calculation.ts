@@ -312,20 +312,37 @@ const collectBuffs = (
     const members = payload?.members ?? []
     const result: { buff: UpstreamBuff; ownerIndex: number | null }[] = []
 
+    // 成员列表里的 `tm_` 副本可能带**动态换算后的数值**（如达妮娅固有：
+    // shared 原始值 10，成员副本按偏谐效率换算成 50）。共享条目负责作用域/归属，
+    // 数值应以成员副本为准，否则会少 40 点谐度破坏增幅。
+    const copiesById = new Map<string, UpstreamBuff[]>()
+    for (const member of members.slice(0, TEAM_SIZE)) {
+        for (const raw of (member.buffs ?? []) as UpstreamBuff[]) {
+            const id = optionalString(raw?.id)
+            if (!id || !id.startsWith(TEAM_COPY_PREFIX)) continue
+            const baseId = id.slice(TEAM_COPY_PREFIX.length)
+            const list = copiesById.get(baseId) ?? []
+            list.push(raw)
+            copiesById.set(baseId, list)
+        }
+    }
     const shared = payload?.team?.sharedBuffs as
         | { buffs?: UpstreamBuff[] }
         | undefined
     const sharedBuffs = shared?.buffs ?? []
-    for (const buff of sharedBuffs) {
-        result.push({ buff, ownerIndex: null })
-    }
-
-    // 成员列表里的 `tm_<原 id>` 是队伍级 buff 的**接收方副本**，和 `sharedBuffs` 里的
-    // 原始条目描述的是同一批生效对象（原始条目还多带 `excludeSource` / `sourceMemberIndex`）。
-    // 两边都收会**重复计入**（例如「苍白死光的祝颂」的固定段被算两次），
-    // 所以以原始条目为准，丢掉成员副本；`sharedBuffs` 缺席时才退回用副本。
     const sharedIds = new Set(sharedBuffs.map((buff) => buff.id))
-
+    for (const buff of sharedBuffs) {
+        const copy = copiesById.get(optionalString(buff.id) ?? "")?.[0]
+        const value = Number(copy?.value)
+        const merged = copy && Number.isFinite(value)
+            ? {
+                ...buff,
+                value,
+                perStack: Number(copy.perStack) || value,
+            }
+            : buff
+        result.push({ buff: merged, ownerIndex: null })
+    }
     members.slice(0, TEAM_SIZE).forEach((member: WuwaCalcMember, index) => {
         for (const buff of (member.buffs ?? []) as UpstreamBuff[]) {
             const id = buff.id
@@ -415,6 +432,8 @@ interface BuffVariant {
      * 值为 0 且不参与勾选。
      */
     placeholder?: boolean
+    /** 集谐·最终伤害：值需要按受益角色的谐度破坏增幅缩放 */
+    convergence?: boolean
 }
 
 /** 同乘区重复出现时的消歧：优先用技能名，其次用序号 */
@@ -443,6 +462,8 @@ const toBuffVariants = (
     usedLayers: number[],
     /** 该成员是否**不吃**这条全队 buff（「分配覆盖」的勾选） */
     excludedBy: (memberIndex: number, buffId: string) => boolean,
+    /** 队伍成员：把效果上的 `onlyCharacterIds` 落到站位 */
+    members: WuwaCalcMember[],
 ): BuffVariant[] => {
     const id = optionalString(buff.id)
     if (!id) return []
@@ -507,7 +528,26 @@ const toBuffVariants = (
         skillNames: string[]
         /** 这一组效果要求的共鸣链门槛（效果上的 `minResonance`） */
         minResonance: number
+        /** 效果限定的站位；`null` 表示不按角色收窄 */
+        allowedSlots: number[] | null
         effects: UpstreamEffect[]
+    }
+
+    /**
+     * 上游某些团队效果只对指定角色 ID 生效（爱弥斯延奏的额外 10% 只给
+     * 达妮娅 / 千咲）。椰果没有「按角色 ID」条件，只能把这条效果**收窄到对应站位**；
+     * 否则同一个乘区的 10% 基础 + 10% 额外会被合并成 20% 发给全队。
+     */
+    const slotsOf = (effect: UpstreamEffect): number[] | null => {
+        const ids = (effect.onlyCharacterIds ?? []).filter(Boolean)
+        if (!ids.length) return null
+        const slots: number[] = []
+        members.forEach((member, index) => {
+            if (ids.includes(optionalString(member.characterId) ?? "")) {
+                slots.push(index)
+            }
+        })
+        return slots
     }
 
     /** 同乘区 + 同条件 + 同技能限定 + 同链阶门槛 → 一条椰果 buff */
@@ -526,9 +566,14 @@ const toBuffVariants = (
         const condition = conditionOf(effect)
         const skillNames = skillNamesOf(effect).sort()
         const minResonance = toInt(effect.minResonance, 0)
+        const allowedSlots = slotsOf(effect)
+        if (allowedSlots && allowedSlots.length === 0) continue
+        const slotKey = allowedSlots ? allowedSlots.join(",") : ""
         const hit = groups.find((group) =>
             group.zoneId === zoneId &&
             group.minResonance === minResonance &&
+            (group.allowedSlots ? group.allowedSlots.join(",") : "") ===
+                slotKey &&
             JSON.stringify(group.condition ?? null) ===
                 JSON.stringify(condition ?? null) &&
             group.skillNames.join("\u0000") === skillNames.join("\u0000")
@@ -541,6 +586,7 @@ const toBuffVariants = (
                 condition,
                 skillNames,
                 minResonance,
+                allowedSlots,
                 effects: [effect],
             })
         }
@@ -572,9 +618,6 @@ const toBuffVariants = (
     )
     // 三个人都吃不到就别落表了（`scope: []` 在椰果里是「仅效应伤害」，不能拿来表达空集）
     if (!narrowed.length) return []
-    const scope: "all" | number[] = narrowed.length === TEAM_SIZE
-        ? "all"
-        : narrowed
     // 归属门：参考本体 / 参考武器 / 参考某人的共鸣链，工具箱据此归档
     const ownerGate = ownerGateOf(buff, id, ownerIndex, rawEffects)
     /**
@@ -600,6 +643,13 @@ const toBuffVariants = (
     const variants: BuffVariant[] = []
 
     groups.forEach((group, index) => {
+        const slots = group.allowedSlots
+            ? narrowed.filter((slot) => group.allowedSlots!.includes(slot))
+            : narrowed
+        if (!slots.length) return
+        const groupScope: "all" | number[] = slots.length === TEAM_SIZE
+            ? "all"
+            : slots
         const groupGate = gateForGroup(group.minResonance)
         const label = ZONE_LABELS[group.zoneId] ?? group.zoneId
         const discriminator = discriminators[index]
@@ -631,7 +681,7 @@ const toBuffVariants = (
                     id: variantId,
                     name,
                     zones: [zone],
-                    scope,
+                    scope: groupScope,
                     source: "builtin",
                     ...(groupGate ? { condition: groupGate } : {}),
                 },
@@ -641,6 +691,9 @@ const toBuffVariants = (
                 minStacks,
                 skillNames: group.skillNames,
                 ...(placeholder ? { placeholder: true } : {}),
+                ...(group.zoneKey === "convergence"
+                    ? { convergence: true }
+                    : {}),
             })
         }
 
@@ -688,7 +741,13 @@ const toBuffVariants = (
         // 只有真的分了多个门槛才在名字上标出来，免得给普通 buff 加没用的后缀。
         const byMinStacks = new Map<number, number>()
         for (const effect of group.effects) {
-            const minStacks = toInt(effect.minStacks, 0)
+            // 叠层 Buff 的「纯固定」效果也要求至少 1 层：W 的
+            // `getCompositeEffectValue()` 在 stacks <= 0 时一律返回 0。
+            // 忽略它会把这个技能上明确 0 层的固定效果照样算进去（露帕追猎）。
+            const minStacks = Math.max(
+                toInt(effect.minStacks, 0),
+                buff.mode === "stack" ? 1 : 0,
+            )
             byMinStacks.set(
                 minStacks,
                 (byMinStacks.get(minStacks) ?? 0) + (Number(effect.value) || 0),
@@ -783,6 +842,7 @@ export const convertCalculationPhase = (
     const activeById = globalBuffActiveOf(payload)
 
     const buffs: CoconutBuffInstance[] = []
+    const convergenceVariants: BuffVariant[] = []
     const damageEntryBuffSetIds: Record<string, string[]> = {}
     const buffIds = new Set<string>()
 
@@ -821,10 +881,14 @@ export const convertCalculationPhase = (
             resonances,
             usedLayers,
             excludedBy,
+            members,
         )
         if (!variants.length) continue
         if (id) buffIds.add(id)
-        for (const variant of variants) buffs.push(variant.instance)
+        for (const variant of variants) {
+            buffs.push(variant.instance)
+            if (variant.convergence) convergenceVariants.push(variant)
+        }
 
         for (const variant of variants) {
             // 占位条目只为了留在 buff 列表里，不参与勾选
@@ -895,6 +959,16 @@ export const convertCalculationPhase = (
                 ) {
                     return false
                 }
+                // 特殊技能（效应）只同步「穿防(pen)」，不会同步「无视防御(ignore)」；
+                // 工具箱的 ignore 落成 defDown，若不摘掉会给效应多算 18% 穿防（SCJ322 +8%）。
+                if (
+                    entry.isEffect &&
+                    variant.instance.zones.every((zone) =>
+                        zone.zoneId === "defDown"
+                    )
+                ) {
+                    return false
+                }
                 return buffApplies(variant.instance, entry)
             })
             for (const entry of targets) {
@@ -929,6 +1003,84 @@ export const convertCalculationPhase = (
                 ...(damageEntryBuffSetIds[entry.id] ?? []),
                 instance.id,
             ]
+        }
+    }
+
+    // 集谐·最终伤害 = stacks × convergenceVuln × 受益角色谐度破坏增幅（W 的口径）。
+    // 按受益角色拆成独立 Buff；增幅 = 面板本体属性 + 该角色吃到的谐度破坏增幅 Buff。
+    if (convergenceVariants.length) {
+        const ampByMember = members.slice(0, TEAM_SIZE).map((member) => {
+            let amp = 0
+            const sources = (member?.char as {
+                harmonyBreakAmpSources?: { value?: unknown }[]
+            } | undefined)?.harmonyBreakAmpSources ?? []
+            for (const source of sources) {
+                const value = Number(source?.value)
+                if (Number.isFinite(value)) amp += value
+            }
+            return amp
+        })
+        for (const buff of buffs) {
+            const tune = buff.zones
+                .filter((zone) => zone.zoneId === "tuneBreakBoost")
+                .reduce((sum, zone) => sum + zone.value, 0)
+            if (!tune) continue
+            for (let i = 0; i < ampByMember.length; i++) {
+                if (buff.scope === "all" || buff.scope.includes(i)) {
+                    ampByMember[i] += tune
+                }
+            }
+        }
+        const convergenceIds = new Set(
+            convergenceVariants.map((variant) => variant.instance.id),
+        )
+        const boundEntries = new Map<string, string[]>()
+        for (const [entryId, ids] of Object.entries(damageEntryBuffSetIds)) {
+            for (const id of ids) {
+                if (!convergenceIds.has(id)) continue
+                const list = boundEntries.get(id) ?? []
+                list.push(entryId)
+                boundEntries.set(id, list)
+            }
+        }
+        for (const entryId of Object.keys(damageEntryBuffSetIds)) {
+            damageEntryBuffSetIds[entryId] = damageEntryBuffSetIds[entryId]
+                .filter((id) => !convergenceIds.has(id))
+        }
+        const kept = buffs.filter((buff) => !convergenceIds.has(buff.id))
+        buffs.length = 0
+        buffs.push(...kept)
+        for (const variant of convergenceVariants) {
+            const base = variant.instance
+            const zone = base.zones[0]
+            if (!zone) continue
+            const entryIds = boundEntries.get(base.id) ?? []
+            for (let i = 0; i < ampByMember.length; i++) {
+                const memberName = optionalString(members[i]?.name) ?? ""
+                const memberEntryIds = entryIds.filter((entryId) =>
+                    entries.some((entry) =>
+                        entry.id === entryId && entry.character === memberName
+                    )
+                )
+                if (!ampByMember[i] || !memberEntryIds.length) continue
+                const clone: CoconutBuffInstance = {
+                    ...base,
+                    id: `${base.id}·m${i}`,
+                    name: `${base.name}·${memberName}`,
+                    scope: [i],
+                    zones: [{
+                        ...zone,
+                        value: roundValue(zone.value * ampByMember[i] / 100),
+                    }],
+                }
+                buffs.push(clone)
+                for (const entryId of memberEntryIds) {
+                    damageEntryBuffSetIds[entryId] = [
+                        ...(damageEntryBuffSetIds[entryId] ?? []),
+                        clone.id,
+                    ]
+                }
+            }
         }
     }
 

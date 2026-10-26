@@ -1,4 +1,4 @@
-import type { EchoStat } from '$lib/types/game-data.ts'
+import type { EchoStat } from "../types/game-data.ts"
 
 export interface EchoSlotConfig {
     cost: number
@@ -8,11 +8,17 @@ export interface EchoSlotConfig {
 }
 
 export interface CharEchoConfig {
-    echoes: [EchoSlotConfig, EchoSlotConfig, EchoSlotConfig, EchoSlotConfig, EchoSlotConfig]
+    echoes: [
+        EchoSlotConfig,
+        EchoSlotConfig,
+        EchoSlotConfig,
+        EchoSlotConfig,
+        EchoSlotConfig,
+    ]
 }
 
 export interface EnemyConfig {
-    type: 'BOSS' | '精英怪' | '小怪'
+    type: "BOSS" | "精英怪" | "小怪"
     level: number
     defense: number
     defenseLocked?: boolean

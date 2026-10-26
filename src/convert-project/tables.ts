@@ -78,6 +78,31 @@ export interface EchoSpecimenInfo {
     }[]
 }
 
+/** 角色面板基础值：计算引擎需要，名称表本身不需要 */
+export interface ProjectCharacterInfo {
+    id: string
+    name: string
+    element: number
+    rank: number
+    baseAtk: number
+    baseHp: number
+    baseDef: number
+    harmonyBreakAmp: number
+    skills: SkillInfo[]
+}
+
+/** 武器面板基础值：计算引擎需要，名称表本身不需要 */
+export interface ProjectWeaponInfo {
+    id: string
+    name: string
+    rarity: number
+    type: number
+    baseAtk90: number
+    subStat: { name: string; value: number; isPercent: boolean } | null
+    effectName: string
+    effect: string
+}
+
 /** 转换期需要的名称表集合 */
 export interface ProjectTables {
     /** 武器 id → 名称 */
@@ -92,6 +117,10 @@ export interface ProjectTables {
     characterElements: Map<string, string>
     /** 声骸 id → 首位效果（`echo-specimens.json`） */
     echoSpecimens: Map<string, EchoSpecimenInfo>
+    /** 角色 id → 面板基础值（来自 `character-skills.json`） */
+    characterStats?: Map<string, ProjectCharacterInfo>
+    /** 武器 id → 面板基础值（来自 `weapons.json`） */
+    weaponStats?: Map<string, ProjectWeaponInfo>
 }
 
 /** 空表：拉取失败或单测里不关心名称时使用 */
@@ -102,6 +131,8 @@ export const EMPTY_TABLES: ProjectTables = {
     skills: new Map(),
     characterElements: new Map(),
     echoSpecimens: new Map(),
+    characterStats: new Map(),
+    weaponStats: new Map(),
 }
 
 /**
@@ -215,6 +246,96 @@ const toSkillsMap = (
     return map
 }
 
+export const toCharacterStats = (
+    characters:
+        | {
+            id?: string
+            name?: string
+            element?: number
+            rank?: number
+            baseAtk?: number
+            baseHp?: number
+            baseDef?: number
+            harmonyBreakAmp?: number
+            skills?: {
+                name?: string
+                skillType?: string
+                damageType?: string
+                baseMult?: number
+            }[]
+        }[]
+        | undefined,
+): Map<string, ProjectCharacterInfo> => {
+    const map = new Map<string, ProjectCharacterInfo>()
+    for (const character of characters ?? []) {
+        const id = optionalString(character?.id)
+        const name = optionalString(character?.name)
+        if (!id || !name) continue
+        map.set(id, {
+            id,
+            name,
+            element: toInt(character?.element, 0),
+            rank: toInt(character?.rank, 5),
+            baseAtk: Number(character?.baseAtk) || 0,
+            baseHp: Number(character?.baseHp) || 0,
+            baseDef: Number(character?.baseDef) || 0,
+            harmonyBreakAmp: Number(character?.harmonyBreakAmp) || 0,
+            skills: (character?.skills ?? [])
+                .map((skill) => {
+                    const skillName = optionalString(skill?.name)
+                    if (!skillName) return null
+                    return {
+                        name: skillName,
+                        skillType: optionalString(skill?.skillType) ?? "",
+                        damageType: optionalString(skill?.damageType) ?? "",
+                        baseMult: Number(skill?.baseMult) || 0,
+                    }
+                })
+                .filter((skill): skill is SkillInfo => skill !== null),
+        })
+    }
+    return map
+}
+
+export const toWeaponStats = (
+    rows:
+        | {
+            id?: string
+            name?: string
+            rarity?: number
+            type?: number
+            baseAtk90?: number
+            subStat?: { name?: string; value?: number; isPercent?: boolean }
+            effectName?: string
+            effect?: string
+        }[]
+        | undefined,
+): Map<string, ProjectWeaponInfo> => {
+    const map = new Map<string, ProjectWeaponInfo>()
+    for (const row of rows ?? []) {
+        const id = optionalString(row?.id)
+        const name = optionalString(row?.name)
+        if (!id || !name) continue
+        map.set(id, {
+            id,
+            name,
+            rarity: toInt(row?.rarity, 5),
+            type: toInt(row?.type, 0),
+            baseAtk90: Number(row?.baseAtk90) || 0,
+            subStat: row?.subStat
+                ? {
+                    name: optionalString(row.subStat.name) ?? "",
+                    value: Number(row.subStat.value) || 0,
+                    isPercent: !!row.subStat.isPercent,
+                }
+                : null,
+            effectName: optionalString(row?.effectName) ?? "",
+            effect: optionalString(row?.effect) ?? "",
+        })
+    }
+    return map
+}
+
 const toEchoSpecimens = (
     specimens:
         | {
@@ -282,10 +403,22 @@ export const loadProjectTables = async (
     inflight = (async (): Promise<ProjectTables> => {
         const [weapons, echoSets, echoes, echoSpecimens, skills] = await Promise
             .all([
-                fetchTable<{ weapons?: { id?: string; name?: string }[] }>(
-                    env,
-                    "weapons.json",
-                ),
+                fetchTable<{
+                    weapons?: {
+                        id?: string
+                        name?: string
+                        rarity?: number
+                        type?: number
+                        baseAtk90?: number
+                        subStat?: {
+                            name?: string
+                            value?: number
+                            isPercent?: boolean
+                        }
+                        effectName?: string
+                        effect?: string
+                    }[]
+                }>(env, "weapons.json"),
                 fetchTable<
                     {
                         sets?: {
@@ -320,6 +453,12 @@ export const loadProjectTables = async (
                         characters?: {
                             id?: string
                             name?: string
+                            element?: number
+                            rank?: number
+                            baseAtk?: number
+                            baseHp?: number
+                            baseDef?: number
+                            harmonyBreakAmp?: number
                             skills?: {
                                 name?: string
                                 skillType?: string
@@ -338,6 +477,8 @@ export const loadProjectTables = async (
             skills: toSkillsMap(skills?.characters),
             characterElements: toCharacterElements(skills?.characters),
             echoSpecimens: toEchoSpecimens(echoSpecimens?.specimens),
+            characterStats: toCharacterStats(skills?.characters),
+            weaponStats: toWeaponStats(weapons?.weapons),
         }
         // 三张表全没拉到 → 不写缓存，下一次请求重试
         if (

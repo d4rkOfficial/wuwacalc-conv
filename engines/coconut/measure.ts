@@ -5,12 +5,12 @@
  * 不重写任何公式。
  */
 
-import { computeAll, type ConditionProfile } from "$lib/calc/compute.ts"
-import type { BuffInstance, DamageEntry } from "$lib/calc/calculation.types.ts"
-import type { ConfigState } from "$lib/calc/config.types.ts"
-import type { ResultEntry } from "$lib/calc/result.types.ts"
-import type { CharSlot } from "$lib/types/project.ts"
-import type { CharacterInfo, WeaponInfo } from "$lib/api/types.ts"
+import { computeAll, type ConditionProfile } from "./lib/calc/compute.ts"
+import type { BuffInstance, DamageEntry } from "./lib/calc/calculation.types.ts"
+import type { ConfigState } from "./lib/calc/config.types.ts"
+import type { ResultEntry } from "./lib/calc/result.types.ts"
+import type { CharSlot } from "./lib/types/project.ts"
+import type { CharacterInfo, WeaponInfo } from "./lib/api/types.ts"
 import {
     buildDamageEntriesFromTimeline,
     type SkillCacheGroup,
@@ -80,6 +80,8 @@ export interface CoconutEntryResult {
     sourceTimelineBlockId: string
     /** 上游技能目录 id（差分对齐用；本体/额外条目共用） */
     catalogId?: string
+    /** 多轮工程的轮次下标（差分按轮对齐） */
+    roundIndex?: number
     character: string
     displayName: string
     hitName: string
@@ -187,10 +189,12 @@ const toWeaponInfo = (
 const pickEntry = (
     result: ResultEntry,
     catalogId?: string,
+    roundIndex?: number,
 ): CoconutEntryResult => ({
     id: result.id,
     sourceTimelineBlockId: result.sourceTimelineBlockId,
     ...(catalogId ? { catalogId } : {}),
+    ...(roundIndex !== undefined ? { roundIndex } : {}),
     character: result.character,
     displayName: result.displayName,
     hitName: result.hitName,
@@ -318,18 +322,26 @@ export const measureCoconut = (
     )
 
     // 时间线里一个伤害块对应一个技能目录条目；差分对齐用它而不是按数组顺序。
-    const catalogByBlock = new Map<string, string>()
+    const catalogByBlock = new Map<
+        string,
+        { catalogId?: string; roundIndex?: number }
+    >()
     for (const block of timeline.damageBlocks ?? []) {
         const catalogId = block.skillHits?.find((hit: any) => hit.catalogId)
             ?.catalogId
-        if (catalogId) catalogByBlock.set(block.id, String(catalogId))
+        catalogByBlock.set(block.id, {
+            ...(catalogId ? { catalogId: String(catalogId) } : {}),
+            ...(block.roundIndex !== undefined
+                ? { roundIndex: block.roundIndex }
+                : {}),
+        })
     }
-    const entries = results.map((result) =>
-        pickEntry(
-            result,
-            catalogByBlock.get(/^(d\d+)/.exec(result.id)?.[1] ?? ""),
+    const entries = results.map((result) => {
+        const meta = catalogByBlock.get(
+            /^(d\d+)/.exec(result.id)?.[1] ?? "",
         )
-    )
+        return pickEntry(result, meta?.catalogId, meta?.roundIndex)
+    })
     return {
         total: entries.reduce((sum, e) => sum + e.totalDamage, 0),
         entries,

@@ -1,6 +1,6 @@
-import type { BuffInstance, CalcState } from '$lib/calc/calculation.types.ts'
-import type { ConfigState } from '$lib/calc/config.types.ts'
-import type { TimelineData } from '$lib/calc/timeline.types.ts'
+import type { BuffInstance, CalcState } from "../calc/calculation.types.ts"
+import type { ConfigState } from "../calc/config.types.ts"
+import type { TimelineData } from "../calc/timeline.types.ts"
 
 export interface SelectedSet {
     name: string
@@ -94,7 +94,7 @@ export interface Project extends ProjectV2 {
     buffSets?: BuffInstance[]
 }
 
-export type { PhaseKey } from '$lib/consts/game-terms.ts'
+export type { PhaseKey } from "../consts/game-terms.ts"
 
 export interface ResultAnalysisData {
     /** 时间记点：seconds 为 null 表示「未填写」（名称未解析出时间，不参与分段），可手动填秒数 */

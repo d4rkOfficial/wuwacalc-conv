@@ -121,21 +121,24 @@ const toRatio = (
 ): string => {
     const suffix = SCALE_SUFFIX[optionalString(scaleStat) ?? ""] ?? ""
     const single = Number(baseMult)
-    if (Number.isFinite(single) && single !== 0) {
-        // 固定伤害（上游 `fixedDamage: true`）不能写成百分比：工具箱会按
-        // 「倍率 × 面板」算，666 会变成 666% × 攻击；不带 % 才是固定值 666。
-        return fixedDamage
-            ? `${roundNumber(single)}`
-            : `${roundNumber(single)}%${suffix}`
-    }
-
-    // 老格式没有 `baseMult`：按分段构成自己求和
-    const total = (components ?? []).reduce((sum, c) => {
+    // `multComponents` 存在时，**它才是总倍率**。
+    // 上游大部分工程 `baseMult` 已经等于 Σ(rate × count)；但新快照里出现过
+    // 「catalog.baseMult 是单段、phase.baseMult 是总倍率」与反过来的两种写法
+    // （MC-U5UNZC 千咲 A2/A3）。只有分段和能同时解释这两种，所以优先用它。
+    const componentTotal = (components ?? []).reduce((sum, c) => {
         const rate = Number(c?.rate)
         if (!Number.isFinite(rate)) return sum
         return sum + rate * Math.max(1, toInt(c?.count, 1))
     }, 0)
-    return total !== 0 ? `${roundNumber(total)}%${suffix}` : ""
+    const total = (components?.length ?? 0) > 0 ? componentTotal : single
+    if (Number.isFinite(total) && total !== 0) {
+        // 固定伤害（上游 `fixedDamage: true`）不能写成百分比：工具箱会按
+        // 「倍率 × 面板」算，666 会变成 666% × 攻击；不带 % 才是固定值 666。
+        return fixedDamage
+            ? `${roundNumber(total)}`
+            : `${roundNumber(total)}%${suffix}`
+    }
+    return ""
 }
 
 /**
@@ -278,6 +281,8 @@ interface AxisItem {
     state?: SkillState
     /** 特殊技能条目的上游 id（同一份团队特殊技能会在每个成员里各复制一份，用它去重） */
     specialKey?: string
+    /** 多轮工程的轮次下标 */
+    roundIndex: number
 }
 
 const toSkillHit = (
@@ -331,11 +336,13 @@ const toSkillHit = (
 const displayNameOf = (
     candidates: (string | undefined)[],
     skillType: string,
+    equipmentEcho = false,
 ): string => {
-    if (skillType === "声骸技能") return "伤害1"
+    // 装备声骸技能用工具箱的「伤害N」；但角色技能也可能标成 `声骸技能`
+    // （如仇远「6链·退出状态」），不能一律改成「伤害1」。
+    if (skillType === "声骸技能" && equipmentEcho) return "伤害1"
     return candidates.find((name) => name) ?? ""
 }
-
 
 const normalizeNonDirect = (
     item: WuwaCalcSpecialSkillItem,
@@ -394,6 +401,7 @@ const collectMemberItems = (
     multAdds: MultAddEffect[],
     activeById: Map<string, boolean>,
     tables: ProjectTables,
+    roundIndex: number,
     hasAmisC6Burst = false,
 ): AxisItem[] => {
     const character = optionalString(member.name) ?? ""
@@ -426,32 +434,29 @@ const collectMemberItems = (
     for (const [index, skill] of source.skills.entries()) {
         const catalogId = optionalString(skill.catalogId)
         const entry = catalogId ? catalog.get(catalogId) : undefined
-        const resolved = resolveStacks(source, catalogId ?? "", entry)
-        // 技能自己的叠层（上游 `unit.buffStacks`）优先级最高：6 链「铭记」这类
-        // 只在某一招上打满 3 层的 buff，目录/阶段层数里都是 0，漏了会把整招伤害算低。
-        if (skill.buffMode === "custom") {
-            for (const [id, value] of Object.entries(skill.buffStacks ?? {})) {
-                const n = Number(value)
-                if (!Number.isFinite(n)) continue
-                // 同一层数要写进两种 id 形态：队伍 buff 在成员列表里是 `tm_*`，
-                // 而 sharedBuffs / 全局层数用的是原始 id；只写一种会让查层数时
-                // 先命中旧的全队层数（例：追猎全局 3 层盖掉技能自己的 1 层）。
-                resolved[id] = n
-                if (id.startsWith("tm_")) resolved[id.slice(3)] = n
-                else resolved["tm_" + id] = n
+        const baseStacks = resolveStacks(source, catalogId ?? "", entry)
+        /** 某个命中单元自己的层数：技能级 custom 快照优先，再补集谐模态层数 */
+        const resolvedFor = (
+            unit: WuwaCalcAxisSkill,
+        ): Record<string, number> => {
+            const resolved = { ...baseStacks }
+            if (unit.buffMode === "custom") {
+                for (
+                    const [id, value] of Object.entries(unit.buffStacks ?? {})
+                ) {
+                    const n = Number(value)
+                    if (!Number.isFinite(n)) continue
+                    // 同一层数写进两种 id 形态（原始 / tm_ 副本）
+                    resolved[id] = n
+                    if (id.startsWith("tm_")) resolved[id.slice(3)] = n
+                    else resolved["tm_" + id] = n
+                }
             }
-        }
-        // 集谐系统 Buff：模态开启时引擎按「模态层数」统一结算，逐技能层数没记时
-        // 用该轮出现过的最大值补上（清宵 4 层 -> 所有技能都吃 4×14.4%）。
-        for (const [id, n] of Object.entries(source.convergenceStacks)) {
-            if (!resolved[id] && n > 0) resolved[id] = n
+            // 集谐层数也按**该技能自己的 catalog 层数**；不要用全轮最大值回填，
+            // 否则没叠集谐的技能会被强加满层（4NRWDV 全体 +12%）。
+            return resolved
         }
         const seconds = secondsOf(entry, placement(index, source.skills.length))
-        let state = skillStateOf(skill, resolved, source.phaseActive)
-        if (source.convergenceIds.length) {
-            state ??= { active: {}, stacks: { ...resolved } }
-            for (const id of source.convergenceIds) state.active[id] = true
-        }
         const shortName = optionalString(skill.name)
         const libraryName = optionalString(entry?.librarySkillName)
         /** 这条技能认的名字（短名 / 目录名 / 技能库全名，去重） */
@@ -465,90 +470,131 @@ const collectMemberItems = (
         const librarySkill = characterId && libraryName
             ? tables.skills.get(`${characterId}|${libraryName}`)
             : undefined
-        // `alsoAsEffect` 在**技能段**上，不在目录条目上；目录条目存在时也要合并，
-        // 否则卡提希娅部分普攻会丢掉「同时视为风蚀」这层第二类型。
-        const alsoAsEffect = optionalString(entry?.alsoAsEffect) ||
-            optionalString(skill.alsoAsEffect)
-        const catalogEntry = entry
-            ? { ...entry, alsoAsEffect }
-            : {
-                baseMult: skill.baseMult,
-                multCount: skill.multCount,
-                damageType: skill.damageType,
-                alsoAsEffect,
-            }
-        const base = toSkillHit(
-            catalogEntry,
-            "",
-            nameCandidates,
-            character,
-            element,
-            librarySkill?.skillType,
-        )
         const groupKey = `sk${trackIndex}_${groupSeq++}`
-        items.push({
-            seconds,
-            trackIndex,
-            character,
-            kind: "direct",
-            hit: {
-                ...base,
-                hitName: displayNameOf(nameCandidates, base.skillType),
-                ...(entry?.id || skill.catalogId
-                    ? { catalogId: entry?.id ?? skill.catalogId }
-                    : {}),
-                ratio: toRatio(
-                    entry?.multComponents,
-                    entry?.baseMult ?? skill.baseMult,
-                    entry?.scaleStat ?? skill.scaleStat,
-                    entry?.fixedDamage ?? skill.fixedDamage ?? false,
-                ),
-                // ratio 就是上游的原始复合倍率 `baseMult`（= Σ rate × count），
-                // 这里只再乘技能自己的 `multCount`
-                hits: toInt(entry?.multCount ?? skill.multCount, 1),
-            },
-            // 名称匹配用的名字集（显示名之外的都在这，见 `displayNameOf`）
-            names: nameCandidates,
-            // 技能本体落线；「（额外）」条目同组共用这条线
-            ownLine: true,
-            groupKey,
-            state,
-        })
-
-        // **（额外）条目**：追加倍率（上游 `multAdd`）是技能级的一次性追加，
-        // 但工具箱的 `extraRatio` 是逐命中加算的 —— 绑到技能本体上会被乘
-        // `hits` 倍（景燃的劫魄：命火 527.5% 被算成近 5 倍）。所以给它单开一条
-        // 倍率≈0、`hits = 1` 的条目，追加倍率类 buff 只挂这里（见 `extra-ratio.ts`）。
-        const extraKeys = resolveSkillMultAdds({
-            effects: multAdds,
-            memberIndex: trackIndex,
-            names: nameCandidates,
-            stacks: resolved,
-            active: skill.buffActive,
-            globalActive: activeById,
-            member,
-        })
-        if (extraKeys.length) {
-            // 缩放词条后缀跟技能本体一致（追加的倍率按同一个面板属性缩放）
-            const suffix = SCALE_SUFFIX[
-                optionalString(entry?.scaleStat ?? skill.scaleStat) ?? ""
-            ] ??
-                ""
+        // 上游 `skill.hits` 是逐命中独立状态：同一技能的不同 Hit 可能勾了不同 Buff
+        // （T6E4P9 第一段 Hit1 全关、Hit2 开了延奏）。必须逐 Hit 落条目，否则会把
+        // 某个 Hit 的状态套到整招上；这些条目共用 groupKey / 参考线，差分时再合并。
+        const units = skill.split && Array.isArray(skill.hits) &&
+                skill.hits.length > 0
+            ? skill.hits
+            : [skill]
+        for (const [unitIndex, unit] of units.entries()) {
+            const resolved = resolvedFor(unit)
+            let state = skillStateOf(unit, resolved, source.phaseActive)
+            if (source.convergenceIds.length) {
+                state ??= { active: {}, stacks: { ...resolved } }
+                for (const id of source.convergenceIds) state.active[id] = true
+            }
+            // `alsoAsEffect` 在技能段 / Hit 上，不在目录条目上；目录条目存在时也要合并。
+            const alsoAsEffect = optionalString(entry?.alsoAsEffect) ||
+                optionalString(unit.alsoAsEffect) ||
+                optionalString(skill.alsoAsEffect)
+            const unitEntry = entry
+                ? {
+                    ...entry,
+                    damageType: unit.damageType ?? entry.damageType,
+                    alsoAsEffect,
+                }
+                : {
+                    baseMult: unit.baseMult ?? skill.baseMult,
+                    multCount: unit.multCount ?? skill.multCount,
+                    damageType: unit.damageType ?? skill.damageType,
+                    alsoAsEffect,
+                }
+            const base = toSkillHit(
+                unitEntry,
+                "",
+                nameCandidates,
+                character,
+                element,
+                librarySkill?.skillType,
+            )
+            const isSplitHit = units.length > 1 || unit !== skill
             items.push({
                 seconds,
+                roundIndex,
+                trackIndex,
+                character,
+                kind: "direct",
+                hit: {
+                    ...base,
+                    hitName: displayNameOf(
+                        nameCandidates,
+                        base.skillType,
+                        !entry?.librarySkillName ||
+                            (optionalString(entry?.librarySkillName) ?? "")
+                                .startsWith(
+                                    "声骸·",
+                                ),
+                    ),
+                    ...(entry?.id || skill.catalogId
+                        ? { catalogId: entry?.id ?? skill.catalogId }
+                        : {}),
+                    ratio: isSplitHit
+                        ? toRatio(
+                            null,
+                            unit.baseMult,
+                            unit.scaleStat ?? entry?.scaleStat ??
+                                skill.scaleStat,
+                            unit.fixedDamage ?? skill.fixedDamage ?? false,
+                        )
+                        : toRatio(
+                            entry?.multComponents,
+                            entry?.baseMult ?? skill.baseMult,
+                            entry?.scaleStat ?? skill.scaleStat,
+                            entry?.fixedDamage ?? skill.fixedDamage ?? false,
+                        ),
+                    hits: isSplitHit
+                        ? toInt(unit.multCount, 1)
+                        : toInt(entry?.multCount ?? skill.multCount, 1),
+                },
+                names: nameCandidates,
+                ownLine: true,
+                groupKey,
+                state,
+            })
+
+            // 追加倍率是技能级的一次性追加：只挂一次，且只挂在第一个 Hit 上。
+            if (unitIndex > 0) continue
+            const extraKeys = resolveSkillMultAdds({
+                effects: multAdds,
+                memberIndex: trackIndex,
+                names: nameCandidates,
+                stacks: resolved,
+                active: unit.buffActive,
+                globalActive: activeById,
+                member,
+            })
+            if (!extraKeys.length) continue
+            const suffix = SCALE_SUFFIX[
+                optionalString(
+                    entry?.scaleStat ?? unit.scaleStat ?? skill.scaleStat,
+                ) ??
+                    ""
+            ] ?? ""
+            items.push({
+                seconds,
+                roundIndex,
                 trackIndex,
                 character,
                 kind: "direct",
                 hit: {
                     ...base,
                     hitName: `${
-                        displayNameOf(nameCandidates, base.skillType)
+                        displayNameOf(
+                            nameCandidates,
+                            base.skillType,
+                            !entry?.librarySkillName ||
+                                (optionalString(entry?.librarySkillName) ?? "")
+                                    .startsWith(
+                                        "声骸·",
+                                    ),
+                        )
                     }${EXTRA_RATIO_SUFFIX}`,
                     ratio: `${EXTRA_RATIO_PLACEHOLDER}${suffix}`,
                     hits: 1,
                 },
                 names: nameCandidates,
-                // 与技能本体同组：共用同一条参考线，轴不会因此变长
                 ownLine: false,
                 groupKey,
                 state,
@@ -575,6 +621,7 @@ const collectMemberItems = (
                 optionalString(item.name) ?? ""
             items.push({
                 seconds: px,
+                roundIndex,
                 trackIndex,
                 character,
                 kind: "direct",
@@ -645,6 +692,7 @@ const collectMemberItems = (
         }
         items.push({
             seconds: px,
+            roundIndex,
             trackIndex,
             character: entry.character ?? character,
             kind: "nonDirect",
@@ -959,10 +1007,14 @@ const resolveRounds = (
                         if (!id) continue
                         defaultActive[id] = !!round?.globalBuffActive?.[id]
                     }
-                    for (const [id, value] of Object.entries(
-                        round?.globalBuffActive ?? {},
-                    )) {
-                        if (typeof value === "boolean") defaultActive[id] = value
+                    for (
+                        const [id, value] of Object.entries(
+                            round?.globalBuffActive ?? {},
+                        )
+                    ) {
+                        if (typeof value === "boolean") {
+                            defaultActive[id] = value
+                        }
                     }
                     const phaseStacks = phaseStacksOf(round?.phases)
                     const convergence = convergenceInfoOf(
@@ -1059,7 +1111,7 @@ export const convertTimelinePhase = (
     const roundBounds: { duration: number; endIndex: number }[] = []
     let items: AxisItem[] = []
 
-    for (const round of rounds) {
+    for (const [roundIndex, round] of rounds.entries()) {
         // **按站位分组**：1 号位的倍率排完再排 2 号位、3 号位，最后补该轮的轴长参考线。
         // 不跨站位按时间混排 —— 同一条轴上是同一时间点的三个人，混排会让人完全分不清谁是谁的段。
         let roundItems = members.flatMap((member, index) =>
@@ -1077,6 +1129,7 @@ export const convertTimelinePhase = (
                 multAdds,
                 activeById,
                 tables,
+                roundIndex,
                 hasAmisC6Burst,
             )
         )
@@ -1172,6 +1225,7 @@ export const convertTimelinePhase = (
             id: blockId,
             // 一律挂「伤害绑定」轨，否则排轴页不渲染（角色归属看 skillHits[].character）
             trackIndex: DAMAGE_TRACK_INDEX,
+            roundIndex: item.roundIndex,
             // 一律绑参考线，不绑操作块
             sourceType: "ref",
             sourceId: refLineId,
@@ -1203,6 +1257,7 @@ export const convertTimelinePhase = (
                     damageBaseType: baseType,
                     damageElement: item.hit!.element,
                     sourceTimelineBlockId: refLineId,
+                    roundIndex: item.roundIndex,
                     hits: item.hit!.hits ?? 1,
                     ratioUnit: unit,
                     // 显示名是短名，名称匹配靠这份名单（含技能库全名）
@@ -1225,25 +1280,10 @@ export const convertTimelinePhase = (
         }
 
         if (item.nonDirect) {
-            // 同一条参考线上同名同类的条目合并，responders 取并集
-            const existing = damageBlocks
-                .filter((candidate) => candidate.sourceId === refLineId)
-                .flatMap((candidate) => candidate.nonDirectEntries)
-                .find((entry) =>
-                    entry.name === item.nonDirect!.name &&
-                    entry.category === item.nonDirect!.category
-                )
+            // 处决/响应可以在同一参考线上出现多次（KGHNE7 一轮 2 次处决）。
+            // 它们必须各自保留成独立条目；按「同名同类」合并会让非直伤少算。
+            block.nonDirectEntries.push(item.nonDirect)
             const responders = item.nonDirect.responders ?? []
-            if (existing) {
-                const merged = new Set([
-                    ...(existing.responders ?? []),
-                    ...responders,
-                ])
-                if (merged.size) existing.responders = [...merged]
-            } else {
-                block.nonDirectEntries.push(item.nonDirect)
-            }
-
             const category = item.nonDirect.category
             const common = {
                 skillType: category === "响应"

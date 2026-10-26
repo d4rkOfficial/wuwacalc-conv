@@ -27,6 +27,8 @@ export interface UpstreamEffect {
     skillScope?: string
     skillNames?: string[] | null
     librarySkillNames?: string[] | null
+    /** 只对这些角色 ID 生效（团队效果里的定向加成） */
+    onlyCharacterIds?: string[] | null
 }
 
 /**

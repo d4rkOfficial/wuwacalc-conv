@@ -30,7 +30,16 @@ const stubUpstream = (impl: (url: string) => Response | Promise<Response>) => {
 
 const WEAPONS = {
     weapons: [
-        { id: "21020086", name: "灼霜" },
+        {
+            id: "21020086",
+            name: "灼霜",
+            rarity: 5,
+            type: 1,
+            baseAtk90: 587.5,
+            subStat: { name: "暴击", value: 24.3, isPercent: true },
+            effectName: "测试武器",
+            effect: "攻击提升12%",
+        },
         { id: "21050086", name: "存帧" },
         { id: "", name: "缺 id" },
     ],
@@ -73,7 +82,13 @@ const CHARACTER_SKILLS = {
     characters: [
         {
             id: "1108",
+            name: "测试角色",
             element: 1,
+            rank: 5,
+            baseAtk: 425,
+            baseHp: 11025,
+            baseDef: 1148.9,
+            harmonyBreakAmp: 10,
             skills: [
                 {
                     name: "普攻·第一段",
@@ -130,6 +145,32 @@ Deno.test("名称表：拉到武器 / 套装 / 声骸并转成 Map", async () =>
             tables.skills.get("1108|普攻·第一段")?.skillType,
             "常态攻击",
         )
+        assertEquals(tables.characterStats?.get("1108"), {
+            id: "1108",
+            name: "测试角色",
+            element: 1,
+            rank: 5,
+            baseAtk: 425,
+            baseHp: 11025,
+            baseDef: 1148.9,
+            harmonyBreakAmp: 10,
+            skills: [{
+                name: "普攻·第一段",
+                skillType: "常态攻击",
+                damageType: "普攻",
+                baseMult: 50,
+            }],
+        })
+        assertEquals(tables.weaponStats?.get("21020086"), {
+            id: "21020086",
+            name: "灼霜",
+            rarity: 5,
+            type: 1,
+            baseAtk90: 587.5,
+            subStat: { name: "暴击", value: 24.3, isPercent: true },
+            effectName: "测试武器",
+            effect: "攻击提升12%",
+        })
         assertEquals(calls.length, TABLE_COUNT)
     } finally {
         globalThis.fetch = realFetch

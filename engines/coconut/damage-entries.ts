@@ -9,12 +9,12 @@
 import {
     getEffectBurstMultiplier,
     getEffectMultiplier,
-} from "$lib/consts/effect-data.ts"
-import { NON_DIRECT_ELEMENT } from "$lib/consts/game-terms.ts"
-import type { DamageEntry } from "$lib/calc/calculation.types.ts"
-import type { TimelineData } from "$lib/calc/timeline.types.ts"
-import type { CharSlot } from "$lib/types/project.ts"
-import { parseValueString } from "$lib/utils/parse-value-string.ts"
+} from "./lib/consts/effect-data.ts"
+import { NON_DIRECT_ELEMENT } from "./lib/consts/game-terms.ts"
+import type { DamageEntry } from "./lib/calc/calculation.types.ts"
+import type { TimelineData } from "./lib/calc/timeline.types.ts"
+import type { CharSlot } from "./lib/types/project.ts"
+import { parseValueString } from "./lib/utils/parse-value-string.ts"
 
 export interface SkillCacheHit {
     name: string

@@ -1,5 +1,11 @@
 /// <reference lib="deno.ns" />
-/** 把 Svelte 风格的无扩展名 import 补成 Deno 能直接解析的 .ts。 */
+/**
+ * 把 Svelte 风格的无扩展名 import 补成 Deno 能直接解析的 .ts，
+ * 并把 `$lib/` 别名改成相对路径（Wrangler 打包 Worker 时不认 Deno 的 import map）。
+ */
+import { relative } from "node:path"
+import { fileURLToPath } from "node:url"
+
 const ROOT = new URL("../engines/coconut/", import.meta.url)
 const LIB = new URL("lib/", ROOT)
 const files: URL[] = []
@@ -33,15 +39,25 @@ for (const file of files) {
     const replacements: [string, string][] = []
     for (const m of text.matchAll(re)) {
         const spec = m[1]
-        if (/\.(ts|tsx|js|mjs|json)$/.test(spec)) continue
+        if (!spec.startsWith("$lib/") && /\.(ts|tsx|js|mjs|json)$/.test(spec)) {
+            continue
+        }
         let target: URL | null = null
         if (spec.startsWith("$lib/")) {
-            target = new URL("lib/" + spec.slice(5) + ".ts", ROOT)
+            target = new URL("lib/" + spec.slice(5), ROOT)
         } else if (spec.startsWith("./") || spec.startsWith("../")) {
             target = new URL(spec + ".ts", dir)
         }
         if (target && await exists(target)) {
-            const next = spec + ".ts"
+            const next = spec.startsWith("$lib/")
+                ? (() => {
+                    const rel = relative(
+                        fileURLToPath(dir),
+                        fileURLToPath(target!),
+                    ).replaceAll("\\", "/")
+                    return rel.startsWith(".") ? rel : "./" + rel
+                })()
+                : spec + ".ts"
             replacements.push([`from "${spec}"`, `from "${next}"`])
             replacements.push([`from '${spec}'`, `from '${next}'`])
         }

@@ -34,17 +34,10 @@ const DIAGNOSTIC = [
     "MC-BSZSVE", // 景燃 / 尤诺 / 莫宁，6+5
     "MC-CM6J6K", // 弗洛洛 / 仇远 / 莫宁
     "MC-T6E4P9", // 西格莉卡 / 仇远 / 守岸人
+    "MC-NT274J", // 秧秧 / 千咲 / 穗穗，5 轮 9 羽（新批次，已对齐）
+    "MC-U5UNZC", // 爱弥斯 / 达妮娅 / 千咲，简化 3 光全局（新批次，待收）
+    "MC-4NRWDV", // 清宵 / 达妮娅 / 莫宁，集谐（新批次，待收）
 ]
-/** 已知的单条差值（数据放在 fixtures，转换器与测试逻辑都不写死具体招式） */
-const KNOWN_OUTLIERS: Record<string, string[]> = JSON.parse(
-    await Deno.readTextFile(
-        new URL("../../fixtures/wuwacalc/known-outliers.json", import.meta.url),
-    ),
-)
-
-const isKnownOutlier = (code: string, name: string): boolean =>
-    (KNOWN_OUTLIERS[code] ?? []).includes(name)
-
 const TOTAL_TOLERANCE = 0.005
 const ENTRY_TOLERANCE = 0.10
 /** 至少 94% 的条目要落在 0.5% 内（多轮工程的零头取整会略低） */
@@ -70,19 +63,15 @@ for (const code of GATE) {
         )
         ok(result.entries.length > 0, `${code} 没有可比较的伤害条目`)
 
-        const comparable = result.entries.filter((entry) =>
-            !isKnownOutlier(code, entry.wuwaName)
-        )
-        const strict = comparable.filter((entry) =>
+        const strict = result.entries.filter((entry) =>
             Math.abs(entry.rel) < TOTAL_TOLERANCE
         )
         ok(
-            strict.length / comparable.length >= ENTRY_STRICT_SHARE,
-            `${code} 只有 ${strict.length}/${comparable.length} 条落在 0.5% 内`,
+            strict.length / result.entries.length >= ENTRY_STRICT_SHARE,
+            `${code} 只有 ${strict.length}/${result.entries.length} 条落在 0.5% 内`,
         )
 
         for (const entry of result.entries) {
-            if (isKnownOutlier(code, entry.wuwaName)) continue
             ok(
                 Math.abs(entry.rel) < ENTRY_TOLERANCE,
                 `${code} ${entry.character}/${entry.wuwaName} 偏差 ${

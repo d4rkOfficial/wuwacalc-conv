@@ -6,14 +6,15 @@
  *   2. 乘区级 —— 挂在具体乘区上：伤害类型 / 伤害属性
  */
 
-import type { BuffCondition } from './calculation.types.ts'
-import { DAMAGE_TYPE_SHORT } from '$lib/consts/game-terms.ts'
+import type { BuffCondition } from "./calculation.types.ts"
+import { DAMAGE_TYPE_SHORT } from "../consts/game-terms.ts"
 
 /** @desc 条件挂载层级：buff=实例级（可含链/阶硬性条件）；zone=乘区级 */
-export type ConditionScope = 'buff' | 'zone'
+export type ConditionScope = "buff" | "zone"
 
 /** @desc 某层级是否允许出现链条件 / 阶条件（链阶只能挂在整个 Buff 上） */
-export const scopeAllowsChainRefinement = (scope: ConditionScope): boolean => scope === 'buff'
+export const scopeAllowsChainRefinement = (scope: ConditionScope): boolean =>
+    scope === "buff"
 
 /** @desc 条件是否为空（无任何子句） */
 export const isConditionEmpty = (cond: BuffCondition | undefined): boolean => {
@@ -29,7 +30,10 @@ export const isConditionEmpty = (cond: BuffCondition | undefined): boolean => {
 }
 
 /** @desc 按层级裁剪条件：乘区级强制剥离链条件与阶条件（它们只作为整个 Buff 的硬性条件） */
-export const normalizeConditionForScope = (cond: BuffCondition, scope: ConditionScope): BuffCondition => {
+export const normalizeConditionForScope = (
+    cond: BuffCondition,
+    scope: ConditionScope,
+): BuffCondition => {
     if (scopeAllowsChainRefinement(scope)) return cond
     const next: BuffCondition = { ...cond }
     delete next.chains
@@ -48,9 +52,14 @@ export const normalizeConditionForScope = (cond: BuffCondition, scope: Condition
  * 因此导入角色来源的 buff 时补 0 链，既保留「挂在哪个角色身上」的归属（左侧列表归档到「角色名本体」），
  * 又不会因为档位把本体效果挡掉（`≥ 0 链` 恒成立）。
  */
-export const withOwnerBodyGate = (cond: BuffCondition, owner: number): BuffCondition => {
+export const withOwnerBodyGate = (
+    cond: BuffCondition,
+    owner: number,
+): BuffCondition => {
     if (owner < 0) return cond
-    if ((cond.chains?.length ?? 0) > 0 || (cond.refinements?.length ?? 0) > 0) return cond
+    if ((cond.chains?.length ?? 0) > 0 || (cond.refinements?.length ?? 0) > 0) {
+        return cond
+    }
     return { ...cond, chains: [{ charIdx: owner, min: 0 }] }
 }
 
@@ -78,29 +87,41 @@ export interface ConditionContext {
  *   同类子句（如多条链要求）之间为「与」——全部满足才生效
  * - 需要条目上下文（伤害属性 / 伤害类型）的子句，在没有条目上下文时视为不满足
  */
-export const evaluateCondition = (cond: BuffCondition | undefined, ctx: ConditionContext): boolean => {
+export const evaluateCondition = (
+    cond: BuffCondition | undefined,
+    ctx: ConditionContext,
+): boolean => {
     if (!cond) return true
 
     // ── 类别 1：伤害类型（内部或）──
     if (cond.damageTypes?.length) {
         const types = ctx.damageTypes ?? []
-        if (ctx.element === undefined || !cond.damageTypes.some((dt) => types.includes(dt))) return false
+        if (
+            ctx.element === undefined ||
+            !cond.damageTypes.some((dt) => types.includes(dt))
+        ) return false
     }
 
     // ── 类别 2：伤害属性（内部或）──
     if (cond.elements?.length) {
-        if (ctx.element === undefined || !cond.elements.includes(ctx.element)) return false
+        if (ctx.element === undefined || !cond.elements.includes(ctx.element)) {
+            return false
+        }
     }
 
     // ── 类别 3：链 / 阶门条件（二选一；同类子句内部为与）──
     const legacyRefIdx = ctx.refCharIdx ?? 0
     const chainClauses = [
         ...(cond.chains ?? []),
-        ...(cond.chain !== undefined ? [{ charIdx: legacyRefIdx, min: cond.chain }] : [])
+        ...(cond.chain !== undefined
+            ? [{ charIdx: legacyRefIdx, min: cond.chain }]
+            : []),
     ]
     const refineClauses = [
         ...(cond.refinements ?? []),
-        ...(cond.refinement !== undefined ? [{ charIdx: legacyRefIdx, min: cond.refinement }] : [])
+        ...(cond.refinement !== undefined
+            ? [{ charIdx: legacyRefIdx, min: cond.refinement }]
+            : []),
     ]
     /**
      * @desc 链条件与阶条件互斥：同一个 Buff 只能生效其中一个。
@@ -109,9 +130,15 @@ export const evaluateCondition = (cond: BuffCondition | undefined, ctx: Conditio
      * 保证「二选一」在任何路径下都成立。
      */
     if (chainClauses.length > 0) {
-        if (!chainClauses.every((c) => (ctx.chains[c.charIdx] ?? 0) >= c.min)) return false
+        if (!chainClauses.every((c) => (ctx.chains[c.charIdx] ?? 0) >= c.min)) {
+            return false
+        }
     } else if (refineClauses.length > 0) {
-        if (!refineClauses.every((c) => (ctx.refinements[c.charIdx] ?? 1) >= c.min)) return false
+        if (
+            !refineClauses.every((c) =>
+                (ctx.refinements[c.charIdx] ?? 1) >= c.min
+            )
+        ) return false
     }
 
     return true
@@ -120,23 +147,32 @@ export const evaluateCondition = (cond: BuffCondition | undefined, ctx: Conditio
 /** @desc 条件摘要文案（界面 chip / 工具说明共用） */
 export const describeCondition = (
     cond: BuffCondition | undefined,
-    slotName = (i: number) => `角色${i + 1}`
+    slotName = (i: number) => `角色${i + 1}`,
 ): string => {
-    if (!cond) return '无条件'
+    if (!cond) return "无条件"
     const groups: string[] = []
     const gate: string[] = []
     // 链 = 角色共鸣链：0 链 = 未点共鸣链的角色本体，因此「本体」只出现在链条件上
-    for (const c of cond.chains ?? [])
-        gate.push(c.min > 0 ? `${slotName(c.charIdx)} ≥ ${c.min}链` : `${slotName(c.charIdx)}本体`)
+    for (const c of cond.chains ?? []) {
+        gate.push(
+            c.min > 0
+                ? `${slotName(c.charIdx)} ≥ ${c.min}链`
+                : `${slotName(c.charIdx)}本体`,
+        )
+    }
     // 阶 = 武器精炼阶数：一律按「≥ N 阶」描述（0 阶即 ≥ 0 阶，无「本体」一说）
-    for (const c of cond.refinements ?? []) gate.push(`${slotName(c.charIdx)}武器 ≥ ${c.min}阶`)
+    for (const c of cond.refinements ?? []) {
+        gate.push(`${slotName(c.charIdx)}武器 ≥ ${c.min}阶`)
+    }
     if (cond.chain !== undefined) gate.push(`共鸣链 ≥ ${cond.chain}`)
-    if (cond.refinement !== undefined) gate.push(`武器精炼 ≥ ${cond.refinement}`)
-    if (gate.length) groups.push(gate.join(' 且 '))
+    if (cond.refinement !== undefined) {
+        gate.push(`武器精炼 ≥ ${cond.refinement}`)
+    }
+    if (gate.length) groups.push(gate.join(" 且 "))
     // 属性 / 类型各自内部为「或」，与门条件之间为「且」
-    if (cond.elements?.length) groups.push(cond.elements.join(' 或 '))
-    if (cond.damageTypes?.length) groups.push(cond.damageTypes.join(' 或 '))
-    return groups.length ? groups.join(' 且 ') : '无条件'
+    if (cond.elements?.length) groups.push(cond.elements.join(" 或 "))
+    if (cond.damageTypes?.length) groups.push(cond.damageTypes.join(" 或 "))
+    return groups.length ? groups.join(" 且 ") : "无条件"
 }
 
 /**
@@ -151,11 +187,17 @@ export const describeCondition = (
  * 与 `describeCondition` 的分工：后者是完整口径的工具说明（含链/阶、带括号分隔），
  * 这里只服务于乘区行的紧凑徽标。
  */
-export const describeZoneConditionBadge = (cond: BuffCondition | undefined): string => {
-    if (!cond) return ''
-    const types = (cond.damageTypes ?? []).map((dt) => DAMAGE_TYPE_SHORT[dt] ?? dt)
+export const describeZoneConditionBadge = (
+    cond: BuffCondition | undefined,
+): string => {
+    if (!cond) return ""
+    const types = (cond.damageTypes ?? []).map((dt) =>
+        DAMAGE_TYPE_SHORT[dt] ?? dt
+    )
     const elements = cond.elements ?? []
-    return [types.join('/'), elements.join('/')].filter((part) => part.length > 0).join('·')
+    return [types.join("/"), elements.join("/")].filter((part) =>
+        part.length > 0
+    ).join("·")
 }
 
 // ── 条件归一化（迁移与界面共用的唯一入口）──
@@ -168,16 +210,25 @@ export const describeZoneConditionBadge = (cond: BuffCondition | undefined): str
  */
 export const normalizeCondition = (
     cond: BuffCondition | undefined,
-    scope: ConditionScope = 'buff',
-    refCharIdx = 0
+    scope: ConditionScope = "buff",
+    refCharIdx = 0,
 ): BuffCondition => {
     if (!cond) return {}
     const next: BuffCondition = { ...cond }
-    if (Array.isArray(cond.chains)) next.chains = cond.chains.filter((c) => c && typeof c.charIdx === 'number')
-    if (Array.isArray(cond.refinements))
-        next.refinements = cond.refinements.filter((c) => c && typeof c.charIdx === 'number')
-    if (typeof cond.chain === 'number' && !next.chains?.length) next.chains = [{ charIdx: refCharIdx, min: cond.chain }]
-    if (typeof cond.refinement === 'number' && !next.refinements?.length) {
+    if (Array.isArray(cond.chains)) {
+        next.chains = cond.chains.filter((c) =>
+            c && typeof c.charIdx === "number"
+        )
+    }
+    if (Array.isArray(cond.refinements)) {
+        next.refinements = cond.refinements.filter((c) =>
+            c && typeof c.charIdx === "number"
+        )
+    }
+    if (typeof cond.chain === "number" && !next.chains?.length) {
+        next.chains = [{ charIdx: refCharIdx, min: cond.chain }]
+    }
+    if (typeof cond.refinement === "number" && !next.refinements?.length) {
         next.refinements = [{ charIdx: refCharIdx, min: cond.refinement }]
     }
     delete next.chain
@@ -188,7 +239,9 @@ export const normalizeCondition = (
 }
 
 /** @desc 归一化乘区级条件：裁剪为「伤害类型 / 伤害属性」并丢弃空条件 */
-export const normalizeZoneCondition = (cond: BuffCondition | undefined): BuffCondition | undefined => {
-    const normalized = normalizeCondition(cond, 'zone')
+export const normalizeZoneCondition = (
+    cond: BuffCondition | undefined,
+): BuffCondition | undefined => {
+    const normalized = normalizeCondition(cond, "zone")
     return isConditionEmpty(normalized) ? undefined : normalized
 }

@@ -7,7 +7,11 @@
  */
 
 import { convertWuwaCalcProjectToCoconutProjectFile } from "../src/convert-project/index.ts"
-import { type ProjectTables } from "../src/convert-project/tables.ts"
+import {
+    type ProjectTables,
+    toCharacterStats,
+    toWeaponStats,
+} from "../src/convert-project/tables.ts"
 import { type GameData, measureCoconut } from "./coconut/measure.ts"
 import { compareParity, type ParityComparison } from "./compare.ts"
 
@@ -146,6 +150,8 @@ export const loadSiteTables = async (): Promise<ProjectTables> => {
         skills: skillMap,
         characterElements,
         echoSpecimens: specimenMap,
+        characterStats: toCharacterStats(skillDb.characters),
+        weaponStats: toWeaponStats(weapons.weapons),
     }
 }
 

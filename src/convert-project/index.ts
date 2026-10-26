@@ -123,16 +123,23 @@ const applyZeroOneConfigVariant = (
  * @param tables 运行时名称表（武器 / 套装）；缺省用空表，此时相关字段留空
  * @param options 信封产出时间与工程 id
  */
-export const convertWuwaCalcProjectToCoconutProjectFile = (
+export interface ConvertedProjectParts {
+    payload: WuwaCalcProjectPayload
+    team: ReturnType<typeof convertTeamPhase>
+    timeline: ReturnType<typeof convertTimelinePhase>
+    calculation: ReturnType<typeof convertCalculationPhase>
+    config: ReturnType<typeof convertConfigPhase>
+}
+
+/** 只跑四个阶段，不组装信封；供下载与诊断报告共用。 */
+export const convertWuwaCalcProjectParts = (
     detail: ConvertProjectInput,
     tables: ProjectTables = EMPTY_TABLES,
-    options: ConvertProjectOptions = {},
-): CoconutProjectFile => {
+): ConvertedProjectParts => {
     const payload = applyZeroOneConfigVariant(
         detail.payload?.data ?? {},
         detail.summary,
     )
-
     const team = convertTeamPhase(payload, tables)
     const timeline = convertTimelinePhase(payload, tables)
     const calculation = convertCalculationPhase(
@@ -142,6 +149,16 @@ export const convertWuwaCalcProjectToCoconutProjectFile = (
         tables,
     )
     const config = convertConfigPhase(payload)
+    return { payload, team, timeline, calculation, config }
+}
+
+/** 把已经转换好的四个阶段组装成椰果工程文件（报告端复用，避免重复转换）。 */
+export const buildCoconutProjectFile = (
+    parts: ConvertedProjectParts,
+    detail: ConvertProjectInput,
+    options: ConvertProjectOptions = {},
+): CoconutProjectFile => {
+    const { team, timeline, calculation, config } = parts
 
     return {
         version: COCONUT_PROJECT_FILE_VERSION,
@@ -173,3 +190,14 @@ export const convertWuwaCalcProjectToCoconutProjectFile = (
         },
     }
 }
+
+export const convertWuwaCalcProjectToCoconutProjectFile = (
+    detail: ConvertProjectInput,
+    tables: ProjectTables = EMPTY_TABLES,
+    options: ConvertProjectOptions = {},
+): CoconutProjectFile =>
+    buildCoconutProjectFile(
+        convertWuwaCalcProjectParts(detail, tables),
+        detail,
+        options,
+    )

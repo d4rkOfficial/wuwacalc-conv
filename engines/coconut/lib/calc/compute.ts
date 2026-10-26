@@ -6,13 +6,13 @@ import type {
     ZoneRef,
 } from "./calculation.types.ts"
 import type { ConfigState, EchoSlotConfig } from "./config.types.ts"
-import type { CharacterInfo, WeaponInfo } from "$lib/api/types.ts"
+import type { CharacterInfo, WeaponInfo } from "../api/types.ts"
 import type {
     MultiplierZone,
     RatioFactor,
     ResultEntry,
 } from "./result.types.ts"
-import type { CharSlot } from "$lib/types/project.ts"
+import type { CharSlot } from "../types/project.ts"
 import {
     TARGET_SIDE_ZONE_IDS,
     ZONE_NO_REF_IDS,
@@ -28,7 +28,7 @@ import {
     EFFECT_BASE_VALUE,
     getEffectBurstMultiplier,
     getEffectMultiplier,
-} from "$lib/consts/effect-data.ts"
+} from "../consts/effect-data.ts"
 import {
     CHAR_LEVEL,
     ELEMENT_BONUS_MAP,
@@ -36,8 +36,8 @@ import {
     SUBSTAT_DECIMAL_TO_PCT,
     TYPE_BONUS_MAP,
     WEAPON_SUBSTAT_NAME_MAP,
-} from "$lib/consts/game-terms.ts"
-import { SECOND_MAIN_STAT } from "$lib/consts/stat-data.ts"
+} from "../consts/game-terms.ts"
+import { SECOND_MAIN_STAT } from "../consts/stat-data.ts"
 
 // ── helpers ──
 
@@ -45,7 +45,7 @@ import type { EnemyConfig } from "./config.types.ts"
 
 import { inferDamageTypes } from "./utils.ts"
 import { buildEchoDescByEntry } from "./skill-infer.ts"
-import { getEchoSkillText } from "$lib/data/char-info.svelte.ts"
+import { getEchoSkillText } from "../data/char-info.svelte.ts"
 
 /** @desc 解析某个伤害条目最终生效的伤害类型集合（显式配置优先，其次按技能/声骸描述推断） */
 export function resolveDamageTypes(
@@ -1423,8 +1423,9 @@ function computeEffectEntry(
     /** @desc ── 加「额外倍率」乘区（buff 提供，效应伤害专属增益）── */
     const effectiveRatio = ratioNum +
         (stats.extraRatio / 100) * (entry.hits || 1)
+    // 具名效应（聚爆·普通光翼）不在规范名表里，必须优先用条目自己的元素
     const element = entry.damageElement ||
-        ((NON_DIRECT_ELEMENT as Record<string, string>)[entry.hitName] ?? "")
+        (NON_DIRECT_ELEMENT as Record<string, string>)[entry.hitName] || ""
 
     /** @desc ── 基础值：效应伤害有独立基础值 3674，与角色攻击力无关（不吃攻击/暴击/增伤/面板类）── */
     const baseUnit = "效应系数"

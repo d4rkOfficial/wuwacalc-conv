@@ -21,6 +21,9 @@ export interface SkillHit {
     element: string
     character: string
     hits?: number
+    damageType?: string
+    alsoAsEffect?: string
+    catalogId?: string
 }
 
 export interface SkillPickerGroup {
@@ -34,13 +37,13 @@ export interface NonDirectEntry {
     layers: number
     hits?: number
     responders?: string[]
-    /** 效应归属角色（Buff 作用域用；显示仍按效应） */
+    /** 效应伤害的归属角色（决定它吃谁的 Buff） */
     character?: string
-    /** 上游效应/处决的每段倍率（百分比数值） */
+    /** 具名效应的每段倍率（上游 baseMult / 100） */
     baseMult?: number
-    /** 效应元素（具名效应也能匹配正确抗性） */
+    /** 效应伤害元素 */
     element?: string
-    /** 效应双暴覆盖（%） */
+    /** 效应双暴覆盖 */
     critRate?: number
     critDmg?: number
 }

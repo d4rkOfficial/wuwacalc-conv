@@ -1,7 +1,7 @@
-import type { ResultEntry } from './result.types.ts'
-import type { DamageEntry } from './calculation.types.ts'
-import type { CharacterInfo } from '$lib/api/types.ts'
-import { inferFromSkillText, matchHitNamePrefix } from './skill-infer.ts'
+import type { ResultEntry } from "./result.types.ts"
+import type { DamageEntry } from "./calculation.types.ts"
+import type { CharacterInfo } from "../api/types.ts"
+import { inferFromSkillText, matchHitNamePrefix } from "./skill-infer.ts"
 
 /**
  * @desc 自动推导伤害类型（优先级从高到低）：
@@ -9,76 +9,93 @@ import { inferFromSkillText, matchHitNamePrefix } from './skill-infer.ts'
  * 2. 规则2：技能富文本「视为/为 XX 伤害」→ 直接顶替其它推导（角色技能文案取 charInfo，
  *    声骸技能文案由调用方通过 echoDesc 传入）；同一份文案里并列多个技能/多段时按技能名、段号锚定，
  *    只有确属本次命中小节的结论才会被采用，有歧义时放弃；
+ *    **「同时视为 XX 伤害」是追加类型**：主类型仍按普通结论/规则1/技能类型取，再把同时类型并进结果
+ *    （如「为重击伤害，同时视为【光噪效应】伤害」→ 重击伤害 + 效应伤害）；
  * 3. 规则1：倍率名含「普攻·/重击·/空中攻击/闪避反击/共鸣技能·/共鸣解放·/变奏技能·/延奏技能·」→ 对应类型
  *    （空中攻击、闪避反击默认按普攻伤害结算，文案写明重击的由上一步覆盖）；
  * 4. 按技能类型推断，常态攻击再按招式名分普攻/重击；无法推导归「其它类型伤害」。
  */
-export function inferDamageTypes(entry: DamageEntry, charInfo?: CharacterInfo | null, echoDesc?: string): string[] {
-    // 效应结算条目自动推导为「效应伤害」
-    if (entry.isEffect) return ['效应伤害']
-    // 规则2：技能文案「视为/为 XX 伤害」（富文本先剥标签再匹配）
-    const fromText = inferFromSkillText(charInfo, entry, echoDesc ? [echoDesc] : [])
-    if (fromText) return [fromText]
-    // 规则1：倍率名里的类型前缀
-    const fromName = matchHitNamePrefix(entry.hitName)
-    if (fromName) return [fromName]
+const fallbackDamageType = (entry: DamageEntry): string => {
     switch (entry.skillType) {
-        case '常态攻击':
-            return entry.hitName.includes('重击') ? ['重击伤害'] : ['普攻伤害']
-        case '共鸣技能':
-            return ['共鸣技能伤害']
-        case '共鸣解放':
-            return ['共鸣解放伤害']
-        case '声骸技能':
-            return ['声骸技能伤害']
-        case '变奏技能':
-            return ['变奏技能伤害']
-        case '延奏技能':
-            return ['延奏技能伤害']
+        case "常态攻击":
+            return entry.hitName.includes("重击") ? "重击伤害" : "普攻伤害"
+        case "共鸣技能":
+            return "共鸣技能伤害"
+        case "共鸣解放":
+            return "共鸣解放伤害"
+        case "声骸技能":
+            return "声骸技能伤害"
+        case "变奏技能":
+            return "变奏技能伤害"
+        case "延奏技能":
+            return "延奏技能伤害"
         default:
             // 无法推导的类型统一归为「其它类型伤害」
-            return ['其它类型伤害']
+            return "其它类型伤害"
     }
 }
 
+export function inferDamageTypes(
+    entry: DamageEntry,
+    charInfo?: CharacterInfo | null,
+    echoDesc?: string,
+): string[] {
+    // 效应结算条目自动推导为「效应伤害」
+    if (entry.isEffect) return ["效应伤害"]
+    // 规则2：技能文案「视为/为 XX 伤害」（富文本先剥标签再匹配）
+    const fromText = inferFromSkillText(
+        charInfo,
+        entry,
+        echoDesc ? [echoDesc] : [],
+    )
+    const fromName = matchHitNamePrefix(entry.hitName)
+    if (fromText) {
+        // 只有「同时视为」时，主类型交给规则1/技能类型兜底（「空中攻击」+「同时视为风蚀效应」→ 普攻 + 效应）
+        const primary = fromText.type ?? fromName ?? fallbackDamageType(entry)
+        return [...new Set([primary, ...fromText.simultaneous])]
+    }
+    if (fromName) return [fromName]
+    return [fallbackDamageType(entry)]
+}
+
 export const DAMAGE_TYPE_CATEGORIES = [
-    '普攻',
-    '重击',
-    '共鸣技能',
-    '共鸣解放',
-    '变奏技能',
-    '延奏技能',
-    '声骸技能',
-    '协同',
-    '效应',
-    '其它'
+    "普攻",
+    "重击",
+    "共鸣技能",
+    "共鸣解放",
+    "变奏技能",
+    "延奏技能",
+    "声骸技能",
+    "协同",
+    "效应",
+    "其它",
 ] as const
 
 export type DamageTypeCategory = (typeof DAMAGE_TYPE_CATEGORIES)[number]
 
 export const TYPE_COLORS: Record<DamageTypeCategory, string> = {
-    普攻: '#8b95c9',
-    重击: '#a48bc9',
-    共鸣技能: '#7ba4d4',
-    共鸣解放: '#d18a8a',
-    变奏技能: '#86b8a0',
-    延奏技能: '#7fb0ac',
-    声骸技能: '#cd93b8',
-    协同: '#e0a458',
-    效应: '#c978e0',
-    其它: '#9aa3ad'
+    普攻: "#8b95c9",
+    重击: "#a48bc9",
+    共鸣技能: "#7ba4d4",
+    共鸣解放: "#d18a8a",
+    变奏技能: "#86b8a0",
+    延奏技能: "#7fb0ac",
+    声骸技能: "#cd93b8",
+    协同: "#e0a458",
+    效应: "#c978e0",
+    其它: "#9aa3ad",
 }
 
 const FULL_TO_CATEGORY: Record<string, DamageTypeCategory> = {
-    普攻伤害: '普攻',
-    重击伤害: '重击',
-    共鸣技能伤害: '共鸣技能',
-    共鸣解放伤害: '共鸣解放',
-    变奏技能伤害: '变奏技能',
-    延奏技能伤害: '延奏技能',
-    声骸技能伤害: '声骸技能',
-    协同攻击伤害: '协同',
-    效应伤害: '效应'
+    普攻伤害: "普攻",
+    重击伤害: "重击",
+    共鸣技能伤害: "共鸣技能",
+    共鸣解放伤害: "共鸣解放",
+    变奏技能伤害: "变奏技能",
+    延奏技能伤害: "延奏技能",
+    声骸技能伤害: "声骸技能",
+    协同攻击伤害: "协同",
+    效应伤害: "效应",
 }
 
 export interface DirectDamageTypeSlice {
@@ -102,7 +119,10 @@ function hexToRgb(hex: string): [number, number, number] {
 
 function rgbToHex(r: number, g: number, b: number): string {
     const clamp = (x: number) => Math.max(0, Math.min(255, Math.round(x)))
-    return `#${((1 << 24) | (clamp(r) << 16) | (clamp(g) << 8) | clamp(b)).toString(16).slice(1)}`
+    return `#${
+        ((1 << 24) | (clamp(r) << 16) | (clamp(g) << 8) | clamp(b)).toString(16)
+            .slice(1)
+    }`
 }
 
 /** @desc RGB → HSL（h:0-360, s/l:0-1） */
@@ -162,14 +182,14 @@ function hslToRgb(h: number, s: number, l: number): [number, number, number] {
  */
 function combinedColor(cats: DamageTypeCategory[]): string {
     const n = cats.length
-    if (n === 0) return TYPE_COLORS['其它']
+    if (n === 0) return TYPE_COLORS["其它"]
     if (n === 1) return TYPE_COLORS[cats[0]]
     const [r, g, b] = cats.reduce<[number, number, number]>(
         (acc, c) => {
             const [cr, cg, cb] = hexToRgb(TYPE_COLORS[c])
             return [acc[0] + cr, acc[1] + cg, acc[2] + cb]
         },
-        [0, 0, 0]
+        [0, 0, 0],
     )
     const [h, s, l] = rgbToHsl(r / n, g / n, b / n)
     const boostedS = Math.min(1, s * 1.4 + 0.1)
@@ -181,15 +201,23 @@ function combinedColor(cats: DamageTypeCategory[]): string {
  * @desc 直伤按类型占比（仅含角色来源、非纯效应的直伤）。
  * 单一类型计入自身类别；同时属于多个类型（a&b…）的伤害独立成「a&b」组合类别，不再分摊进各单一类型。
  */
-export function aggregateDirectDamageByType(entries: ResultEntry[]): DirectDamageByType[] {
+export function aggregateDirectDamageByType(
+    entries: ResultEntry[],
+): DirectDamageByType[] {
     const result: DirectDamageByType[] = []
     const indexMap = new Map<string, number>()
-    const sliceMaps: Map<string, { value: number; cats: DamageTypeCategory[] }>[] = []
+    const sliceMaps: Map<
+        string,
+        { value: number; cats: DamageTypeCategory[] }
+    >[] = []
 
     for (const e of entries) {
         // 排除：无伤害类型、纯效应条目（baseUnit === '效应系数'，无角色来源）、无角色来源直伤（无名组不生成）；
         // 「视为效应」的直伤（有角色、baseUnit 非效应系数）保留
-        if (e.damageTypes.length === 0 || e.baseUnit === '效应系数' || !e.character) continue
+        if (
+            e.damageTypes.length === 0 || e.baseUnit === "效应系数" ||
+            !e.character
+        ) continue
         let idx = indexMap.get(e.character)
         if (idx === undefined) {
             idx = result.length
@@ -200,10 +228,16 @@ export function aggregateDirectDamageByType(entries: ResultEntry[]): DirectDamag
         const agg = result[idx]
         const sm = sliceMaps[idx]
         // 按类别顺序去重排序；多类型拼接「a&b」组合标签
-        const cats = [...new Set(e.damageTypes.map((dt) => FULL_TO_CATEGORY[dt] ?? '其它'))].sort(
-            (a, b) => DAMAGE_TYPE_CATEGORIES.indexOf(a) - DAMAGE_TYPE_CATEGORIES.indexOf(b)
+        const cats = [
+            ...new Set(
+                e.damageTypes.map((dt) => FULL_TO_CATEGORY[dt] ?? "其它"),
+            ),
+        ].sort(
+            (a, b) =>
+                DAMAGE_TYPE_CATEGORIES.indexOf(a) -
+                DAMAGE_TYPE_CATEGORIES.indexOf(b),
         )
-        const label = cats.length > 1 ? cats.join('&') : cats[0]
+        const label = cats.length > 1 ? cats.join("&") : cats[0]
         const existing = sm.get(label)
         if (existing) existing.value += e.totalDamage
         else sm.set(label, { value: e.totalDamage, cats })
@@ -211,11 +245,15 @@ export function aggregateDirectDamageByType(entries: ResultEntry[]): DirectDamag
     }
 
     for (let i = 0; i < result.length; i++) {
-        result[i].slices = [...sliceMaps[i].entries()].map(([label, { value, cats }]) => ({
+        result[i].slices = [...sliceMaps[i].entries()].map((
+            [label, { value, cats }],
+        ) => ({
             label,
             value,
             pct: result[i].total > 0 ? (value / result[i].total) * 100 : 0,
-            color: cats.length > 1 ? combinedColor(cats) : TYPE_COLORS[cats[0] ?? '其它']
+            color: cats.length > 1
+                ? combinedColor(cats)
+                : TYPE_COLORS[cats[0] ?? "其它"],
         }))
         result[i].slices.sort((a, b) => b.value - a.value)
     }

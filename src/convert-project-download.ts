@@ -81,6 +81,26 @@ const attachmentResponse = (
     ...extraHeaders,
 })
 
+/** 抓取一份上游方案详情（下载与诊断报告共用）。 */
+export const fetchProjectDetail = async (
+    code: string,
+    env: Bindings,
+): Promise<
+    | { ok: true; detail: WuwaCalcSchemeDetail }
+    | { ok: false; response: Response }
+> => {
+    const upstream = await fetchUpstream(
+        env,
+        `/api/schemes/${encodeURIComponent(code)}`,
+        DETAIL_TIMEOUT_MS,
+    )
+    if (!upstream.ok) return { ok: false, response: upstream.response }
+
+    const parsed = await readUpstreamJson<WuwaCalcSchemeDetail>(upstream.res)
+    if (!parsed.ok) return { ok: false, response: parsed.response }
+    return { ok: true, detail: parsed.data }
+}
+
 /** 抓一次上游并转换；成功返回工程文件，失败返回可透传的错误响应 */
 const fetchAndConvert = async (
     code: string,
@@ -98,22 +118,15 @@ const fetchAndConvert = async (
         response: Response
     }
 > => {
-    const upstream = await fetchUpstream(
-        env,
-        `/api/schemes/${encodeURIComponent(code)}`,
-        DETAIL_TIMEOUT_MS,
-    )
-    if (!upstream.ok) return { ok: false, response: upstream.response }
-
-    const parsed = await readUpstreamJson<WuwaCalcSchemeDetail>(upstream.res)
-    if (!parsed.ok) return { ok: false, response: parsed.response }
+    const result = await fetchProjectDetail(code, env)
+    if (!result.ok) return result
 
     // 名称表（武器 / 套装 / 声骸）运行时拉取并缓存；拉不到按「名称缺失」降级
     const tables = await loadProjectTables(env)
     return {
         ok: true,
-        file: convertWuwaCalcProjectToCoconutProjectFile(parsed.data, tables),
-        title: parsed.data?.title ?? "",
+        file: convertWuwaCalcProjectToCoconutProjectFile(result.detail, tables),
+        title: result.detail?.title ?? "",
         degraded: isProjectTablesEmpty(tables),
     }
 }

@@ -123,6 +123,9 @@ export interface WuwaCalcAxisSkill {
     damageType?: string
     /** 同时视为某种效应（上游 `alsoAsEffect`，如卡提希娅部分普攻同时算风蚀） */
     alsoAsEffect?: string
+    /** 上游把技能拆成多个 Hit（每个 Hit 有自己的 Buff 开关 / 层数） */
+    split?: boolean
+    hits?: WuwaCalcAxisSkill[]
     energyRegen?: number
     fixedDamage?: boolean
     scaleStat?: string
@@ -409,6 +412,8 @@ export interface CoconutNonDirectEntry {
 export interface CoconutDamageBlock {
     id: string
     trackIndex: number
+    /** 多轮工程的轮次下标 */
+    roundIndex?: number
     sourceType: "op" | "ref"
     sourceId: string
     skillHits: CoconutSkillHit[]
@@ -502,6 +507,8 @@ export interface CoconutDamageEntry {
     damageType?: string
     /** 同时视为某种效应（上游 `alsoAsEffect`），拉表阶段会追加 `效应伤害` */
     alsoAsEffect?: string
+    /** 多轮工程的轮次下标（差分按轮对齐） */
+    roundIndex?: number
 }
 
 /** 对应工具箱 `CalcState` */

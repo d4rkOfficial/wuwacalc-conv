@@ -7,6 +7,8 @@
  * | `GET` | `/assets/usage-{dark\|light}.jpg` | `home.ts`（使用方法附图） |
  * | `GET` | `/api/public/projects` | `convert-project-list.ts` |
  * | `GET` | `/share/{code}/download` | `convert-project-download.ts` |
+ * | `GET` | `/share/{code}/report` | `convert-project-report-endpoint.ts`（HTML） |
+ * | `GET` | `/api/convert/{code}/report` | `convert-project-report-endpoint.ts`（JSON） |
  */
 
 import {
@@ -14,6 +16,11 @@ import {
     SHARE_DOWNLOAD_PATTERN,
 } from "./convert-project-download.ts"
 import { handleListProjects } from "./convert-project-list.ts"
+import {
+    handleProjectReport,
+    REPORT_HTML_PATTERN,
+    REPORT_JSON_PATTERN,
+} from "./convert-project-report-endpoint.ts"
 import { handleHome, handleUsageImage, USAGE_IMAGE_ROUTE } from "./home.ts"
 import { CORS_HEADERS, errorResponse } from "./http.ts"
 import type { Bindings } from "./http.ts"
@@ -34,6 +41,32 @@ export default {
 
         if (url.pathname === "/api/public/projects") {
             return await handleListProjects(url, env)
+        }
+
+        const reportJson = REPORT_JSON_PATTERN.exec(url.pathname)
+        if (reportJson) {
+            try {
+                return await handleProjectReport(
+                    decodeURIComponent(reportJson[1]),
+                    env,
+                    "json",
+                )
+            } catch {
+                return errorResponse(400, "分享码格式不合法")
+            }
+        }
+
+        const reportHtml = REPORT_HTML_PATTERN.exec(url.pathname)
+        if (reportHtml) {
+            try {
+                return await handleProjectReport(
+                    decodeURIComponent(reportHtml[1]),
+                    env,
+                    "html",
+                )
+            } catch {
+                return errorResponse(400, "分享码格式不合法")
+            }
         }
 
         const share = SHARE_DOWNLOAD_PATTERN.exec(url.pathname)
