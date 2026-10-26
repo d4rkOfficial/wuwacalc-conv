@@ -20,6 +20,7 @@ import type {
     ReportEngineSkill,
 } from "./convert-project-report-engine.ts"
 import { renderLocalRecomputeHtml } from "./convert-project-report-client.ts"
+import { FAST_CALC_URL } from "./toolbox.ts"
 
 export interface ReportZone {
     zoneId: string
@@ -645,6 +646,10 @@ export const renderProjectReportHtml = (report: ProjectReport): string => {
         ) + "</td></tr>"
     ).join("")
     const engine = report.engine
+    const projectUrl = report.localRecompute?.projectUrl ??
+        ("/share/" + encodeURIComponent(report.code) + "/download")
+    const fastCalcUrl = FAST_CALC_URL + "?import_project=" +
+        encodeURIComponent(projectUrl)
     const timing = report.timings
     const coconutMs = timing?.coconutMs !== undefined
         ? String(Math.round(timing.coconutMs))
@@ -1064,6 +1069,17 @@ p { margin: 10px 0; }
 .engine-time-coconut b { background-image: linear-gradient(135deg, var(--accent), var(--good)); }
 .engine-time-wuwa b { background-image: linear-gradient(135deg, var(--accent-2), var(--warn)); }
 .engine-time small { font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 11px; color: var(--muted); }
+.local-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 4px 0 18px; border: 1px solid var(--rule); background: var(--wash); }
+.local-metric { padding: 14px 16px 16px; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.local-metric:nth-child(3n) { border-right: 0; }
+.local-metric:nth-child(n+4) { border-bottom: 0; }
+.local-metric > span { display: block; font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.local-metric > div { display: flex; align-items: baseline; gap: 6px; margin-top: 5px; }
+.local-metric b { font-size: clamp(24px, 3vw, 34px); line-height: 1.05; font-variant-numeric: tabular-nums; font-weight: 500; color: var(--ink); }
+.local-metric small { font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 11px; color: var(--muted); }
+.local-metric.good b { color: var(--good); }
+.local-metric.warn b { color: var(--warn); }
+.local-metric.bad b { color: var(--bad); }
 .notice {
   margin: 16px 0;
   padding: 14px 16px;
@@ -1205,6 +1221,10 @@ details.zones > summary { cursor: pointer; color: var(--muted); font-family: ui-
   .zone-grid { grid-template-columns: 1fr; }
   .config-picker { grid-template-columns: 1fr; }
   .config-options { justify-content: flex-start; }
+  .local-metrics { grid-template-columns: 1fr; }
+  .local-metric { border-right: 0; }
+  .local-metric:nth-child(n+4) { border-bottom: 1px solid var(--rule); }
+  .local-metric:last-child { border-bottom: 0; }
   table { font-size: 13px; }
   th, td { padding-left: 5px; padding-right: 5px; }
 }
@@ -1253,9 +1273,9 @@ details.zones > summary { cursor: pointer; color: var(--muted); font-family: ui-
         '<p class="deck">同一份鸣算屋方案，由浏览器里的鸣算屋 iframe 与线上椰果工具箱 fast-calc 分别重算，再逐技能、逐乘区对齐。</p>',
         '</div><div class="meta"><span>分享码 <code>' +
         escapeHtml(report.code) + "</code></span><span>" +
-        escapeHtml(report.generatedAt) + '</span><span><a href="/share/' +
-        encodeURIComponent(report.code) +
-        '/download">下载工程文件</a></span></div></header>',
+        escapeHtml(report.generatedAt) +
+        '</span><span><a href="' + fastCalcUrl +
+        '" target="_blank" rel="noopener">跳转到椰果工具箱简表</a></span></div></header>',
         bookmarks,
         '<div class="stat-grid">' + engineCards.join("") + "</div>",
         configPickerHtml,

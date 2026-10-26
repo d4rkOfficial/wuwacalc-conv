@@ -399,9 +399,30 @@ const SCRIPT = String.raw`
       rows.sort((a, b) => Math.abs(b.rel) - Math.abs(a.rel));
       const total = wuwa.reduce((sum, member) => sum + member.total, 0) +
         Number(wc.state.specialSkills && wc.state.specialSkills.results && wc.state.specialSkills.results.total || 0);
-      let html = coconutNote + '<div class="recompute-result"><span class="kicker">RESULT</span>' +
-        '<p class="muted">浏览器本地重算总伤 <b>' + num(total) + "</b>，共 " +
-        rows.length + " 条逐技能。和上面的分享快照合计可能不同。</p></div>";
+      const coconutTotal = Number(fast.result && fast.result.total) || 0;
+      const duration = Number(fast.result && fast.result.duration) ||
+        Number(wc.state && wc.state.team && wc.state.team.axisDuration) || 0;
+      const wuwaDps = duration > 0 ? total / duration : null;
+      const coconutDps = duration > 0 ? coconutTotal / duration : null;
+      const totalDelta = coconutTotal - total;
+      const dpsDelta = wuwaDps !== null && coconutDps !== null ? coconutDps - wuwaDps : null;
+      const totalRel = total ? totalDelta / Math.abs(total) : 0;
+      const dpsRel = wuwaDps ? (dpsDelta || 0) / Math.abs(wuwaDps) : 0;
+      const metric = (label, value, unit, status) =>
+        '<div class="local-metric' + (status ? " " + status : "") + '"><span>' +
+        label + '</span><div><b>' + value + '</b>' +
+        (unit ? "<small>" + unit + "</small>" : "") + "</div></div>";
+      let html = coconutNote + '<div class="local-metrics">' +
+        metric("鸣算屋总伤", num(total)) +
+        metric("椰果工具箱总伤", num(coconutTotal)) +
+        metric("总伤差值", (totalDelta >= 0 ? "+" : "") + num(totalDelta),
+          pct(totalRel), statusClass(statusOf(totalRel))) +
+        metric("鸣算屋总 DPS", wuwaDps === null ? "—" : num(wuwaDps), "/s") +
+        metric("椰果工具箱总 DPS", coconutDps === null ? "—" : num(coconutDps), "/s") +
+        metric("DPS 差值", dpsDelta === null ? "—" :
+          (dpsDelta >= 0 ? "+" : "") + num(dpsDelta), "/s",
+          dpsDelta === null ? "" : statusClass(statusOf(dpsRel))) +
+        "</div>";
       html += '<table class="skills-table"><thead><tr><th>技能</th><th class="num">鸣算屋</th><th class="num">椰果工具箱</th><th class="num">偏差</th><th>状态</th><th>乘区差异</th></tr></thead><tbody>';
       for (const row of rows) {
         const zoneHtml = row.zones.length
