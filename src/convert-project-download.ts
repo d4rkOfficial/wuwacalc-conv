@@ -105,6 +105,7 @@ export const fetchProjectDetail = async (
 const fetchAndConvert = async (
     code: string,
     env: Bindings,
+    configIndex?: number,
 ): Promise<
     | {
         ok: true
@@ -123,9 +124,16 @@ const fetchAndConvert = async (
 
     // 名称表（武器 / 套装 / 声骸）运行时拉取并缓存；拉不到按「名称缺失」降级
     const tables = await loadProjectTables(env)
+    const variant = configIndex !== undefined
+        ? result.detail.summary?.configVariants?.[configIndex]
+        : undefined
     return {
         ok: true,
-        file: convertWuwaCalcProjectToCoconutProjectFile(result.detail, tables),
+        file: convertWuwaCalcProjectToCoconutProjectFile(
+            result.detail,
+            tables,
+            variant ? { configVariant: variant } : {},
+        ),
         title: result.detail?.title ?? "",
         degraded: isProjectTablesEmpty(tables),
     }
@@ -136,9 +144,19 @@ export const handleDownloadProject = async (
     env: Bindings,
     /** 当前请求的 origin；缓存键必须拼在它上面（Cache API 按 zone 生效） */
     baseUrl: string,
+    configIndex?: number,
 ): Promise<Response> => {
     if (!SHARE_CODE_PATTERN.test(code)) {
         return errorResponse(400, "分享码格式不合法")
+    }
+
+    // 指定链阶档位是报告页的临时预览，不走默认档缓存，避免覆盖 0+1 缓存。
+    if (configIndex !== undefined) {
+        const result = await fetchAndConvert(code, env, configIndex)
+        if (!result.ok) return result.response
+        return attachmentResponse(result.file, code, result.title, {
+            "x-project-cache": "variant",
+        })
     }
 
     const cache = projectCache()

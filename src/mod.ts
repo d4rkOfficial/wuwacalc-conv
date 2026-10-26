@@ -75,10 +75,15 @@ export default {
         const reportHtml = REPORT_HTML_PATTERN.exec(url.pathname)
         if (reportHtml) {
             try {
+                const configRaw = url.searchParams.get("config")
+                const configIndex = configRaw && /^\d+$/.test(configRaw)
+                    ? Number(configRaw)
+                    : undefined
                 return await handleProjectReport(
                     decodeURIComponent(reportHtml[1]),
                     env,
                     url.origin,
+                    configIndex,
                 )
             } catch {
                 return errorResponse(400, "分享码格式不合法")
@@ -93,7 +98,16 @@ export default {
             } catch {
                 return errorResponse(400, "分享码格式不合法")
             }
-            return await handleDownloadProject(code, env, url.origin)
+            const configRaw = url.searchParams.get("config")
+            const configIndex = configRaw && /^\d+$/.test(configRaw)
+                ? Number(configRaw)
+                : undefined
+            return await handleDownloadProject(
+                code,
+                env,
+                url.origin,
+                configIndex,
+            )
         }
 
         return errorResponse(404, "接口不存在")

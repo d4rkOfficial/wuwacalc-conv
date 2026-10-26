@@ -102,14 +102,25 @@ export interface ProjectReport {
     entries: ReportEntry[]
     /** 全局 Buff 提取列表 */
     buffs?: ReportBuffItem[]
+    /** 鸣算屋原工程声明的全部链阶档位（整队一键切换） */
+    configVariants?: {
+        index: number
+        label: string
+        memberConfigs: string[]
+    }[]
+    selectedConfigIndex?: number
     engine?: ReportEngineComparison
     /** 浏览器本地重算：W 侧 iframe + 线上椰果工具箱 fast-calc iframe */
     localRecompute?: {
         code: string
-        /** 转换后的工程文件下载地址，交给线上 fast-calc iframe 导入 */
+        /** 转换后的工程文件下载地址（备用入口） */
         projectUrl?: string
+        /** 转换后的工程对象；报告页直接 postMessage 给 fast-calc iframe，避免二次拉取 */
+        project?: unknown
         /** 线上椰果工具箱 fast-calc 地址 */
         toolboxUrl?: string
+        /** 当前档位的整队链阶配置，浏览器重算 W 时同步改写 payload */
+        memberConfigs?: string[]
         coconutMs?: number
         coconutSkills?: CoconutSkillSnapshot[]
     }
@@ -751,6 +762,17 @@ export const renderProjectReportHtml = (report: ProjectReport): string => {
                     '</td><td class="zone-cell">' + zones + "</td></tr>"
             }).join("")
         : ""
+    const configPickerHtml = report.configVariants?.length
+        ? '<div class="config-picker"><div><span class="kicker">CONFIG PRESET</span>' +
+            "<p>按鸣算屋原工程声明的整队链阶档位一键切换；不支持单独改某个站位的链或精炼。</p></div>" +
+            '<div class="config-options">' +
+            report.configVariants.map((variant) =>
+                '<a class="config-option' +
+                (variant.index === report.selectedConfigIndex ? " active" : "") +
+                '" href="?config=' + variant.index + '"><b>' +
+                escapeHtml(variant.label) + "</b></a>"
+            ).join("") + "</div></div>"
+        : ""
     const localPanelHtml = report.localRecompute
         ? [
             '<div class="recompute" id="recompute-panel">',
@@ -760,13 +782,21 @@ export const renderProjectReportHtml = (report: ProjectReport): string => {
             '<button class="button" id="recompute-button" type="button">开始重算</button>',
             "</div>",
             '<div class="progress" role="progressbar" aria-label="重算进度" aria-valuemin="0" aria-valuemax="100"><i id="recompute-bar"></i></div>',
+            ...(engine?.available
+                ? []
+                : [
+                    '<div class="engine-times">' +
+                        '<div class="engine-time engine-time-coconut"><span>线上椰果工具箱计算用时</span><div><b id="coconut-time">…</b><small>ms</small></div></div>' +
+                        '<div class="engine-time engine-time-wuwa"><span>鸣算屋浏览器计算用时</span><div><b id="wuwa-time">…</b><small id="wuwa-unit">ms</small></div></div>' +
+                        "</div>",
+                ]),
             '<div id="local-engine"><p class="muted">正在加载鸣算屋引擎与线上椰果工具箱…</p></div>',
         ].join("")
         : ""
     const localSectionHtml = report.localRecompute
         ? [
             "<h3>逐技能 · 浏览器复核</h3>",
-            '<p class="muted">椰果侧由线上椰果工具箱 <code>/fast-calc</code> iframe 实时计算；与上方静态快照可能不同。</p>',
+            '<p class="muted">鸣算屋与椰果两侧都由浏览器本地 iframe 实时计算，不使用服务端预算结果。</p>',
             localPanelHtml,
         ]
         : []
@@ -992,6 +1022,15 @@ h1 {
 .stat.good .value { color: var(--good); }
 .stat.warn .value { color: var(--warn); }
 .stat.bad .value { color: var(--bad); }
+.config-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: end; margin: 22px 0 0; padding: 14px 16px; border: 1px solid var(--rule); background: var(--paper-2); }
+.config-picker p { margin: 5px 0 0; font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 11px; color: var(--muted); }
+.config-options { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.config-option { display: flex; flex-direction: column; gap: 2px; min-width: 118px; padding: 7px 10px; border: 1px solid var(--rule); background: var(--paper); color: var(--muted); text-decoration: none; }
+.config-option b { font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 11px; font-weight: 600; color: var(--ink); }
+.config-option small { font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 10px; font-variant-numeric: tabular-nums; }
+.config-option:hover { border-color: var(--accent); }
+.config-option.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, var(--paper)); }
+.config-option.active b { color: var(--accent); }
 .section { margin-top: 54px; animation: rise .65s ease both; }
 .section:nth-of-type(2) { animation-delay: .08s; }
 .section:nth-of-type(3) { animation-delay: .14s; }
@@ -1146,16 +1185,16 @@ details.zones > summary { cursor: pointer; color: var(--muted); font-family: ui-
 .modal-close { border: 0; background: none; color: var(--muted); font-size: 22px; line-height: 1; cursor: pointer; }
 .modal-close:hover { color: var(--ink); }
 .buff-modal-links { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; padding: 16px; overflow: auto; }
-.bookmarks { position: fixed; z-index: 30; top: 88px; right: 18px; display: flex; flex-direction: column; gap: 1px; padding: 5px; border: 1px solid var(--rule); background: color-mix(in srgb, var(--wash) 92%, transparent); box-shadow: 0 8px 28px rgba(0, 0, 0, .12); backdrop-filter: blur(10px); animation: rise .45s .2s ease both; }
-.bookmark { display: flex; align-items: center; gap: 9px; padding: 6px 10px; border: 0; border-right: 2px solid transparent; font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 11px; color: var(--muted); transition: background .18s ease, color .18s ease, transform .18s ease, border-color .18s ease; }
-.bookmark b { min-width: 20px; font-size: 10px; font-weight: 650; letter-spacing: .08em; color: var(--accent); }
-.bookmark:hover, .bookmark.active { background: var(--paper-2); border-right-color: var(--accent); color: var(--ink); transform: translateX(-2px); }
+.bookmarks { position: fixed; z-index: 40; top: 0; left: 0; right: 0; display: flex; justify-content: center; gap: 2px; padding: 9px 16px; border-bottom: 1px solid var(--rule); background: color-mix(in srgb, var(--wash) 90%, transparent); box-shadow: 0 10px 30px rgba(0, 0, 0, .10); backdrop-filter: blur(14px); transform: translateY(-105%); opacity: 0; visibility: hidden; transition: transform .24s ease, opacity .24s ease, visibility .24s ease; }
+.bookmarks.is-visible { transform: translateY(0); opacity: 1; visibility: visible; }
+.bookmark { display: flex; align-items: center; gap: 8px; padding: 7px 14px; border: 0; border-bottom: 2px solid transparent; font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 12px; color: var(--muted); white-space: nowrap; transition: background .18s ease, color .18s ease, border-color .18s ease; }
+.bookmark b { font-size: 10px; font-weight: 650; letter-spacing: .08em; color: var(--accent); }
+.bookmark:hover, .bookmark.active { background: var(--paper-2); border-bottom-color: var(--accent); color: var(--ink); }
+.section, #section-team { scroll-margin-top: 64px; }
 .footer { margin-top: 64px; padding-top: 14px; border-top: 1px solid var(--rule); color: var(--muted); font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 11px; display: flex; justify-content: space-between; gap: 16px; }
 @keyframes rise { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 1440px) {
-  .bookmarks { position: static; flex-direction: row; margin: 18px 0 0; overflow-x: auto; }
-  .bookmark { border-right: 0; border-bottom: 2px solid transparent; white-space: nowrap; }
-  .bookmark:hover, .bookmark.active { transform: none; border-bottom-color: var(--accent); }
+  .bookmarks { justify-content: flex-start; overflow-x: auto; }
 }
 @media (max-width: 820px) {
   .masthead { grid-template-columns: 1fr; }
@@ -1164,9 +1203,8 @@ details.zones > summary { cursor: pointer; color: var(--muted); font-family: ui-
   .stat:nth-child(-n+2) { border-bottom: 1px solid var(--rule); }
   .recompute { align-items: flex-start; flex-direction: column; }
   .zone-grid { grid-template-columns: 1fr; }
-  .bookmarks { position: static; flex-direction: row; margin: 18px 0 0; overflow-x: auto; }
-  .bookmark { border-right: 0; border-bottom: 2px solid transparent; white-space: nowrap; }
-  .bookmark:hover, .bookmark.active { transform: none; border-bottom-color: var(--accent); }
+  .config-picker { grid-template-columns: 1fr; }
+  .config-options { justify-content: flex-start; }
   table { font-size: 13px; }
   th, td { padding-left: 5px; padding-right: 5px; }
 }
@@ -1174,13 +1212,14 @@ details.zones > summary { cursor: pointer; color: var(--muted); font-family: ui-
   *, *:before, *:after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 `
+    const hasEngineSection = !!(engine?.available || report.localRecompute)
     const bookmarkItems = [
-        { no: "00", label: "队伍", href: "#section-team" },
-        ...(engine?.available
-            ? [{ no: "01", label: "引擎", href: "#section-engine" }]
+        { no: "00", label: "队伍编制", href: "#section-team" },
+        ...(hasEngineSection
+            ? [{ no: "01", label: "引擎审计", href: "#section-engine" }]
             : []),
-        { no: "02", label: "Buff", href: "#section-buffs" },
-        { no: "03", label: "映射", href: "#section-map" },
+        { no: "02", label: "Buff 提取列表", href: "#section-buffs" },
+        { no: "03", label: "转换映射", href: "#section-map" },
     ]
     const bookmarks = '<nav class="bookmarks" aria-label="页面书签">' +
         bookmarkItems.map((item) =>
@@ -1194,7 +1233,7 @@ details.zones > summary { cursor: pointer; color: var(--muted); font-family: ui-
         '<div class="buff-modal-links" id="buff-modal-links"></div>',
         "</dialog>",
     ].join("")
-    const engineSection = engine?.available
+    const engineSection = hasEngineSection
         ? [
             '<section class="section" id="section-engine">',
             '<div class="section-head"><span class="section-no">01</span>',
@@ -1211,7 +1250,7 @@ details.zones > summary { cursor: pointer; color: var(--muted); font-family: ui-
         '<header class="masthead"><div>',
         '<span class="kicker">WUWACALC → COCONUT TOOLBOX / TRANSLATION AUDIT</span>',
         "<h1>" + title + "</h1>",
-        '<p class="deck">同一份鸣算屋方案，逐技能、逐乘区对照椰果工具箱的静态快照与线上 fast-calc 复核。</p>',
+        '<p class="deck">同一份鸣算屋方案，由浏览器里的鸣算屋 iframe 与线上椰果工具箱 fast-calc 分别重算，再逐技能、逐乘区对齐。</p>',
         '</div><div class="meta"><span>分享码 <code>' +
         escapeHtml(report.code) + "</code></span><span>" +
         escapeHtml(report.generatedAt) + '</span><span><a href="/share/' +
@@ -1219,6 +1258,7 @@ details.zones > summary { cursor: pointer; color: var(--muted); font-family: ui-
         '/download">下载工程文件</a></span></div></header>',
         bookmarks,
         '<div class="stat-grid">' + engineCards.join("") + "</div>",
+        configPickerHtml,
         '<section class="section" id="section-team"><div class="section-head">',
         '<span class="section-no">00</span><h2>队伍编制</h2>',
         '<span class="sans">TEAM &amp; LOADOUT</span></div>',
@@ -1244,7 +1284,7 @@ details.zones > summary { cursor: pointer; color: var(--muted); font-family: ui-
         '<footer class="footer"><span>鸣算屋 → 椰果工具箱 · 转换审计报告</span><span>' +
         escapeHtml(report.code) + "</span></footer>",
         '<script>document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest(\'a[href^="#entry-"]\');if(!a)return;var el=document.querySelector(a.getAttribute("href"));if(el&&el.tagName==="DETAILS")el.open=true;});</script>',
-        '<script>(function(){var links=[].slice.call(document.querySelectorAll(".bookmark"));var sections=links.map(function(a){return document.querySelector(a.getAttribute("href"));});if(!("IntersectionObserver" in window))return;var io=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(!entry.isIntersecting)return;links.forEach(function(a,i){a.classList.toggle("active",sections[i]===entry.target);});});},{rootMargin:"-20% 0px -70% 0px",threshold:0});sections.forEach(function(section){if(section)io.observe(section);});})();</script>',
+        '<script>(function(){var nav=document.querySelector(".bookmarks");var hero=document.querySelector(".masthead");if(nav&&hero){var toggle=function(){nav.classList.toggle("is-visible",hero.getBoundingClientRect().bottom<=0);};window.addEventListener("scroll",toggle,{passive:true});toggle();}var links=[].slice.call(document.querySelectorAll(".bookmark"));var sections=links.map(function(a){return document.querySelector(a.getAttribute("href"));});if(!("IntersectionObserver" in window))return;var io=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(!entry.isIntersecting)return;links.forEach(function(a,i){a.classList.toggle("active",sections[i]===entry.target);});});},{rootMargin:"-64px 0px -70% 0px",threshold:0});sections.forEach(function(section){if(section)io.observe(section);});})();</script>',
         '<script>(function(){var modal=document.getElementById("buff-modal");if(!modal)return;var title=document.getElementById("buff-modal-title");var body=document.getElementById("buff-modal-links");document.addEventListener("click",function(e){var more=e.target.closest&&e.target.closest("[data-buff-modal]");if(more){var id=more.getAttribute("data-buff-modal");var tpl=document.getElementById("buff-links-"+id);if(!tpl)return;title.textContent=more.getAttribute("data-buff-title")||"";body.replaceChildren(tpl.content.cloneNode(true));if(modal.showModal)modal.showModal();else modal.setAttribute("open","");return;}if(e.target.closest&&e.target.closest("[data-close-modal]")){if(modal.close)modal.close();else modal.removeAttribute("open");return;}if(e.target===modal){if(modal.close)modal.close();else modal.removeAttribute("open");return;}if(e.target.closest&&e.target.closest(".buff-modal-links a")){if(modal.close)modal.close();else modal.removeAttribute("open");}});})();</script>',
         "</div></body></html>",
     ].join("\n")

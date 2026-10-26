@@ -2,8 +2,9 @@
  * 端点：`GET /share/{code}`（HTML）。
  *
  * 输入鸣算屋分享码，输出：
- * - 鸣算屋快照 vs 椰果引擎的总伤 / 逐角色 / 逐技能 / 逐乘区对比；
- * - 转换后的逐条目 Buff 绑定与乘区汇总。
+ * - 转换后的逐条目 Buff 绑定与乘区汇总；
+ * - 浏览器本地复核所需的转换工程：页面用鸣算屋 iframe + 线上椰果工具箱
+ *   fast-calc iframe 现场重算，不在服务端预算结果。
  */
 
 import {
@@ -19,12 +20,6 @@ import {
     type ProjectReport,
     renderProjectReportHtml,
 } from "./convert-project-report.ts"
-import {
-    buildCoconutSkillSnapshots,
-    buildReportEngineComparison,
-} from "./convert-project-report-engine.ts"
-import { gameDataOfProjectTables } from "./convert-project/game-data.ts"
-import { measureCoconut } from "../engines/coconut/measure.ts"
 import { loadProjectTables } from "./convert-project/tables.ts"
 import { errorResponse } from "./http.ts"
 import { FAST_CALC_URL } from "./toolbox.ts"
@@ -37,6 +32,7 @@ export const handleProjectReport = async (
     code: string,
     env: Bindings,
     origin = "",
+    configIndex?: number | null,
 ): Promise<Response> => {
     if (!SHARE_CODE_PATTERN.test(code)) {
         return errorResponse(400, "分享码格式不合法")
@@ -44,57 +40,61 @@ export const handleProjectReport = async (
     const detail = await fetchProjectDetail(code, env)
     if (!detail.ok) return detail.response
     const tables = await loadProjectTables(env)
-    const parts = convertWuwaCalcProjectParts(detail.detail, tables)
-    const game = gameDataOfProjectTables(tables)
-    let engine = undefined
-    let coconut: ReturnType<typeof measureCoconut> | undefined
-    let coconutMs: number | undefined
-    let file: ReturnType<typeof buildCoconutProjectFile> | undefined
-    try {
-        file = buildCoconutProjectFile(parts, detail.detail, {
-            projectId: code,
-        })
-    } catch (error) {
-        // 工程文件都组不出来时，报告仍要能打开：退化为「只有转换映射」。
-        console.warn("report project file build failed", error)
-    }
-    if (game && file) {
-        try {
-            const startedAt = performance.now()
-            coconut = measureCoconut(file, game)
-            coconutMs = performance.now() - startedAt
-            engine = buildReportEngineComparison(
-                parts.payload,
-                detail.detail.payload?.meta ?? undefined,
-                coconut,
-            )
-        } catch (error) {
-            // 报告本身仍要能打开：引擎跑不动时退化为「只有转换映射」，不返回 500。
-            console.warn("report engine comparison failed", error)
-        }
-    }
+    const variants = detail.detail.summary?.configVariants ?? []
+    const requestedVariant = configIndex !== undefined && configIndex !== null
+        ? variants[configIndex]
+        : undefined
+    const parts = convertWuwaCalcProjectParts(detail.detail, tables, {
+        configVariant: requestedVariant,
+    })
     const report = buildProjectReport(
         code,
         detail.detail?.title ?? "",
         parts,
-        engine,
     )
-    report.timings = {
-        ...(coconutMs !== undefined ? { coconutMs } : {}),
-        wuwaMs: null,
-        wuwaMode: engine?.detailed ? "snapshot" : "local",
-    }
-    if (file) {
-        report.localRecompute = {
-            code,
-            projectUrl: origin + "/share/" + encodeURIComponent(code) +
-                "/download",
-            toolboxUrl: env.TOOLBOX_FAST_CALC_URL || FAST_CALC_URL,
-            ...(coconutMs !== undefined ? { coconutMs } : {}),
-            ...(coconut ? {
-                coconutSkills: buildCoconutSkillSnapshots(coconut),
-            } : {}),
+    const profile = parts.team.conditionProfile
+    const matchedIndex = variants.findIndex((variant) => {
+        const configs = variant.memberConfigs
+        if (!Array.isArray(configs) || configs.length < profile.chains.length) {
+            return false
         }
+        return configs.slice(0, profile.chains.length).every((raw, index) => {
+            const matched = /^(\d+)\s*\+\s*(\d+)$/.exec(String(raw ?? ""))
+            return !!matched &&
+                Number(matched[1]) === profile.chains[index] &&
+                Number(matched[2]) === profile.refinements[index]
+        })
+    })
+    const selectedConfigIndex = requestedVariant
+        ? configIndex!
+        : matchedIndex
+    if (variants.length) {
+        report.configVariants = variants.map((variant, index) => ({
+            index,
+            label: variant.label ||
+                (variant.memberConfigs ?? []).join(" · ") ||
+                "档位 " + (index + 1),
+            memberConfigs: variant.memberConfigs ?? [],
+        }))
+        report.selectedConfigIndex = selectedConfigIndex
+    }
+    const file = buildCoconutProjectFile(parts, detail.detail, {
+        projectId: code,
+    })
+    report.localRecompute = {
+        code,
+        project: file.project,
+        projectUrl: origin + "/share/" + encodeURIComponent(code) +
+            "/download" +
+            (selectedConfigIndex >= 0
+                ? "?config=" + selectedConfigIndex
+                : ""),
+        toolboxUrl: env.TOOLBOX_FAST_CALC_URL || FAST_CALC_URL,
+        ...(selectedConfigIndex >= 0
+            ? {
+                memberConfigs: variants[selectedConfigIndex].memberConfigs ?? [],
+            }
+            : {}),
     }
     return new Response(renderProjectReportHtml(report), {
         status: 200,

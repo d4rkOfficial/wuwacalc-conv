@@ -162,6 +162,14 @@ const SCRIPT = String.raw`
     const onMessage = (event) => {
       const message = event.data;
       if (!message || typeof message !== "object") return;
+      if (message.type === "fast-calc:ready" && data.project) {
+        setProgress(42, "正在把工程交给线上椰果工具箱…");
+        fastFrame.contentWindow.postMessage(
+          { type: "fast-calc:load", project: data.project },
+          "*",
+        );
+        return;
+      }
       if (message.type === "fast-calc:project-loaded") {
         setProgress(52, "线上椰果工具箱已导入工程，正在计算…");
         return;
@@ -175,10 +183,58 @@ const SCRIPT = String.raw`
       reject(new Error("线上椰果工具箱计算超时"));
     }, 60000);
     window.addEventListener("message", onMessage);
-    fastFrame.src = data.toolboxUrl + "?import_project=" +
-      encodeURIComponent(data.projectUrl);
+    fastFrame.src = data.project
+      ? data.toolboxUrl
+      : data.toolboxUrl + "?import_project=" + encodeURIComponent(data.projectUrl);
     document.body.appendChild(fastFrame);
   });
+
+  /** 报告页选了整队档位时，把 W payload 的成员链 / 武器精炼改成该档位 */
+  const applyMemberConfig = (payload, configs) => {
+    if (!payload || !Array.isArray(payload.members) || !Array.isArray(configs)) return payload;
+    payload.members = payload.members.map((member, index) => {
+      const matched = /^(\d+)\s*\+\s*(\d+)$/.exec(String(configs[index] ?? ""));
+      if (!matched) return member;
+      return {
+        ...member,
+        resonanceUnlocked: Math.max(0, Math.min(6, Number(matched[1]))),
+        weaponSelection: {
+          ...(member.weaponSelection || {}),
+          refinement: Math.max(1, Math.min(5, Number(matched[2]))),
+        },
+      };
+    });
+    return payload;
+  };
+
+  /** 用 W 自己的链/精炼切换入口应用整队档位，保证链 Buff 与武器 Buff 都真正重建 */
+  const applyWConfig = (wc, configs) => {
+    if (!wc || !Array.isArray(configs)) return;
+    const members = (wc.state && wc.state.members) || [];
+    configs.forEach((raw, index) => {
+      const member = members[index];
+      if (!member) return;
+      const matched = /^(\d+)\s*\+\s*(\d+)$/.exec(String(raw ?? ""));
+      if (!matched) return;
+      const chain = Math.max(0, Math.min(6, Number(matched[1])));
+      const refinement = Math.max(1, Math.min(5, Number(matched[2])));
+      if (typeof wc.applyExportSweepResonance === "function") {
+        wc.applyExportSweepResonance(member, chain);
+      } else if (typeof wc.applyCharacterBuffTemplate === "function") {
+        wc.applyCharacterBuffTemplate(member, member.characterId, { resonanceUnlocked: chain });
+      }
+      if (typeof wc.applyExportSweepRefinement === "function") {
+        wc.applyExportSweepRefinement(member, refinement);
+      } else {
+        if (!member.weaponSelection) member.weaponSelection = {};
+        member.weaponSelection.refinement = refinement;
+        if (typeof wc.syncWeaponToMember === "function") {
+          wc.syncWeaponToMember(member, { silent: true, resetWeaponAtk: false });
+        }
+      }
+    });
+    if (typeof wc.reconcileWorkspace === "function") wc.reconcileWorkspace();
+  };
 
   /** fast-calc 的逐条目 → 报告用的逐技能快照（按伤害块合并本体 / 额外 / 多 Hit） */
   const groupFastEntries = (entries) => {
@@ -224,9 +280,23 @@ const SCRIPT = String.raw`
     try {
       const wc = await waitForEngine();
       setProgress(26, "正在获取分享详情…");
-      const detailResponse = await fetch("/api/schemes/" + encodeURIComponent(data.code), { cache: "no-store" });
-      if (!detailResponse.ok) throw new Error("分享详情加载失败（" + detailResponse.status + "）");
-      const detail = await detailResponse.json();
+      let detail = null;
+      let detailError = null;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const detailResponse = await fetch("/api/schemes/" + encodeURIComponent(data.code), { cache: "no-store" });
+        if (!detailResponse.ok) throw new Error("分享详情加载失败（" + detailResponse.status + "）");
+        const text = await detailResponse.text();
+        try {
+          detail = JSON.parse(text);
+          break;
+        } catch (error) {
+          detailError = error;
+        }
+      }
+      if (!detail) {
+        throw new Error("分享详情读取不完整，请重试：" +
+          (detailError && detailError.message || "JSON 解析失败"));
+      }
       const payload = detail.payload && detail.payload.data ? detail.payload.data : detail.data;
       const meta = detail.payload && detail.payload.meta ? detail.payload.meta : (detail.meta || {});
       setProgress(46, "正在导入工程…");
@@ -245,11 +315,22 @@ const SCRIPT = String.raw`
       }
       const importStarted = performance.now();
       try {
-        await wc.importWorkspaceFromData(payload, meta);
+        await wc.importWorkspaceFromData(applyMemberConfig(payload, data.memberConfigs), meta);
       } finally {
         if (win && originalFetch) win.fetch = originalFetch;
       }
       const importMs = performance.now() - importStarted;
+      const stateMembers = (wc.state && wc.state.members) || [];
+      const configMatches = !Array.isArray(data.memberConfigs) ||
+        data.memberConfigs.every((raw, index) => {
+          const matched = /^(\d+)\s*\+\s*(\d+)$/.exec(String(raw ?? ""));
+          const member = stateMembers[index];
+          if (!matched || !member) return false;
+          return Number(member.resonanceUnlocked) === Number(matched[1]) &&
+            Number(member.weaponSelection && member.weaponSelection.refinement) ===
+              Number(matched[2]);
+        });
+      if (!configMatches) applyWConfig(wc, data.memberConfigs);
       setProgress(70, "正在重算鸣算屋逐技能…");
       const computeStarted = performance.now();
       wc.computeAll();

@@ -32,6 +32,10 @@ import {
 
 /** 详情摘要里的单档配置（只关心各站位的链 + 武器精炼） */
 export interface ConvertProjectConfigVariant {
+    key?: string | null
+    label?: string | null
+    teamTotal?: number | null
+    teamDps?: number | null
     memberConfigs?: string[] | null
 }
 
@@ -54,6 +58,8 @@ export interface ConvertProjectOptions {
     exportedAt?: number
     /** 工程 id；缺省沿用鸣算屋方案 id，再退到分享码 */
     projectId?: string
+    /** 指定链阶档位；缺省下载「全队 0+1」 */
+    configVariant?: ConvertProjectConfigVariant | null
 }
 
 /** 解析 `0+1` 形式的站位配置（共鸣链 + 武器精炼） */
@@ -76,25 +82,13 @@ const parseMemberConfig = (
  *
  * 只改副本，不动传入的详情（下载缓存会复用 detail）。
  */
-const applyZeroOneConfigVariant = (
+const applyConfigVariant = (
     payload: WuwaCalcProjectPayload,
-    summary: ConvertProjectInput["summary"],
+    variant: ConvertProjectConfigVariant | null | undefined,
 ): WuwaCalcProjectPayload => {
     const members = payload.members ?? []
-    if (!members.length) return payload
-
-    const variant = (summary?.configVariants ?? []).find((candidate) => {
-        const configs = candidate?.memberConfigs
-        if (!Array.isArray(configs) || configs.length < members.length) {
-            return false
-        }
-        return configs.slice(0, members.length).every((raw) => {
-            const parsed = parseMemberConfig(raw)
-            return parsed?.chain === 0 && parsed.refinement === 1
-        })
-    })
     const configs = variant?.memberConfigs
-    if (!variant || !configs) return payload
+    if (!members.length || !Array.isArray(configs)) return payload
 
     return {
         ...payload,
@@ -111,6 +105,22 @@ const applyZeroOneConfigVariant = (
             }
         }),
     }
+}
+
+/** 下载 / 默认报告选的档位：全队 0+1；找不到时用鸣算屋主动配置。 */
+const defaultConfigVariant = (
+    payload: WuwaCalcProjectPayload,
+    summary: ConvertProjectInput["summary"],
+): ConvertProjectConfigVariant | null => {
+    const count = payload.members?.length ?? 0
+    return (summary?.configVariants ?? []).find((candidate) => {
+        const configs = candidate?.memberConfigs
+        if (!Array.isArray(configs) || configs.length < count) return false
+        return configs.slice(0, count).every((raw) => {
+            const parsed = parseMemberConfig(raw)
+            return parsed?.chain === 0 && parsed.refinement === 1
+        })
+    }) ?? null
 }
 
 /**
@@ -135,11 +145,12 @@ export interface ConvertedProjectParts {
 export const convertWuwaCalcProjectParts = (
     detail: ConvertProjectInput,
     tables: ProjectTables = EMPTY_TABLES,
+    options: { configVariant?: ConvertProjectConfigVariant | null } = {},
 ): ConvertedProjectParts => {
-    const payload = applyZeroOneConfigVariant(
-        detail.payload?.data ?? {},
-        detail.summary,
-    )
+    const rawPayload = detail.payload?.data ?? {}
+    const variant = options.configVariant ??
+        defaultConfigVariant(rawPayload, detail.summary)
+    const payload = applyConfigVariant(rawPayload, variant)
     const team = convertTeamPhase(payload, tables)
     const timeline = convertTimelinePhase(payload, tables)
     const calculation = convertCalculationPhase(
@@ -197,7 +208,9 @@ export const convertWuwaCalcProjectToCoconutProjectFile = (
     options: ConvertProjectOptions = {},
 ): CoconutProjectFile =>
     buildCoconutProjectFile(
-        convertWuwaCalcProjectParts(detail, tables),
+        convertWuwaCalcProjectParts(detail, tables, {
+            configVariant: options.configVariant,
+        }),
         detail,
         options,
     )
