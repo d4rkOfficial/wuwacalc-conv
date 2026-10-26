@@ -633,7 +633,7 @@ Deno.test("排轴：直伤落到参考线，一个技能只落一条倍率", () 
 })
 
 Deno.test("排轴：参考线等距，末尾补「结束」线，time 是相对增量", () => {
-    const { phase } = convertTimelinePhase(axisPayload)
+    const { phase, timings } = convertTimelinePhase(axisPayload)
     const refLines = phase.data!.refLines
 
     // 普通伤害节点**不带**时间标签（只有轮次边界与收尾带）
@@ -653,6 +653,13 @@ Deno.test("排轴：参考线等距，末尾补「结束」线，time 是相对�
     const last = refLines[refLines.length - 1]
     assertEquals(last.id, "end")
     assertEquals(last.time, "结束")
+
+    // 时间段只按轮次边界 + 收尾切分，普通伤害节点不产生计时点
+    assertEquals(timings, [
+        { refLineId: "round1", seconds: 25 },
+        { refLineId: "end", seconds: 25 },
+    ])
+    assertEquals(refLines.slice(0, -2).every((line) => line.seconds === undefined), true)
 })
 
 Deno.test("排轴：按站位分组铺开，1 号位排完再排 2、3 号位", () => {
@@ -769,7 +776,7 @@ Deno.test("排轴：多层轴按轮次铺开，每轮边界带轴长标签", () 
         ],
     } as never
 
-    const { phase, entries } = convertTimelinePhase(payload)
+    const { phase, entries, timings } = convertTimelinePhase(payload)
     const data = phase.data!
 
     // 两轮的伤害都进来了（不再只转 activeRound）
@@ -781,6 +788,12 @@ Deno.test("排轴：多层轴按轮次铺开，每轮边界带轴长标签", () 
         ["+22s", "+25s", "结束"],
     )
     assertEquals(data.damageBlocks.length, 2)
+    // 计时点按累计轴长：22 → 47，收尾同 47
+    assertEquals(timings, [
+        { refLineId: "round1", seconds: 22 },
+        { refLineId: "round2", seconds: 47 },
+        { refLineId: "end", seconds: 47 },
+    ])
 })
 
 Deno.test("排轴：参考线条数多时等比收窄，仍落在工具箱 MAX_POS 内", () => {

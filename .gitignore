@@ -1,7 +1,11 @@
-.wrangler
-.scratch
+.wrangler/
+.scratch/
 tmp/
-test*
-*test.ts
-!src/**/*_test.ts
-!engines/**/*_test.ts
+node_modules/
+coverage/
+
+# 本地临时笔记，不属于仓库
+test.ipynb
+test2.ipynb
+
+*.log

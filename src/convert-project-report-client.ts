@@ -158,11 +158,31 @@ const SCRIPT = String.raw`
       const payload = detail.payload && detail.payload.data ? detail.payload.data : detail.data;
       const meta = detail.payload && detail.payload.meta ? detail.payload.meta : (detail.meta || {});
       setProgress(46, "正在导入工程…");
-      const started = performance.now();
-      await wc.importWorkspaceFromData(payload, meta);
+      // 导入阶段会拉 Buff 模板等网络资源；在 iframe 内临时包一层 fetch，
+      // 把网络耗时从“引擎计算”里扣掉，避免把网络等待误算成计算时间。
+      const win = frame.contentWindow;
+      const originalFetch = win && win.fetch;
+      let networkMs = 0;
+      if (win && typeof originalFetch === "function") {
+        win.fetch = function (...args) {
+          const requestStarted = performance.now();
+          return originalFetch.apply(this, args).finally(() => {
+            networkMs += performance.now() - requestStarted;
+          });
+        };
+      }
+      const importStarted = performance.now();
+      try {
+        await wc.importWorkspaceFromData(payload, meta);
+      } finally {
+        if (win && originalFetch) win.fetch = originalFetch;
+      }
+      const importMs = performance.now() - importStarted;
       setProgress(70, "正在重算鸣算屋逐技能…");
+      const computeStarted = performance.now();
       wc.computeAll();
-      const elapsed = performance.now() - started;
+      const computeMs = performance.now() - computeStarted;
+      const elapsed = Math.max(0, importMs - networkMs) + computeMs;
       setProgress(88, "正在对齐差异…");
       const wuwa = collect(wc.state);
       const queues = {};

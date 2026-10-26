@@ -186,7 +186,7 @@ export const buildCoconutProjectFile = (
                 calculation: calculation.phase,
                 config,
             },
-            analysis: { timings: [] },
+            analysis: { timings: timeline.timings },
         },
     }
 }

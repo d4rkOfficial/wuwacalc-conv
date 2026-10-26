@@ -1053,12 +1053,16 @@ p { margin: 10px 0; }
 table { width: 100%; border-collapse: collapse; margin: 8px 0 18px; font-size: 14px; table-layout: fixed; }
 .summary-table th:nth-child(1) { width: 40%; }
 .member-table th:nth-child(1) { width: 24%; }
-.skills-table th:nth-child(1) { width: 24%; }
-.zone-grid { display: grid; grid-template-columns: repeat(2, minmax(120px, 1fr)); gap: 4px; }
-.zone-chip { min-width: 0; padding: 5px 6px; border: 1px solid var(--rule); background: var(--paper-2); font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 11px; }
+.skills-table th:nth-child(1) { width: 26%; }
+.skills-table th:nth-child(2), .skills-table th:nth-child(3) { width: 13%; }
+.skills-table th:nth-child(4) { width: 14%; }
+.skills-table th:nth-child(5) { width: 9%; }
+.skills-table th:nth-child(6) { width: 25%; }
+.zone-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; min-width: 0; }
+.zone-chip { min-width: 0; padding: 5px 6px; border: 1px solid var(--rule); background: var(--paper-2); font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 11px; overflow-wrap: anywhere; }
 .zone-chip > b { display: block; margin-bottom: 3px; font-size: 11px; font-weight: 650; }
-.zone-values { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; color: var(--muted); }
-.zone-values em { overflow: hidden; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
+.zone-values { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; color: var(--muted); }
+.zone-values em { font-style: normal; overflow-wrap: anywhere; }
 .zone-chip > small { display: block; margin-top: 3px; text-align: right; font-variant-numeric: tabular-nums; }
 .buff-table { table-layout: fixed; }
 .buff-table th:nth-child(1) { width: 30%; }
@@ -1102,7 +1106,7 @@ tbody tr:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); 
 .skill-cell strong { display: block; font-weight: 600; }
 .skill-cell small { display: block; margin-top: 2px; font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 11px; color: var(--muted); }
 .pct { display: block; margin-top: 2px; font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 11px; font-variant-numeric: tabular-nums; }
-.zone-cell { width: 42%; }
+.zone-cell { overflow: visible; }
 .good { color: var(--good); }
 .warn { color: var(--warn); }
 .bad { color: var(--bad); }
@@ -1136,7 +1140,7 @@ details.zones > summary { cursor: pointer; color: var(--muted); font-family: ui-
 .bookmark:hover, .bookmark.active { background: var(--paper-2); border-right-color: var(--accent); color: var(--ink); transform: translateX(-2px); }
 .footer { margin-top: 64px; padding-top: 14px; border-top: 1px solid var(--rule); color: var(--muted); font-family: ui-sans-serif, "Microsoft YaHei", sans-serif; font-size: 11px; display: flex; justify-content: space-between; gap: 16px; }
 @keyframes rise { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
-@media (max-width: 1200px) {
+@media (max-width: 1440px) {
   .bookmarks { position: static; flex-direction: row; margin: 18px 0 0; overflow-x: auto; }
   .bookmark { border-right: 0; border-bottom: 2px solid transparent; white-space: nowrap; }
   .bookmark:hover, .bookmark.active { transform: none; border-bottom-color: var(--accent); }
@@ -1147,6 +1151,7 @@ details.zones > summary { cursor: pointer; color: var(--muted); font-family: ui-
   .stat:nth-child(2) { border-right: 0; }
   .stat:nth-child(-n+2) { border-bottom: 1px solid var(--rule); }
   .recompute { align-items: flex-start; flex-direction: column; }
+  .zone-grid { grid-template-columns: 1fr; }
   .bookmarks { position: static; flex-direction: row; margin: 18px 0 0; overflow-x: auto; }
   .bookmark { border-right: 0; border-bottom: 2px solid transparent; white-space: nowrap; }
   .bookmark:hover, .bookmark.active { transform: none; border-bottom-color: var(--accent); }

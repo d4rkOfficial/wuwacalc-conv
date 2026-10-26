@@ -807,6 +807,8 @@ export interface TimelineResult {
     entries: CoconutDamageEntry[]
     /** 条目 id → 该时点的 buff 选中态（叠层数 / 是否生效） */
     entryState: Map<string, SkillState>
+    /** 参考线 → 真实轴秒数（结果页 DPS 分段用） */
+    timings: { refLineId: string; seconds: number | null }[]
 }
 
 const EMPTY_TIMELINE: CoconutTimelineData = {
@@ -1108,8 +1110,13 @@ export const convertTimelinePhase = (
     const activeById = globalBuffActiveOf(payload)
 
     // 每轮：本条轴上的结束下标，用来把轮次边界参考线放准
-    const roundBounds: { duration: number; endIndex: number }[] = []
+    const roundBounds: {
+        duration: number
+        endIndex: number
+        endSeconds: number
+    }[] = []
     let items: AxisItem[] = []
+    let elapsedSeconds = 0
 
     for (const [roundIndex, round] of rounds.entries()) {
         // **按站位分组**：1 号位的倍率排完再排 2 号位、3 号位，最后补该轮的轴长参考线。
@@ -1143,9 +1150,11 @@ export const convertTimelinePhase = (
             return true
         })
         items.push(...roundItems)
+        elapsedSeconds += round.duration
         roundBounds.push({
             duration: round.duration,
             endIndex: items.length,
+            endSeconds: elapsedSeconds,
         })
     }
 
@@ -1154,6 +1163,7 @@ export const convertTimelinePhase = (
             phase: { locked: true, data: EMPTY_TIMELINE },
             entries: [],
             entryState: new Map(),
+            timings: [],
         }
     }
 
@@ -1189,8 +1199,13 @@ export const convertTimelinePhase = (
         Math.min(REF_LINE_STEP, Math.floor(MAX_POS / (lineCount + 2))),
     )
 
-    const pushRefLine = (id: string, time: string) => {
-        refLines.push({ id, time, pos: refLines.length * step })
+    const pushRefLine = (id: string, time: string, seconds?: number) => {
+        refLines.push({
+            id,
+            time,
+            pos: refLines.length * step,
+            ...(seconds !== undefined ? { seconds } : {}),
+        })
     }
 
     /** 该轮最后一条（含）之前是否已经收过尾 */
@@ -1206,6 +1221,7 @@ export const convertTimelinePhase = (
             pushRefLine(
                 `round${nextRoundBoundary}`,
                 `+${Math.round(round.duration)}s`,
+                round.endSeconds,
             )
         }
     }
@@ -1217,7 +1233,8 @@ export const convertTimelinePhase = (
             ? refLines[refLines.length - 1].id
             : `r${refLines.length}`
 
-        // `time` 只在轮次边界与收尾上写，普通伤害节点留空
+        // `time` 只在轮次边界与收尾上写，普通伤害节点留空；
+        // 普通节点不写 seconds —— 时间段按轮次参考线切分（与工具箱记点口径一致）。
         if (!shareLine) pushRefLine(refLineId, "")
 
         const blockId = `d${index}`
@@ -1349,7 +1366,12 @@ export const convertTimelinePhase = (
     flushRoundBoundaries(items.length)
 
     // 末尾补一条「结束」参考线（与工具箱默认的 right 线同款），把轴收口
-    pushRefLine(END_REF_LINE_ID, END_REF_LINE_LABEL)
+    pushRefLine(
+        END_REF_LINE_ID,
+        END_REF_LINE_LABEL,
+        roundBounds[roundBounds.length - 1]?.endSeconds ??
+            items[items.length - 1]?.seconds,
+    )
 
     return {
         phase: {
@@ -1358,5 +1380,12 @@ export const convertTimelinePhase = (
         },
         entries,
         entryState,
+        // 只有轮次边界与收尾参与时间段切分；普通伤害节点不产生计时点。
+        timings: refLines
+            .filter((line) => (line.seconds ?? 0) > 0)
+            .map((line) => ({
+                refLineId: line.id,
+                seconds: line.seconds!,
+            })),
     }
 }

@@ -367,6 +367,8 @@ export interface CoconutRefLine {
     id: string
     time: string
     pos: number
+    /** 该参考线对应的真实轴时间（秒）；只写在轮次边界与收尾线上，用于时间段切分 */
+    seconds?: number
 }
 
 /** 一次直伤命中 */
