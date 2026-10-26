@@ -15,6 +15,7 @@ import {
 } from "./convert-project-list.ts"
 import { fetchUpstream, LIST_TIMEOUT_MS, readUpstreamJson } from "./http.ts"
 import type { Bindings } from "./http.ts"
+import { TOOLBOX_URL } from "./toolbox.ts"
 import { USAGE_IMAGE_PATHS, USAGE_IMAGES } from "./usage-images.ts"
 import type { UsageTheme } from "./usage-images.ts"
 import type {
@@ -35,7 +36,6 @@ const HOME_CACHE_SECONDS = 60
 /** 三处外部主站 */
 const WUWACALC_URL = "https://wuwacalc.cn"
 const WORKSHOP_URL = "https://wuwa-afyg-share.200503.xyz"
-const TOOLBOX_URL = "https://wuwa-afyg-tool.200503.xyz"
 
 /** 本转接器自己的部署地址：使用方法里让用户填进工具箱的「工坊 / 分享源」 */
 const BRIDGE_URL = "https://wuwacalc-conv.200503.xyz"

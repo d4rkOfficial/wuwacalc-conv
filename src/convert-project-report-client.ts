@@ -3,7 +3,8 @@
  *
  * 分享快照没带逐技能时，页面会加载同源的鸣算屋站点 iframe，在用户浏览器里
  * 调 `__WC.importWorkspaceFromData()` + `computeAll()` 重算 W 侧结果；
- * 再把结果与本页服务端算好的椰果工具箱逐技能快照对齐，填进「逐技能」表。
+ * 椰果侧同时加载**线上椰果工具箱 /fast-calc iframe**（`?import_project=<工程 URL>`），
+ * 用 iframe 回传的逐条目结果对齐，填进「逐技能」表。
  */
 
 import type { ProjectReport } from "./convert-project-report.ts"
@@ -16,6 +17,7 @@ const SCRIPT = String.raw`
   const bar = document.getElementById("recompute-bar");
   const button = document.getElementById("recompute-button");
   const wuwaTime = document.getElementById("wuwa-time");
+  const coconutTime = document.getElementById("coconut-time");
   const frame = document.getElementById("wuwa-engine");
   if (!dataEl || !host || !frame) return;
   const setProgress = (value, message) => {
@@ -140,15 +142,85 @@ const SCRIPT = String.raw`
     tick();
   });
 
+  /** 线上椰果工具箱 fast-calc iframe：用 ?import_project=<工程 URL> 导入并等它回传结果 */
+  const waitForFastCalc = () => new Promise((resolve, reject) => {
+    if (!data.toolboxUrl || !data.projectUrl) {
+      reject(new Error("报告缺少 fast-calc 地址"));
+      return;
+    }
+    const fastFrame = document.createElement("iframe");
+    fastFrame.id = "fast-calc-engine";
+    fastFrame.title = "线上椰果工具箱 fast-calc";
+    fastFrame.style.cssText = "position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0";
+    let settled = false;
+    const cleanup = () => {
+      if (settled) return;
+      settled = true;
+      window.removeEventListener("message", onMessage);
+      clearTimeout(timer);
+    };
+    const onMessage = (event) => {
+      const message = event.data;
+      if (!message || typeof message !== "object") return;
+      if (message.type === "fast-calc:project-loaded") {
+        setProgress(52, "线上椰果工具箱已导入工程，正在计算…");
+        return;
+      }
+      if (message.type !== "fast-calc:result") return;
+      cleanup();
+      resolve(message);
+    };
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error("线上椰果工具箱计算超时"));
+    }, 60000);
+    window.addEventListener("message", onMessage);
+    fastFrame.src = data.toolboxUrl + "?import_project=" +
+      encodeURIComponent(data.projectUrl);
+    document.body.appendChild(fastFrame);
+  });
+
+  /** fast-calc 的逐条目 → 报告用的逐技能快照（按伤害块合并本体 / 额外 / 多 Hit） */
+  const groupFastEntries = (entries) => {
+    const groups = new Map();
+    for (const entry of entries || []) {
+      if (!(Number(entry && entry.damage) > 0)) continue;
+      if (String(entry.id || "").includes("-nd|")) continue;
+      const key = entry.blockId || entry.id;
+      const list = groups.get(key) || [];
+      list.push(entry);
+      groups.set(key, list);
+    }
+    return [...groups].map(([blockId, list]) => {
+      const base = list[0];
+      const zones = { ...(base.zones || {}) };
+      zones.baseMult = list.reduce((sum, entry) => sum + Number(entry.zones && entry.zones.baseMult || 0), 0);
+      zones.multAdd = list.reduce((sum, entry) => sum + Number(entry.zones && entry.zones.multAdd || 0), 0);
+      return {
+        blockId,
+        ...(base.catalogId ? { catalogId: String(base.catalogId) } : {}),
+        character: String(base.character || ""),
+        name: cleanName(base.name),
+        damage: list.reduce((sum, entry) => sum + Number(entry.damage || 0), 0),
+        fixed: !!base.fixed,
+        zones,
+      };
+    });
+  };
+
   const runRecompute = async () => {
     if (button && button.disabled) return;
     if (button) {
       button.disabled = true;
       button.textContent = "重算中…";
     }
-    host.innerHTML = '<p class="muted">正在加载鸣算屋引擎…</p>';
-    setProgress(8, "正在加载鸣算屋引擎…");
+    host.innerHTML = '<p class="muted">正在加载鸣算屋引擎与线上椰果工具箱…</p>';
+    setProgress(8, "正在加载鸣算屋引擎与线上椰果工具箱…");
     if (wuwaTime) wuwaTime.textContent = "重算中…";
+    if (coconutTime) coconutTime.textContent = "重算中…";
+    const fastOutcome = waitForFastCalc()
+      .then((result) => ({ result }))
+      .catch((error) => ({ error }));
     try {
       const wc = await waitForEngine();
       setProgress(26, "正在获取分享详情…");
@@ -183,10 +255,27 @@ const SCRIPT = String.raw`
       wc.computeAll();
       const computeMs = performance.now() - computeStarted;
       const elapsed = Math.max(0, importMs - networkMs) + computeMs;
+      setProgress(82, "正在等待线上椰果工具箱…");
+      const fast = await fastOutcome;
+      let coconutSkills = [];
+      let coconutNote = "";
+      if (fast.result && Array.isArray(fast.result.entries) && fast.result.entries.length) {
+        coconutSkills = groupFastEntries(fast.result.entries);
+        if (coconutTime && Number.isFinite(Number(fast.result.computeMs))) {
+          coconutTime.textContent = String(Math.round(Number(fast.result.computeMs)));
+        }
+      } else if (data.coconutSkills && data.coconutSkills.length) {
+        coconutSkills = data.coconutSkills;
+        coconutNote = '<p class="warn">线上椰果工具箱未返回结果，已退回服务端快照（' +
+          esc(fast.error && fast.error.message || "无结果") + "）。</p>";
+        if (coconutTime) coconutTime.textContent = data.coconutMs != null ? String(Math.round(data.coconutMs)) : "—";
+      } else {
+        throw fast.error || new Error("线上椰果工具箱没有返回结果");
+      }
       setProgress(88, "正在对齐差异…");
       const wuwa = collect(wc.state);
       const queues = {};
-      for (const skill of data.coconutSkills || []) {
+      for (const skill of coconutSkills) {
         const base = skill.catalogId ? "c:" + skill.catalogId : "n:" + cleanName(skill.name);
         (queues[base] || (queues[base] = [])).push(skill);
       }
@@ -229,7 +318,7 @@ const SCRIPT = String.raw`
       rows.sort((a, b) => Math.abs(b.rel) - Math.abs(a.rel));
       const total = wuwa.reduce((sum, member) => sum + member.total, 0) +
         Number(wc.state.specialSkills && wc.state.specialSkills.results && wc.state.specialSkills.results.total || 0);
-      let html = '<div class="recompute-result"><span class="kicker">RESULT</span>' +
+      let html = coconutNote + '<div class="recompute-result"><span class="kicker">RESULT</span>' +
         '<p class="muted">浏览器本地重算总伤 <b>' + num(total) + "</b>，共 " +
         rows.length + " 条逐技能。和上面的分享快照合计可能不同。</p></div>";
       html += '<table class="skills-table"><thead><tr><th>技能</th><th class="num">鸣算屋</th><th class="num">椰果工具箱</th><th class="num">偏差</th><th>状态</th><th>乘区差异</th></tr></thead><tbody>';

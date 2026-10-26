@@ -18,7 +18,11 @@ export const DEFAULT_API_BASE = "https://wuwacalc.cn"
 export const LIST_TIMEOUT_MS = 15_000
 export const DETAIL_TIMEOUT_MS = 90_000
 
-export type Bindings = Env & { WUWACALC_API_BASE?: string }
+export type Bindings = Env & {
+    WUWACALC_API_BASE?: string
+    /** 线上 fast-calc 地址；本地联调可指向 dev server */
+    TOOLBOX_FAST_CALC_URL?: string
+}
 
 export const CORS_HEADERS: Record<string, string> = {
     "access-control-allow-origin": "*",

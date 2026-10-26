@@ -103,11 +103,15 @@ export interface ProjectReport {
     /** 全局 Buff 提取列表 */
     buffs?: ReportBuffItem[]
     engine?: ReportEngineComparison
-    /** 分享快照没有逐技能时，交给浏览器本地重算的数据 */
+    /** 浏览器本地重算：W 侧 iframe + 线上椰果工具箱 fast-calc iframe */
     localRecompute?: {
         code: string
+        /** 转换后的工程文件下载地址，交给线上 fast-calc iframe 导入 */
+        projectUrl?: string
+        /** 线上椰果工具箱 fast-calc 地址 */
+        toolboxUrl?: string
         coconutMs?: number
-        coconutSkills: CoconutSkillSnapshot[]
+        coconutSkills?: CoconutSkillSnapshot[]
     }
     timings?: {
         coconutMs?: number
@@ -663,7 +667,7 @@ export const renderProjectReportHtml = (report: ProjectReport): string => {
             statCard(
                 "椰果工具箱总伤",
                 numberText(engine.total.coconut),
-                "服务端重跑结果",
+                "服务端预跑快照",
             ),
             statCard(
                 "总伤偏差",
@@ -750,37 +754,45 @@ export const renderProjectReportHtml = (report: ProjectReport): string => {
     const localPanelHtml = report.localRecompute
         ? [
             '<div class="recompute" id="recompute-panel">',
-            '<div class="recompute-copy"><span class="kicker">LOCAL RECOMPUTE</span>',
-            "<h3>重算控制</h3>",
-            '<p class="recompute-status" id="recompute-status" aria-live="polite">准备加载鸣算屋引擎…</p></div>',
+            '<div class="recompute-copy"><span class="kicker">ONLINE RECHECK</span>',
+            "<h3>线上椰果引擎复核</h3>",
+            '<p class="recompute-status" id="recompute-status" aria-live="polite">准备加载鸣算屋引擎与线上椰果工具箱…</p></div>',
             '<button class="button" id="recompute-button" type="button">开始重算</button>',
             "</div>",
             '<div class="progress" role="progressbar" aria-label="重算进度" aria-valuemin="0" aria-valuemax="100"><i id="recompute-bar"></i></div>',
+            '<div id="local-engine"><p class="muted">正在加载鸣算屋引擎与线上椰果工具箱…</p></div>',
         ].join("")
         : ""
-    const engineHtml = engine?.available
+    const localSectionHtml = report.localRecompute
         ? [
-            '<table class="summary-table"><thead><tr><th>范围</th><th class="num">鸣算屋</th><th class="num">椰果工具箱</th><th class="num">偏差</th></tr></thead><tbody>' +
-            engineSummaryRows + "</tbody></table>",
-            "<h3>角色合计</h3>",
-            '<table class="member-table"><thead><tr><th>角色</th><th class="num">鸣算屋</th><th class="num">椰果工具箱</th><th class="num">偏差</th><th>状态</th></tr></thead><tbody>' +
-            memberRows + "</tbody></table>",
-            ...(engine.detailed
-                ? [
-                    "<h3>逐技能</h3>",
-                    skillTimingHtml,
-                    '<p class="muted">乘区值：增伤 / 加深 / 易伤 / 抗性 / 防御为倍率，暴击 / 暴伤 / 倍率加成为百分点，攻击 / 生命 / 防御为面板值。</p>',
-                    '<table class="skills-table"><thead><tr><th>技能</th><th class="num">鸣算屋</th><th class="num">椰果工具箱</th><th class="num">偏差</th><th>状态</th><th>乘区差异</th></tr></thead><tbody>' +
-                    skillRows + "</tbody></table>",
-                ]
-                : [
-                    "<h3>逐技能</h3>",
-                    skillTimingHtml,
-                    localPanelHtml,
-                    '<div id="local-engine"><p class="muted">正在加载鸣算屋引擎并重算…</p></div>',
-                ]),
+            "<h3>逐技能 · 浏览器复核</h3>",
+            '<p class="muted">椰果侧由线上椰果工具箱 <code>/fast-calc</code> iframe 实时计算；与上方静态快照可能不同。</p>',
+            localPanelHtml,
         ]
         : []
+    const engineHtml = [
+        ...(engine?.available
+            ? [
+                '<table class="summary-table"><thead><tr><th>范围</th><th class="num">鸣算屋</th><th class="num">椰果工具箱</th><th class="num">偏差</th></tr></thead><tbody>' +
+                engineSummaryRows + "</tbody></table>",
+                "<h3>角色合计</h3>",
+                '<table class="member-table"><thead><tr><th>角色</th><th class="num">鸣算屋</th><th class="num">椰果工具箱</th><th class="num">偏差</th><th>状态</th></tr></thead><tbody>' +
+                memberRows + "</tbody></table>",
+                "<h3>逐技能 · 静态快照</h3>",
+                skillTimingHtml,
+                ...(engine.detailed
+                    ? [
+                        '<p class="muted">乘区值：增伤 / 加深 / 易伤 / 抗性 / 防御为倍率，暴击 / 暴伤 / 倍率加成为百分点，攻击 / 生命 / 防御为面板值。</p>',
+                        '<table class="skills-table"><thead><tr><th>技能</th><th class="num">鸣算屋</th><th class="num">椰果工具箱</th><th class="num">偏差</th><th>状态</th><th>乘区差异</th></tr></thead><tbody>' +
+                        skillRows + "</tbody></table>",
+                    ]
+                    : [
+                        '<p class="muted">分享快照没有逐技能静态结果，直接看下方线上复核。</p>',
+                    ]),
+            ]
+            : []),
+        ...localSectionHtml,
+    ]
     const buffRows = (report.buffs ?? []).map((buff) => {
         const effects = buff.zones.map((zone) =>
             '<span class="effect-item">' + escapeHtml(zone.label) + " " +
@@ -1199,7 +1211,7 @@ details.zones > summary { cursor: pointer; color: var(--muted); font-family: ui-
         '<header class="masthead"><div>',
         '<span class="kicker">WUWACALC → COCONUT TOOLBOX / TRANSLATION AUDIT</span>',
         "<h1>" + title + "</h1>",
-        '<p class="deck">同一份鸣算屋方案，逐技能、逐乘区对照椰果工具箱的服务端结算与浏览器本地重算。</p>',
+        '<p class="deck">同一份鸣算屋方案，逐技能、逐乘区对照椰果工具箱的静态快照与线上 fast-calc 复核。</p>',
         '</div><div class="meta"><span>分享码 <code>' +
         escapeHtml(report.code) + "</code></span><span>" +
         escapeHtml(report.generatedAt) + '</span><span><a href="/share/' +

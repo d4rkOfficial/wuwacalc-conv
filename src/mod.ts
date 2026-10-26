@@ -78,6 +78,7 @@ export default {
                 return await handleProjectReport(
                     decodeURIComponent(reportHtml[1]),
                     env,
+                    url.origin,
                 )
             } catch {
                 return errorResponse(400, "分享码格式不合法")

@@ -27,6 +27,7 @@ import { gameDataOfProjectTables } from "./convert-project/game-data.ts"
 import { measureCoconut } from "../engines/coconut/measure.ts"
 import { loadProjectTables } from "./convert-project/tables.ts"
 import { errorResponse } from "./http.ts"
+import { FAST_CALC_URL } from "./toolbox.ts"
 import type { Bindings } from "./http.ts"
 
 /** 报告页与下载接口共用 /share/{code} 空间，这里只匹配不带 /download 的精确路径 */
@@ -35,6 +36,7 @@ export const REPORT_HTML_PATTERN = /^\/share\/([^/]+)$/
 export const handleProjectReport = async (
     code: string,
     env: Bindings,
+    origin = "",
 ): Promise<Response> => {
     if (!SHARE_CODE_PATTERN.test(code)) {
         return errorResponse(400, "分享码格式不合法")
@@ -47,11 +49,17 @@ export const handleProjectReport = async (
     let engine = undefined
     let coconut: ReturnType<typeof measureCoconut> | undefined
     let coconutMs: number | undefined
-    if (game) {
+    let file: ReturnType<typeof buildCoconutProjectFile> | undefined
+    try {
+        file = buildCoconutProjectFile(parts, detail.detail, {
+            projectId: code,
+        })
+    } catch (error) {
+        // 工程文件都组不出来时，报告仍要能打开：退化为「只有转换映射」。
+        console.warn("report project file build failed", error)
+    }
+    if (game && file) {
         try {
-            const file = buildCoconutProjectFile(parts, detail.detail, {
-                projectId: code,
-            })
             const startedAt = performance.now()
             coconut = measureCoconut(file, game)
             coconutMs = performance.now() - startedAt
@@ -76,11 +84,16 @@ export const handleProjectReport = async (
         wuwaMs: null,
         wuwaMode: engine?.detailed ? "snapshot" : "local",
     }
-    if (coconut && engine && !engine.detailed) {
+    if (file) {
         report.localRecompute = {
             code,
+            projectUrl: origin + "/share/" + encodeURIComponent(code) +
+                "/download",
+            toolboxUrl: env.TOOLBOX_FAST_CALC_URL || FAST_CALC_URL,
             ...(coconutMs !== undefined ? { coconutMs } : {}),
-            coconutSkills: buildCoconutSkillSnapshots(coconut),
+            ...(coconut ? {
+                coconutSkills: buildCoconutSkillSnapshots(coconut),
+            } : {}),
         }
     }
     return new Response(renderProjectReportHtml(report), {
