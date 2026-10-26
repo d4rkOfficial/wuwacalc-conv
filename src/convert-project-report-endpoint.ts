@@ -1,5 +1,5 @@
 /**
- * 端点：`GET /share/{code}/report`（HTML）与 `GET /api/convert/{code}/report`（JSON）。
+ * 端点：`GET /share/{code}`（HTML）。
  *
  * 输入鸣算屋分享码，输出：
  * - 鸣算屋快照 vs 椰果引擎的总伤 / 逐角色 / 逐技能 / 逐乘区对比；
@@ -23,16 +23,15 @@ import { buildReportEngineComparison } from "./convert-project-report-engine.ts"
 import { gameDataOfProjectTables } from "./convert-project/game-data.ts"
 import { measureCoconut } from "../engines/coconut/measure.ts"
 import { loadProjectTables } from "./convert-project/tables.ts"
-import { errorResponse, json } from "./http.ts"
+import { errorResponse } from "./http.ts"
 import type { Bindings } from "./http.ts"
 
-export const REPORT_JSON_PATTERN = /^\/api\/convert\/([^/]+)\/report$/
-export const REPORT_HTML_PATTERN = /^\/share\/([^/]+)\/report$/
+/** 报告页与下载接口共用 /share/{code} 空间，这里只匹配不带 /download 的精确路径 */
+export const REPORT_HTML_PATTERN = /^\/share\/([^/]+)$/
 
 export const handleProjectReport = async (
     code: string,
     env: Bindings,
-    format: "json" | "html",
 ): Promise<Response> => {
     if (!SHARE_CODE_PATTERN.test(code)) {
         return errorResponse(400, "分享码格式不合法")
@@ -65,16 +64,13 @@ export const handleProjectReport = async (
         parts,
         engine,
     )
-    if (format === "html") {
-        return new Response(renderProjectReportHtml(report), {
-            status: 200,
-            headers: {
-                "content-type": "text/html; charset=utf-8",
-                "cache-control": "no-store",
-            },
-        })
-    }
-    return json(report, 200, { "cache-control": "no-store" })
+    return new Response(renderProjectReportHtml(report), {
+        status: 200,
+        headers: {
+            "content-type": "text/html; charset=utf-8",
+            "cache-control": "no-store",
+        },
+    })
 }
 
 export type { ProjectReport }

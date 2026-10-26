@@ -556,6 +556,9 @@ export const renderProjectReportHtml = (report: ProjectReport): string => {
         ? [
             "<h2>引擎对比（鸣算屋快照 vs 椰果）</h2>",
             '<p class="muted">左边是鸣算屋分享快照里保存的结算（分享时的值，不保证等于当前线上引擎重算）；右边是转换后在服务端重跑的椰果工具箱引擎。偏差按「椰果 − 鸣算屋快照」计算。</p>',
+            engine.detailed
+                ? ""
+                : '<div class="notice">' + escapeHtml(engine.note) + "</div>",
             "<table><thead><tr><th>口径</th><th>鸣算屋</th><th>椰果</th><th>偏差</th></tr></thead><tbody>" +
             engineSummaryRows + "</tbody></table>",
             "<h3>角色合计</h3>",
@@ -569,7 +572,7 @@ export const renderProjectReportHtml = (report: ProjectReport): string => {
                     skillRows + "</tbody></table>",
                 ]
                 : []),
-            engine.note
+            engine.detailed && engine.note
                 ? '<p class="muted">' + escapeHtml(engine.note) + "</p>"
                 : "",
         ]
@@ -630,7 +633,7 @@ export const renderProjectReportHtml = (report: ProjectReport): string => {
     return [
         '<!doctype html><html lang="zh-CN"><head>',
         '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
-        "<title>" + title + " · 转换映射</title>",
+        "<title>" + title + " · 转换报告</title>",
         "<style>",
         ":root{color-scheme:dark;--bg:#111418;--panel:#1b2028;--line:#2c3440;--text:#e7edf5;--muted:#93a1b3;--accent:#7cc7ff}",
         '*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 ui-sans-serif,system-ui,"Microsoft YaHei",sans-serif}',
@@ -649,12 +652,13 @@ export const renderProjectReportHtml = (report: ProjectReport): string => {
         ".good{color:#7ee787}.warn{color:#e3b341}.bad{color:#ff7b72}",
         ".engine-line{margin:6px 0 10px;padding:6px 8px;border-left:3px solid currentColor;background:#151a21}",
         ".card.good,.card.warn,.card.bad{border-color:currentColor}",
+        ".notice{margin:12px 0;padding:12px 14px;border:1px solid #6b5520;border-left:4px solid #e3b341;border-radius:6px;background:#241f12;color:#f0d58a}",
         "</style></head><body><main>",
         "<h1>" + title + "</h1>",
         '<p class="muted">分享码 <code>' + escapeHtml(report.code) +
         "</code> · " + escapeHtml(report.generatedAt) +
-        ' · <a href="/api/convert/' + encodeURIComponent(report.code) +
-        '/report">JSON</a></p>',
+        ' · <a href="/share/' + encodeURIComponent(report.code) +
+        '/download">下载工程文件</a></p>',
         '<div class="cards">',
         ...engineCards,
         '<div class="card">条目<b>' + report.stages.entries + "</b></div>",

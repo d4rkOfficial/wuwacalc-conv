@@ -75,7 +75,8 @@ Deno.test("路由：未知路径 404", async () => {
             "/api/unknown",
             "/assets/usage-mid.jpg",
             "/assets/usage-dark.png",
-            "/share/MC-KJ8VZL",
+            "/share/MC-KJ8VZL/report",
+            "/api/convert/MC-KJ8VZL/report",
             "/share/MC-KJ8VZL/Download",
             "/share/a/b/download",
         ]

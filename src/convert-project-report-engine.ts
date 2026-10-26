@@ -272,7 +272,7 @@ export const buildReportEngineComparison = (
     const notes: string[] = []
     if (!detailed) {
         notes.push(
-            "分享快照只保存了每角色合计，没有逐技能 _breakdown；因此只能核对总伤与角色合计，逐条定位需用本地 golden 差分。",
+            "该工程的鸣算屋分享快照只保存了角色合计，没有保存逐技能结算（members[].results 缺少 damagePhases / cycles / _breakdown）。因此只能核对总伤和角色合计，无法逐条对比；这是上游保存分享时没有写入逐技能数据，不是转换器漏算。浏览器本地重算鸣算屋引擎的方案暂缓。",
         )
     }
     if (missingWuwa.length || missingCoconut.length) {
