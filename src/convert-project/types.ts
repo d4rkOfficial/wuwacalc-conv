@@ -154,6 +154,10 @@ export interface WuwaCalcCycleRound {
     catalogStacks?: Record<string, Record<string, number>> | null
     /** 该轮的默认层数（`globalBuffStacks` 的轮内快照） */
     globalBuffStacks?: Record<string, number> | null
+    /** 该轮的 Buff 勾选快照（`globalBuffActive`） */
+    globalBuffActive?: Record<string, boolean> | null
+    /** 该轮的 Buff 列表快照 */
+    buffs?: unknown[] | null
     buffStacks?: Record<string, number> | null
 }
 
@@ -380,6 +384,8 @@ export interface CoconutSkillHit {
     damageType?: string
     /** 同时视为某种效应（上游 `alsoAsEffect`），拉表阶段会追加 `效应伤害` */
     alsoAsEffect?: string
+    /** 上游技能目录 id（用于差分对齐；一个技能本体/额外条目共用） */
+    catalogId?: string
 }
 
 /** 非直伤条目：处决 / 响应带 `responders`，效应带 `layers` 与 `hits` */

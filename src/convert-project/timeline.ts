@@ -494,6 +494,9 @@ const collectMemberItems = (
             hit: {
                 ...base,
                 hitName: displayNameOf(nameCandidates, base.skillType),
+                ...(entry?.id || skill.catalogId
+                    ? { catalogId: entry?.id ?? skill.catalogId }
+                    : {}),
                 ratio: toRatio(
                     entry?.multComponents,
                     entry?.baseMult ?? skill.baseMult,
@@ -935,16 +938,32 @@ const resolveRounds = (
                 startSeconds: cursor,
                 sources: members.map((member) => {
                     const round = member.cycleConfig?.rounds?.[roundIndex]
-                    // 该轮自己的目录；轮内没有目录时才退回顶层（`activeRound`）的
                     const catalog = (round?.rotationCatalog ??
                         member.rotationCatalog ??
                         []) as WuwaCalcRotationEntry[]
                     const catalogStacks = asLayerMap(round?.catalogStacks)
                     const skills = skillsOfRound(member, roundIndex)
-                    const defaultStacks = mergeStacks(
-                        member.globalBuffStacks,
-                        round?.globalBuffStacks,
-                    )
+                    // W 的多轮结算会临时把 member.globalBuffStacks / Active 换成**该轮快照**：
+                    // `member.globalBuffStacks = round.globalBuffStacks || savedGlobalStacks`。
+                    // 顶层 global* 是 activeRound（通常是最后一轮）的数据，不能拿来给每轮打底，
+                    // 否则第一轮会继承最后一轮的层数（T6E4P9 第一段凭空多 5 倍 Buff）。
+                    const defaultStacks = round?.globalBuffStacks
+                        ? mergeStacks(round.globalBuffStacks)
+                        : mergeStacks(member.globalBuffStacks)
+                    const roundBuffs = (round?.buffs ?? member.buffs ?? []) as {
+                        id?: string
+                    }[]
+                    const defaultActive: Record<string, boolean> = {}
+                    for (const buff of roundBuffs) {
+                        const id = optionalString(buff?.id)
+                        if (!id) continue
+                        defaultActive[id] = !!round?.globalBuffActive?.[id]
+                    }
+                    for (const [id, value] of Object.entries(
+                        round?.globalBuffActive ?? {},
+                    )) {
+                        if (typeof value === "boolean") defaultActive[id] = value
+                    }
                     const phaseStacks = phaseStacksOf(round?.phases)
                     const convergence = convergenceInfoOf(
                         member,
@@ -963,7 +982,10 @@ const resolveRounds = (
                             payload?.specialSkills?.items ?? [],
                         defaultStacks,
                         phaseStacks,
-                        phaseActive: phaseActiveOf(round?.phases),
+                        phaseActive: {
+                            ...defaultActive,
+                            ...phaseActiveOf(round?.phases),
+                        },
                         convergenceIds: convergence.ids,
                         convergenceStacks: convergence.stacks,
                         catalogStacks,

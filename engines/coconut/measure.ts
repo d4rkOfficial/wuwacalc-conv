@@ -78,6 +78,8 @@ export interface GameData {
 export interface CoconutEntryResult {
     id: string
     sourceTimelineBlockId: string
+    /** 上游技能目录 id（差分对齐用；本体/额外条目共用） */
+    catalogId?: string
     character: string
     displayName: string
     hitName: string
@@ -182,9 +184,13 @@ const toWeaponInfo = (
     }
 }
 
-const pickEntry = (result: ResultEntry): CoconutEntryResult => ({
+const pickEntry = (
+    result: ResultEntry,
+    catalogId?: string,
+): CoconutEntryResult => ({
     id: result.id,
     sourceTimelineBlockId: result.sourceTimelineBlockId,
+    ...(catalogId ? { catalogId } : {}),
     character: result.character,
     displayName: result.displayName,
     hitName: result.hitName,
@@ -311,7 +317,19 @@ export const measureCoconut = (
         profile,
     )
 
-    const entries = results.map(pickEntry)
+    // 时间线里一个伤害块对应一个技能目录条目；差分对齐用它而不是按数组顺序。
+    const catalogByBlock = new Map<string, string>()
+    for (const block of timeline.damageBlocks ?? []) {
+        const catalogId = block.skillHits?.find((hit: any) => hit.catalogId)
+            ?.catalogId
+        if (catalogId) catalogByBlock.set(block.id, String(catalogId))
+    }
+    const entries = results.map((result) =>
+        pickEntry(
+            result,
+            catalogByBlock.get(/^(d\d+)/.exec(result.id)?.[1] ?? ""),
+        )
+    )
     return {
         total: entries.reduce((sum, e) => sum + e.totalDamage, 0),
         entries,

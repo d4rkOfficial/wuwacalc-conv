@@ -63,6 +63,7 @@ const cleanDisplayName = (name: string): string =>
 interface CoconutGroup {
     key: string
     name: string
+    catalogId?: string
     entries: CoconutEntryResult[]
     total: number
 }
@@ -80,6 +81,7 @@ const groupCoconutEntries = (
             list.push({
                 key,
                 name: cleanDisplayName(entry.displayName),
+                ...(entry.catalogId ? { catalogId: entry.catalogId } : {}),
                 entries: [],
                 total: 0,
             })
@@ -161,17 +163,35 @@ export const compareParity = (
             skill.damage > 0
         )
         const groups = grouped.get(member.name) ?? []
-        for (let i = 0; i < Math.max(skills.length, groups.length); i++) {
-            const skill = skills[i]
-            const group = groups[i]
-            if (!skill && group) {
-                missingWuwa.push(member.name + "/" + group.name)
-                continue
-            }
-            if (skill && !group) {
+        // 对齐键：目录 id 优先，重复出现（多轮）按出现序号区分；没有目录 id 才退回名字。
+        // 不能按数组顺序对齐——本体/额外、别名、轮次都会让顺序错位。
+        const groupQueues = new Map<string, CoconutGroup[]>()
+        const groupOccurrence = new Map<string, number>()
+        for (const group of groups) {
+            const base = group.catalogId
+                ? "c:" + group.catalogId
+                : "n:" + group.name
+            const n = groupOccurrence.get(base) ?? 0
+            groupOccurrence.set(base, n + 1)
+            const key = base + "#" + n
+            const queue = groupQueues.get(key) ?? []
+            queue.push(group)
+            groupQueues.set(key, queue)
+        }
+        const skillOccurrence = new Map<string, number>()
+        const usedGroups = new Set<CoconutGroup>()
+        for (const skill of skills) {
+            const base = skill.catalogId ? "c:" + skill.catalogId : "n:" + skill.name
+            const n = skillOccurrence.get(base) ?? 0
+            skillOccurrence.set(base, n + 1)
+            const key = base + "#" + n
+            const group = groupQueues.get(key)?.shift() ??
+                groups.find((candidate) => !usedGroups.has(candidate))
+            if (!group) {
                 missingCoconut.push(member.name + "/" + skill.name)
                 continue
             }
+            usedGroups.add(group)
             const delta = group.total - skill.damage
             entries.push({
                 character: member.name,
@@ -185,6 +205,11 @@ export const compareParity = (
                 zones: zonesOf(skill, group),
                 coconutEntries: group.entries,
             })
+        }
+        for (const group of groups) {
+            if (!usedGroups.has(group)) {
+                missingWuwa.push(member.name + "/" + group.name)
+            }
         }
     }
 

@@ -421,6 +421,20 @@ resolved = { ...globalBuffStacks（缺省 0）, ...该技能目录条目的层�
 `buffActive` / `buffStacks` 落到对应伤害条目的绑定上即可，**不能也不需要**去模拟时间窗口——
 按时间窗口重算反而会与上游口径不一致。
 
+### 2.3.2.2 多轮状态按轮快照，不继承 activeRound
+
+鸣算屋多轮结算会临时把 `member.globalBuffStacks / globalBuffActive` 换成
+`cycleConfig.rounds[r]` 的**轮内快照**：
+
+```js
+member.globalBuffStacks = round.globalBuffStacks || savedGlobalStacks
+member.globalBuffActive = round.globalBuffActive || savedGlobalActive
+```
+
+顶层 `member.globalBuff*` 是当前编辑轮（通常是最后一轮）的数据，**不能**给每一轮打底。
+转换器此前把顶层层数并入每轮，导致第一轮继承最后一轮的层数（T6E4P9 第一段凭空多出
+大量 Buff）。现在多轮只读该轮快照，阶段开关再覆盖到轮级开关之上。
+
 ### 2.3.3 一个技能一条原始复合倍率（关键）
 
 上游一个技能段的倍率是**分段**构成的（`rotationCatalog[].multComponents`），
